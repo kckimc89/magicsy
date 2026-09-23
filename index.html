@@ -3570,6 +3570,45 @@ function ns182OpenRegisteredCard(section,name){
 })();
 </script>
 
+
+
+<!-- NS89.8 READY-STATE CONSISTENCY + SINGLE VAULT CLOSE -->
+<style id="ns898-style">
+/* One close control only: NS89.8 owns the single bottom control. */
+.ns892-closebar,.ns896-closebar{display:none!important}
+.ns898-closebar{display:flex;justify-content:center;margin:16px 0 5px;position:sticky;bottom:10px;z-index:35}
+.ns898-closebar button{border:1px solid #b9cbe0;background:#fff;color:#173f75;border-radius:999px;padding:10px 16px;font-weight:900;box-shadow:0 3px 12px #0002}
+</style>
+<script id="ns898-script">
+(()=>{
+ const VER='✅ MASTER V28 · NS89.8 READY-STATE CONSISTENCY · ONE MASTER';
+ document.title='MASTER V28 · NS89.8 READY-STATE CONSISTENCY';
+ function header(){document.querySelectorAll('body > div[style*="position:fixed"][style*="top:0"]').forEach(x=>{if(/MASTER V28/.test(x.textContent||''))x.textContent=VER})}
+ header();setInterval(header,800);
+ function clean(s){return String(s||'').replace(/^[✓●○…\s]+/,'').trim()}
+ function boxes(){return [...document.querySelectorAll('h3')].filter(h=>/새 백과구조|NS80|FAIL-SKIP/.test(h.textContent||'')).map(h=>h.closest('.card,.panel,section,div')).filter((x,i,a)=>x&&a.indexOf(x)===i)}
+ function closeVault(b){b.classList.remove('ns891-open');b.classList.add('ns891-legacy-wrap');b.style.maxHeight='86px';b.style.overflow='hidden';b.querySelectorAll(':scope > .ns898-closebar').forEach(x=>x.remove());setTimeout(()=>b.scrollIntoView({behavior:'smooth',block:'center'}),30)}
+ function oneClose(){boxes().forEach(b=>{b.querySelectorAll(':scope > .ns892-closebar,:scope > .ns896-closebar').forEach(x=>x.remove());if(b.classList.contains('ns891-open')){let d=b.querySelector(':scope > .ns898-closebar');if(!d){d=document.createElement('div');d.className='ns898-closebar';d.innerHTML='<button type="button">🗃️ 대표후보 보관함 닫기</button>';d.querySelector('button').onclick=e=>{e.preventDefault();e.stopPropagation();closeVault(b)};b.appendChild(d)}}else b.querySelectorAll(':scope > .ns898-closebar').forEach(x=>x.remove())})}
+ let active=null;
+ function rowBy(section,name,key){try{const st=typeof v16State==='function'?v16State(section):null;if(!st)return null;if(key&&st.rows.has(key))return st.rows.get(key);return [...st.rows.values()].find(r=>sameIdentity(cardInputName(r.resolvedName||r.name),name)||sameIdentity(cardInputName(r.name),name))||null}catch(e){return null}}
+ function candidate(section,name,key,reason){const row=rowBy(section,name,key);if(!row)return false;row.ok=false;row.pending=false;row.verified=null;row.resolvedName=row.name;row.ns292=false;try{const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel&&typeof v16PaintRow==='function')v16PaintRow(section,row,panel);if(typeof v16PaintStatus==='function')v16PaintStatus(section)}catch(e){};try{let a=JSON.parse(localStorage.getItem('ns898CandidateReturns')||'[]');a.push({country:String(window.COUNTRY||''),section,name:clean(name),reason,time:Date.now()});localStorage.setItem('ns898CandidateReturns',JSON.stringify(a.slice(-300)))}catch(e){};return true}
+ function contextFromButton(b){const sec=b.closest('section')?.id||'';const key=b.dataset.repKey||'';let name=clean(b.textContent);const row=rowBy(sec,name,key);if(row)name=cardInputName(row.resolvedName||row.name);return {section:sec,name,key}}
+ document.addEventListener('click',e=>{
+   const rep=e.target.closest?.('.rep-card-btn-v5[data-rep-key]');if(rep)active=contextFromButton(rep);
+   const close=e.target.closest?.('.rep-preview-v5 .rep-close-v5');if(!close)return;
+   const pv=close.closest('.rep-preview-v5');
+   // A purple dot promises an immediately buildable card. If this preview has no build/save action,
+   // closing it means that promise failed, so return the item to the ordinary candidate pool.
+   const canBuild=!!pv?.querySelector('.rep-save-v5,.v18-manual-save');
+   if(!canBuild&&active?.section&&active?.name){const ok=candidate(active.section,active.name,active.key,'closed_without_card_ready');if(ok&&typeof toast==='function')setTimeout(()=>toast('카드 만들기 불가 → 일반 후보로 돌렸어요'),20)}
+ },true);
+ // Retry can replace a strict preview with assisted search. Remember its original candidate context.
+ document.addEventListener('click',e=>{if(e.target.closest?.('.ns896-feedback .retry')){const pv=e.target.closest('.rep-preview-v5');const h=pv?.querySelector('.preview-card h3');if(h){const sec=pv.closest('section')?.id||'';active={section:sec,name:clean(h.textContent),key:''}}}},true);
+ setInterval(oneClose,450);oneClose();
+ window.ns898ReturnCandidate=candidate;
+})();
+</script>
+
 </body></html><style id="ns88style">
 #ns88Hub{margin:12px 0;padding:14px;border:2px solid #cfe7d8;border-radius:18px;background:linear-gradient(180deg,#fbfffc,#fff)}
 .ns88chips{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}.ns88chip{border:1px solid #d7d7e6;background:#fff;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800}.ns88progress{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.ns88progress div{background:#f5f4fa;border-radius:12px;padding:9px;text-align:center;font-size:12px}.ns88progress b{display:block;font-size:18px}.ns88storycard{border:2px solid #eee6c8;border-radius:16px;padding:13px;background:#fffdf4;margin:9px 0}.ns88storycard b{font-size:17px}.ns88storycard small{display:block;color:#666;margin-top:5px;line-height:1.45}.ns88more{width:100%;border:0;border-radius:14px;padding:13px;background:#eef8ff;color:#174a70;font-weight:900;font-size:16px;margin-top:10px}
@@ -3749,8 +3788,8 @@ body:not(.ns896-parent-on) .ns89panel,body:not(.ns896-parent-on) #ns89Vault{filt
 </style>
 <script id="ns897-script">
 (()=>{
- const VER='✅ MASTER V28 · NS89.7 FEEDBACK CANDIDATE RETURN · ONE MASTER';
- document.title='MASTER V28 · NS89.7 FEEDBACK CANDIDATE RETURN';
+ const VER='✅ MASTER V28 · NS89.8 READY-STATE CONSISTENCY · ONE MASTER';
+ document.title='MASTER V28 · NS89.8 READY-STATE CONSISTENCY';
  function header(){document.querySelectorAll('body > div[style*="position:fixed"][style*="top:0"]').forEach(x=>{if(/MASTER V28/.test(x.textContent||''))x.textContent=VER})}
  header();setInterval(header,900);
 
