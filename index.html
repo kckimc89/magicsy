@@ -3666,6 +3666,46 @@ function ns182OpenRegisteredCard(section,name){
 })();
 </script>
 
+<script>
+(()=>{
+ const VER='✅ MASTER V28 · NS90.1 CATEGORY BRIDGE REPAIR · ONE MASTER';
+ const SECS=['food','fruit','animals','places','culture','singers','athletes','people','art'];
+ const LABEL={food:'음식',fruit:'과일',animals:'동식물',places:'명소',culture:'문화',singers:'가수',athletes:'운동선수',people:'역사인물',art:'예술작품'};
+ const FALL={
+ food:['파에야','하몽 이베리코','토르티야 에스파뇰라','가스파초','추로스','감바스 알 아히요','크로케타','살모레호','판 콘 토마테','코시도 마드릴레뇨'],
+ fruit:['오렌지','포도','레몬','무화과','복숭아','석류','멜론','딸기','체리','감','만다린','자두'],
+ animals:['이베리아스라소니','이베리아늑대','스페인아이벡스','큰홍학','스페인제국수리','수염독수리','붉은사슴','멧돼지','올리브나무','코르크참나무','홀름참나무','스페인전나무','라벤더','로즈메리'],
+ places:['사그라다 파밀리아','알함브라 궁전','프라도 미술관','구엘 공원','세비야 대성당','코르도바 메스키타','산티아고 데 콤포스텔라','톨레도 구시가지'],
+ culture:['플라멩코','산 페르민 축제','산티아고 순례길','세비야의 봄 축제','카스텔','스페인 기타','도자기'],
+ singers:['로살리아','훌리오 이글레시아스','엔리케 이글레시아스','알레한드로 산스'],
+ athletes:['라파엘 나달','카롤리나 마린','파우 가솔','미겔 인두라인','미레이아 벨몬테'],
+ people:['미겔 데 세르반테스','이사벨 1세','페르디난드 2세','안토니 가우디','산티아고 라몬 이 카할'],
+ art:['게르니카','시녀들','기억의 지속','아비뇽의 처녀들','1808년 5월 3일']};
+ const clean=v=>String(v||'').replace(/^\s*[✓●○…\.]+\s*/,'').trim();
+ function names(sec){const out=[],seen=new Set(),add=x=>{x=clean(x);if(x&&!seen.has(x)){seen.add(x);out.push(x)}};try{window.ns900?.names?.(sec)?.forEach(add)}catch(e){};(FALL[sec]||[]).forEach(add);return out}
+ function made(sec){const r=document.getElementById(sec),s=new Set();if(!r)return s;r.querySelectorAll('.cards .card h3,.cards .card-title,.cards [data-title],.cards .item h3').forEach(x=>s.add(clean(x.dataset?.title||x.textContent)));return s}
+ function launch(sec,name){
+   const root=document.getElementById(sec); root?.scrollIntoView({behavior:'smooth',block:'start'});
+   setTimeout(()=>{
+     try{ if(typeof window.manualRepresentative==='function'){ window.manualRepresentative(sec,name); return; } }catch(e){}
+     try{ if(typeof manualRepresentative==='function'){ manualRepresentative(sec,name); return; } }catch(e){}
+     alert('검색 편집실 연결을 준비하지 못했습니다. 다시 한 번 눌러 주세요.');
+   },120);
+ }
+ function install(sec){const root=document.getElementById(sec);if(!root)return;let box=root.querySelector(':scope > .ns901-vault');root.querySelectorAll(':scope > .ns900-vault').forEach(x=>x.remove());if(!box){box=document.createElement('details');box.className='ns901-vault';const add=root.querySelector(':scope > .add-btn');if(add)add.insertAdjacentElement('afterend',box);else root.appendChild(box)}
+   const all=names(sec), done=made(sec), avail=all.filter(n=>!done.has(n));
+   box.innerHTML=`<summary>🗃️ ${LABEL[sec]} 백과구조 · 대표후보 보관함 <small>${avail.length}개</small></summary><div class="ns901-note"><b>후보를 직접 눌러 검색합니다.</b> 설명과 사진을 확인해 맞으면 카드로 만들고, 맞지 않으면 후보로 남겨 둡니다.</div><div class="ns901-grid">${avail.map(n=>`<button type="button" data-n="${n.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}">○ ${n}</button>`).join('')}</div><div class="ns901-actions"><button type="button" class="ns901-close">🗃️ 대표후보 보관함 닫기</button></div>`;
+   box.querySelectorAll('[data-n]').forEach(b=>b.onclick=e=>{e.preventDefault();launch(sec,b.dataset.n)});box.querySelector('.ns901-close').onclick=e=>{e.preventDefault();box.open=false;root.scrollIntoView({behavior:'smooth',block:'start'})};
+ }
+ function head(){document.title='MASTER V28 · NS90.1 CATEGORY BRIDGE REPAIR';document.querySelectorAll('body > div[style*="position:fixed"][style*="top:0"]').forEach(x=>{if(/MASTER V28/.test(x.textContent||''))x.remove()});let b=document.getElementById('ns901ver');if(!b){b=document.createElement('div');b.id='ns901ver';b.style='position:fixed;top:0;left:0;right:0;z-index:100100;background:#173f75;color:white;text-align:center;padding:10px;font-weight:800';document.body.appendChild(b);document.body.style.paddingTop='42px'}b.textContent=VER}
+ function boot(){head();SECS.forEach(install);const f=document.querySelector('#fruit > .ns901-vault'),a=document.querySelector('#animals > .ns901-vault');if(f)f.open=true;if(a)a.open=true}
+ const css=document.createElement('style');css.textContent=`.ns901-vault{margin:16px 0;padding:0;border:1.5px solid #cbd6e5;border-radius:18px;background:#fbfdff}.ns901-vault summary{cursor:pointer;padding:16px;font-weight:900;color:#27496f}.ns901-vault summary small{float:right}.ns901-note{margin:0 16px 12px;padding:11px 13px;background:#f4f8fc;border-radius:12px;font-size:13px;line-height:1.55}.ns901-grid{display:flex;flex-wrap:wrap;gap:9px;padding:0 16px 14px}.ns901-grid button{border:1px solid #b8c8dc;background:white;color:#315b88;border-radius:999px;padding:9px 13px;font-size:14px}.ns901-actions{padding:0 16px 16px;text-align:center}.ns901-actions button{border:1px solid #c6d2df;background:#fff;border-radius:999px;padding:9px 15px}`;document.head.appendChild(css);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,400));else setTimeout(boot,400);setTimeout(boot,1400);setInterval(head,1800);
+ const old=window.openCountry;if(typeof old==='function')window.openCountry=function(){const r=old.apply(this,arguments);setTimeout(boot,800);return r};
+ window.ns901={install,launch,names};
+})();
+
+</script>
 </body></html><style id="ns88style">
 #ns88Hub{margin:12px 0;padding:14px;border:2px solid #cfe7d8;border-radius:18px;background:linear-gradient(180deg,#fbfffc,#fff)}
 .ns88chips{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}.ns88chip{border:1px solid #d7d7e6;background:#fff;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800}.ns88progress{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.ns88progress div{background:#f5f4fa;border-radius:12px;padding:9px;text-align:center;font-size:12px}.ns88progress b{display:block;font-size:18px}.ns88storycard{border:2px solid #eee6c8;border-radius:16px;padding:13px;background:#fffdf4;margin:9px 0}.ns88storycard b{font-size:17px}.ns88storycard small{display:block;color:#666;margin-top:5px;line-height:1.45}.ns88more{width:100%;border:0;border-radius:14px;padding:13px;background:#eef8ff;color:#174a70;font-weight:900;font-size:16px;margin-top:10px}
