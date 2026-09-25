@@ -3867,6 +3867,44 @@ function ns182OpenRegisteredCard(section,name){
 })();
 </script>
 
+<script id="ns908-purple-ready-stage">
+(()=>{
+ const VER='✅ MASTER V28 · NS90.8 PURPLE READY STAGE · ONE MASTER';
+ const KEY='ns908PurpleReady';
+ const clean=s=>String(s||'').replace(/^\s*[✓●○…\.]+\s*/,'').replace(/\s+/g,' ').trim();
+ const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}};
+ const save=o=>{try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}};
+ const made=(sec,name)=>{try{return (getCustom(sec)||[]).some(x=>clean(x?.name)===clean(name)||clean(x?.entityTitle)===clean(name))}catch(e){return false}};
+ function setReady(sec,name,on=true){if(!sec||!name)return;const o=load();o[sec]=o[sec]||{};if(on)o[sec][clean(name)]=Date.now();else delete o[sec][clean(name)];save(o);paint(sec)}
+ function isReady(sec,name){return !!load()?.[sec]?.[clean(name)]&&!made(sec,name)}
+ function panel(sec){return document.getElementById(sec)?.querySelector('.rep-card-panel-v5')}
+ function paint(sec){const p=panel(sec);if(!p)return;const host=p.querySelector('.rep-card-buttons-v5');if(!host)return;const ready=load()?.[sec]||{};
+   for(const name of Object.keys(ready)){
+    if(made(sec,name)){setReady(sec,name,false);continue}
+    let b=[...host.querySelectorAll('.rep-card-btn-v5')].find(x=>clean(x.dataset?.ns908Name||x.textContent)===clean(name));
+    if(!b){b=document.createElement('button');b.type='button';b.className='rep-card-btn-v5';b.dataset.ns908Name=name;host.appendChild(b)}
+    b.textContent='● '+name;b.className='rep-card-btn-v5 can-make ns908-ready';b.disabled=false;b.title='설명과 사진이 확인된 카드 준비 후보입니다. 눌러서 카드를 만드세요.';
+    b.onclick=()=>{const vb=[...document.querySelectorAll('#'+sec+' .ns901-vault [data-n]')].find(x=>clean(x.dataset.n)===clean(name));if(vb)vb.click();else try{window.ns903?.launch(sec,name,b)}catch(e){}};
+   }
+   host.querySelectorAll('.rep-card-btn-v5').forEach(b=>{const n=clean(b.dataset?.ns908Name||b.textContent);if(made(sec,n)){setReady(sec,n,false)}})
+ }
+ function forceVersion(){document.title='MASTER V28 · NS90.8 PURPLE READY STAGE';document.querySelectorAll('body > div[style*="position:fixed"][style*="top:0"]').forEach(x=>{if(/MASTER V28/.test(x.textContent||''))x.textContent=VER});const b=document.getElementById('ns834-authoritative')||document.getElementById('ns901ver');if(b)b.textContent=VER}
+ let pending=null;
+ document.addEventListener('click',e=>{
+   const v=e.target.closest?.('.ns901-vault [data-n]');if(v){const sec=v.closest('section')?.id;if(sec)pending={sec,name:v.dataset.n,at:Date.now()}}
+   const bad=e.target.closest?.('.ns896-feedback .bad');if(bad&&pending){setReady(pending.sec,pending.name,false)}
+ },true);
+ const mo=new MutationObserver(()=>{
+   if(pending&&Date.now()-pending.at<120000){const p=panel(pending.sec);if(p){const pv=p.querySelector('.rep-preview-v5');if(pv&&pv.querySelector('.v904-save,.v906-save,.v18-manual-save,.v22-save'))setReady(pending.sec,pending.name,true)}}
+   ['food','fruit','animals','places','culture','singers','athletes','people','art'].forEach(paint);forceVersion();
+ });
+ mo.observe(document.documentElement,{subtree:true,childList:true});
+ const oldSet=window.setCustom;if(typeof oldSet==='function'&&!oldSet.__ns908){const f=function(sec,a){const r=oldSet.apply(this,arguments);setTimeout(()=>{const o=load();for(const n of Object.keys(o?.[sec]||{}))if(made(sec,n))setReady(sec,n,false);paint(sec)},80);return r};f.__ns908=true;window.setCustom=f}
+ setInterval(()=>{forceVersion();['food','fruit','animals','places','culture','singers','athletes','people','art'].forEach(paint)},900);
+ forceVersion();window.ns908={setReady,isReady,paint};
+})();
+</script>
+
 </body></html><style id="ns88style">
 #ns88Hub{margin:12px 0;padding:14px;border:2px solid #cfe7d8;border-radius:18px;background:linear-gradient(180deg,#fbfffc,#fff)}
 .ns88chips{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}.ns88chip{border:1px solid #d7d7e6;background:#fff;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800}.ns88progress{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.ns88progress div{background:#f5f4fa;border-radius:12px;padding:9px;text-align:center;font-size:12px}.ns88progress b{display:block;font-size:18px}.ns88storycard{border:2px solid #eee6c8;border-radius:16px;padding:13px;background:#fffdf4;margin:9px 0}.ns88storycard b{font-size:17px}.ns88storycard small{display:block;color:#666;margin-top:5px;line-height:1.45}.ns88more{width:100%;border:0;border-radius:14px;padding:13px;background:#eef8ff;color:#174a70;font-weight:900;font-size:16px;margin-top:10px}
@@ -4146,3 +4184,4 @@ body:not(.ns896-parent-on) .ns89panel,body:not(.ns896-parent-on) #ns89Vault{filt
  window.ns906={sync,showPlace};
 })();
 </script>
+
