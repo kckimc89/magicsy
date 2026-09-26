@@ -108,7 +108,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
  .item .photo-area{height:200px!important;min-height:200px!important}
 }
 </style>
-<style id="v13-guard">.item img[src=''],.item img:not([src]){display:none!important}</style></head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.15 TRUE ONE ENGINE · ONE MASTER</div>
+<style id="v13-guard">.item img[src=''],.item img:not([src]){display:none!important}</style><style id='ns9016-style'>.rep-card-btn-v5.ns9016-done{background:#e9ddff!important;border-color:#7b52b9!important;color:#4b267c!important;font-weight:800!important}.rep-card-btn-v5.can-make{cursor:pointer}.rep-card-btn-v5:disabled{cursor:default}</style></head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1277,7 +1277,7 @@ function fmtBackupDate(iso){if(!iso)return '';try{return new Intl.DateTimeFormat
 async function updateBackupLast(){const name=localStorage.getItem('last_backup_name'),at=localStorage.getItem('last_backup_at'),last=await loadLastBackup();const el=document.getElementById('backupLast'),btn=document.getElementById('restoreLast');if(last){el.innerHTML='마지막 백업: <b>'+esc(name||backupFilename(last.createdAt))+'</b><br>'+fmtBackupDate(at||last.createdAt);btn.disabled=false;btn.style.opacity='1'}else{el.textContent='마지막 백업: 아직 없습니다.';btn.disabled=true;btn.style.opacity='.5'}}
 const backupModal=document.getElementById('backupModal');document.getElementById('backupBtn').onclick=()=>{backupModal.classList.remove('hidden');updateBackupLast()};document.getElementById('backupClose').onclick=()=>backupModal.classList.add('hidden');backupModal.onclick=e=>{if(e.target===backupModal)backupModal.classList.add('hidden')};document.getElementById('makeBackup').onclick=makeBackupFile;document.getElementById('restoreLast').onclick=async()=>{const d=await loadLastBackup();if(!d){alert('이 기기에 기억된 마지막 백업이 없습니다. 다른 백업 파일을 선택해 주세요.');return}const n=localStorage.getItem('last_backup_name')||'마지막 백업';if(confirm('「'+n+'」으로 복원할까요?\n현재 수정 내용과 등록 사진은 이 백업 시점의 내용으로 바뀝니다.'))await applyBackup(d)};document.getElementById('chooseBackup').onclick=()=>document.getElementById('backupFileInput').click();document.getElementById('backupFileInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!validBackup(d))throw new Error();if(confirm('선택한 백업 파일\n「'+f.name+'」\n으로 복원할까요?')){await saveLastBackup(d);localStorage.setItem('last_backup_name',f.name);localStorage.setItem('last_backup_at',d.createdAt||new Date().toISOString());await applyBackup(d)}}catch(err){alert('이 백업 파일을 읽을 수 없습니다. 세계 나라 백과사전에서 만든 JSON 백업 파일인지 확인해 주세요.')}finally{e.target.value=''}};
 
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{}));}
 </script>
 
 
@@ -1560,7 +1560,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.15 TRUE ONE ENGINE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1623,7 +1623,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:best.p.title||clean,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,clean,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.15 공통 단일 카드 엔진'],score:bestScore,section,kind:topic.kind};
 }
 const ONE_CARD_ENGINE={
- version:NS9015_VERSION,
+ version:'MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2043,8 +2043,7 @@ function v16PaintStatus(section){
  const pending=rows.filter(x=>x.pending).length;
  const done=rows.length-pending;
  const si=v20StorageInfo();
- status.textContent=(pending?`처음 한 번만 확인 중 ${done}/${rows.length} · ● 가능 ${good}개 · ✓ 등록 ${reg}개`:
- `확인 완료 · ● 카드 만들기 가능 ${good}개 · ✓ 등록됨 ${reg}개 · ○ 검색도움 ${rows.length-good-reg}개`)+` · 저장 ${si.mb}MB`;
+ status.textContent=`후보 ${rows.length}개 · ◆ 카드 ${reg}개 · 하나씩 눌러 찾기 · 저장 ${si.mb}MB`;
 }
 
 
@@ -2087,17 +2086,26 @@ function v26RefreshOverviewRep(section){
  rep.innerHTML='<b>대표적으로 알아둘 이름</b><br>'+txt;
 }
 function v16PaintRow(section,row,panel){
- const shown=cardInputName(row.resolvedName||row.name), original=cardInputName(row.name);
- const existing=getCustom(section), registered=hasIdentity(shown,existing);
+ const shown=cardInputName(row.resolvedName||row.name), existing=getCustom(section);
+ const registered=hasIdentity(shown,existing);
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
- const changed=shown!==original;
- b.textContent=(registered?'✓ ':row.pending?'… ':row.ok?'● ':'○ ')+shown;
- b.className='rep-card-btn-v5 '+(registered?'registered':row.pending?'checking':row.ok?'can-make':'cannot-make');
- b.disabled=registered||row.pending;
- b.title=changed?`대표후보 비교: ${original} → ${shown} (대표성이 비슷한 후보 중 설명·사진 완성도를 함께 확인)`:
-   registered?'이미 카드로 등록되어 있습니다.':row.pending?'처음 한 번만 확인하고 있습니다.':row.ok?'확인된 결과입니다. 눌러서 카드를 만드세요.':'자동확인은 어려웠지만 검색도움으로 비슷한 항목을 찾아 선택할 수 있습니다.';
- b.onclick=()=>{if(registered||row.pending)return;row.ok?openRepresentativePreview(section,shown,row.verified,panel):manualRepresentative(section,shown)};
+ b.textContent=(registered?'◆ ':'○ ')+shown;
+ b.className='rep-card-btn-v5 '+(registered?'registered ns9016-done':'can-make');
+ b.disabled=registered;
+ b.title=registered?'이미 카드로 등록되어 있습니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
+ b.onclick=async()=>{
+   if(registered||b.dataset.busy==='1')return;
+   b.dataset.busy='1'; b.disabled=true; b.textContent='… '+shown;
+   let pv=panel.querySelector('.rep-preview-v5');
+   if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
+   let r=null;
+   try{r=await precheckRepresentative(section,shown)}catch(e){console.warn('[NS90.16 click resolve]',e)}
+   b.dataset.busy='0'; b.disabled=false;
+   if(r?.ok&&r.verified){row.ok=true;row.verified=r.verified;openRepresentativePreview(section,shown,r.verified,panel);}
+   else{row.ok=false;row.verified=null;if(pv)pv.innerHTML='';manualRepresentative(section,shown);}
+   v16PaintRow(section,row,panel);
+ };
 }
 function v15CachedRepresentative(section,name){
  const req=v12Request(section,name);
@@ -2151,13 +2159,13 @@ async function renderRepresentativeCardButtonsV5(section){
   if(!st.rows.has(req.key)){
    const hasRepAlternatives=finalName!==cardInputName(name)||!!V24_REP_ALTERNATIVES?.[COUNTRY]?.[section]?.[cardInputName(name)];
    const cached=hasRepAlternatives?null:v15CachedRepresentative(section,finalName);
-   st.rows.set(req.key,{key:req.key,name,pending:!cached,ok:!!cached,verified:cached?.verified||null,resolvedName:finalName});
+   st.rows.set(req.key,{key:req.key,name,pending:false,ok:!!cached,verified:cached?.verified||null,resolvedName:finalName});
   }
  }
  // Never clear innerHTML here: existing buttons and preview stay visible.
  for(const row of st.rows.values())v16PaintRow(section,row,panel);
  v16PaintStatus(section);
- v16RunQueue(section); // idempotent: existing job is reused
+ // NS90.16: no automatic queue. A network search starts only when the user clicks one candidate.
 }
 function renderAllRepresentativeCardButtonsV5(){
  // Compatibility helper; render visible sections without resetting their state.
@@ -2171,7 +2179,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9015_ONE_ENGINE={version:NS9015_VERSION,engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9016_ONE_ENGINE={version:'MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
