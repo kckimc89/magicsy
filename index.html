@@ -108,7 +108,14 @@ body.view-cards #detail .cards .item>.actions{display:none}
  .item .photo-area{height:200px!important;min-height:200px!important}
 }
 </style>
-<style id="v13-guard">.item img[src=''],.item img:not([src]){display:none!important}</style><style id='ns9016-style'>.rep-card-btn-v5.ns9016-done{background:#e9ddff!important;border-color:#7b52b9!important;color:#4b267c!important;font-weight:800!important}.rep-card-btn-v5.can-make{cursor:pointer}.rep-card-btn-v5:disabled{cursor:default}</style></head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER</div>
+<style id="v13-guard">.item img[src=''],.item img:not([src]){display:none!important}</style><style id='ns9016-style'>.rep-card-btn-v5.ns9016-done{background:#e9ddff!important;border-color:#7b52b9!important;color:#4b267c!important;font-weight:800!important}.rep-card-btn-v5.can-make{cursor:pointer}.rep-card-btn-v5:disabled{cursor:default}</style>
+<style id="ns9017-state-fix">
+/* NS90.17: neutral = not made, purple diamond = completed card */
+.rep-card-btn-v5.can-make{background:#fff!important;border:1.5px solid #aeb5c2!important;color:#333!important;box-shadow:none!important;opacity:1!important}
+.rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
+.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
+</style>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.17 ONE ENGINE STATE FIX · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1560,7 +1567,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.17 ONE ENGINE STATE FIX · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1623,7 +1630,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:best.p.title||clean,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,clean,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.15 공통 단일 카드 엔진'],score:bestScore,section,kind:topic.kind};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER',
+ version:'MASTER V28 · NS90.17 ONE ENGINE STATE FIX · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2030,7 +2037,7 @@ function v16MarkRegisteredInPlace(section,name){
  const sec=document.getElementById(section),panel=sec?.querySelector('.rep-card-panel-v5');if(!panel||panel.dataset.country!==String(COUNTRY||''))return;
  const key=v12Request(section,name).key;
  const b=panel.querySelector(`[data-rep-key="${CSS.escape(key)}"]`);
- if(b){b.textContent='✓ '+cardInputName(name);b.className='rep-card-btn-v5 registered';b.disabled=true;b.title='이미 카드로 등록되어 있습니다.';}
+ if(b){b.textContent='◆ '+cardInputName(name);b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=true;b.title='이미 카드로 등록되어 있습니다.';}
  const st=v16State(section); const row=st.rows.get(key); if(row)row.registered=true;
  v16PaintStatus(section);
 }
@@ -2091,7 +2098,7 @@ function v16PaintRow(section,row,panel){
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
  b.textContent=(registered?'◆ ':'○ ')+shown;
- b.className='rep-card-btn-v5 '+(registered?'registered ns9016-done':'can-make');
+ b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':'can-make');
  b.disabled=registered;
  b.title=registered?'이미 카드로 등록되어 있습니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
  b.onclick=async()=>{
@@ -2103,7 +2110,7 @@ function v16PaintRow(section,row,panel){
    try{r=await precheckRepresentative(section,shown)}catch(e){console.warn('[NS90.16 click resolve]',e)}
    b.dataset.busy='0'; b.disabled=false;
    if(r?.ok&&r.verified){row.ok=true;row.verified=r.verified;openRepresentativePreview(section,shown,r.verified,panel);}
-   else{row.ok=false;row.verified=null;if(pv)pv.innerHTML='';manualRepresentative(section,shown);}
+   else{row.ok=false;row.verified=null;if(pv)pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>자동 검색에서 바로 확인하지 못했습니다. 같은 버튼을 다시 누르면 다시 찾습니다.</p></div>`; repAvailabilityCache.delete(v12Request(section,shown).key);}
    v16PaintRow(section,row,panel);
  };
 }
@@ -2179,7 +2186,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9016_ONE_ENGINE={version:'MASTER V28 · NS90.16 CLICK ONE ENGINE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9017_ONE_ENGINE={version:'MASTER V28 · NS90.17 ONE ENGINE STATE FIX · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
