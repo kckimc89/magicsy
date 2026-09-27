@@ -115,7 +115,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.19 CLICK SAVED OR SEARCH · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.20 SEARCH PIPELINE FIX · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1567,7 +1567,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.19 CLICK SAVED OR SEARCH · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.20 SEARCH PIPELINE FIX · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1617,20 +1617,26 @@ async function onePage(title){try{
 async function oneResolve(section,name,forcedKind=''){
  const clean=String(name||'').replace(/^(동물|식물)\s*[—\-:]\s*/,'').replace(/\s+/g,' ').trim();
  const topic=oneTopic(section,name); if(forcedKind)topic.kind=forcedKind;
+ // NS90.20: 모든 카테고리가 이 한 검색 파이프라인만 사용한다.
+ // 후보명이 위키 문서명과 조금 달라도(예: 통용명/별칭) 검색 상위 결과의 설명과 주제 적합도로 검증한다.
  const hits=await oneWikiSearch(clean,topic); let best=null,bestScore=-999;
- for(const h of hits.slice(0,14)){
-  const p=await onePage(h.title); if(!p)continue;
-  const desc=(p.extract||'').replace(/\s+/g,' ').trim();
-  const nf=oneNameFit(clean,h.title); if(nf<8)continue;
-  const score=nf+sharedTypeFit(topic.kind,h.title,desc)+(p.thumbnail?.source?1:0)+(desc.length>60?1:0);
+ for(let i=0;i<hits.slice(0,14).length;i++){
+  const h=hits[i], p=await onePage(h.title); if(!p)continue;
+  const desc=(p.extract||'').replace(/\s+/g,' ').trim(); if(desc.length<45)continue;
+  const nf=oneNameFit(clean,h.title), tf=sharedTypeFit(topic.kind,h.title,desc);
+  // 정확한 이름은 우선. 이름이 달라도 검색 상위(0~4)이고 주제가 분명히 맞으면 별칭 후보로 허용한다.
+  if(nf<8 && !(i<5 && tf>=2))continue;
+  const rankBonus=Math.max(0,5-i);
+  const score=nf+tf+rankBonus+(p.thumbnail?.source?2:0)+(desc.length>90?1:0);
   if(score>bestScore){bestScore=score;best={p,desc}}
  }
- if(!best||best.desc.length<45)return null;
+ if(!best)return null;
  const photo=best.p.thumbnail?.source||'';
- return {name:clean,title:best.p.title||clean,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,clean,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.15 공통 단일 카드 엔진'],score:bestScore,section,kind:topic.kind};
+ const finalName=best.p.title||clean;
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,finalName,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.20 공통 단일 검색 파이프라인'],score:bestScore,section,kind:topic.kind};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.19 CLICK SAVED OR SEARCH · ONE MASTER',
+ version:'MASTER V28 · NS90.20 SEARCH PIPELINE FIX · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2217,7 +2223,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9019_ONE_ENGINE={version:'MASTER V28 · NS90.19 CLICK SAVED OR SEARCH · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9020_ONE_ENGINE={version:'MASTER V28 · NS90.20 SEARCH PIPELINE FIX · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
