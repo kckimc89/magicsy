@@ -115,7 +115,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.26 MULTILINGUAL ENTITY BRIDGE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1577,7 +1577,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.26 MULTILINGUAL ENTITY BRIDGE · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1675,6 +1675,37 @@ async function onePage(title){try{
  const u='https://ko.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&pithumbsize=1200&titles='+encodeURIComponent(title)+'&redirects=1&format=json&origin=*';
  const r=await fetch(u),j=await r.json();return Object.values(j.query?.pages||{})[0]||null;
 }catch(e){return null}}
+
+// ===== NS90.26 MULTILINGUAL ENTITY BRIDGE =====
+// One shared engine: aliases may be Korean, English or scientific names.
+// Resolve the same entity across languages, then prefer Korean article text when available.
+async function onePageLang(lang,title){try{
+ const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&pithumbsize=1200&titles='+encodeURIComponent(title)+'&redirects=1&format=json&origin=*';
+ const r=await fetch(u),j=await r.json();return Object.values(j.query?.pages||{})[0]||null;
+}catch(e){return null}}
+async function oneKoPageFromEntity(qid){try{
+ if(!qid)return null;
+ const u='https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+encodeURIComponent(qid)+'&props=sitelinks&format=json&origin=*';
+ const r=await fetch(u),j=await r.json(); const title=j.entities?.[qid]?.sitelinks?.kowiki?.title;
+ return title?await onePageLang('ko',title):null;
+}catch(e){return null}}
+async function oneForeignExactBridge(clean,topic,aliases){
+ let best=null,bestScore=-999;
+ for(const alias of aliases.slice(0,10)){
+  if(!/[A-Za-z]/.test(alias))continue;
+  const p=await onePageLang('en',alias); if(!p||p.missing!==undefined)continue;
+  const desc=(p.extract||'').replace(/\s+/g,' ').trim(); if(desc.length<45)continue;
+  const tf=sharedTypeFit(topic.kind,p.title||alias,desc); if(tf<=0)continue;
+  // Exact alias/redirect identity is required. This prevents homonyms such as Mandarin (character).
+  const nf=Math.max(...aliases.map(a=>oneNameFit(a,p.title||alias))); if(nf<10)continue;
+  let chosen=p, chosenDesc=desc;
+  const ko=await oneKoPageFromEntity(p.pageprops?.wikibase_item||'');
+  if(ko&&ko.missing===undefined){const kd=(ko.extract||'').replace(/\s+/g,' ').trim(); if(kd.length>=45){chosen=ko;chosenDesc=kd}}
+  const score=nf+tf+20+(chosen.thumbnail?.source?2:0);
+  if(score>bestScore){bestScore=score;best={p:chosen,desc:chosenDesc,score,identityTitle:p.title||alias}}
+ }
+ return best;
+}
 async function oneResolve(section,name,forcedKind=''){
  const clean=String(name||'').replace(/^(동물|식물)\s*[—\-:]\s*/,'').replace(/\s+/g,' ').trim();
  const topic=oneTopic(section,name); if(forcedKind)topic.kind=forcedKind;
@@ -1684,6 +1715,8 @@ async function oneResolve(section,name,forcedKind=''){
  // NS90.24: 검색 결과 순위에만 의존하지 않고, 후보명/별칭의 정확한 문서를 먼저 확인한다.
  // 이 단계도 모든 카테고리가 공통으로 사용하며, 통과 기준은 동일한 주제 검증이다.
  const aliases=sharedAliases(clean);
+ const bridged=await oneForeignExactBridge(clean,topic,aliases);
+ if(bridged){best=bridged;bestScore=bridged.score;}
  for(const exact of aliases.slice(0,6)){
   const p=await onePage(exact); if(!p||p.missing!==undefined)continue;
   const desc=(p.extract||'').replace(/\s+/g,' ').trim(); if(desc.length<45)continue;
@@ -1712,10 +1745,10 @@ async function oneResolve(section,name,forcedKind=''){
  if(!best)return null;
  const photo=best.p.thumbnail?.source||'';
  const finalName=best.p.title||clean;
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,finalName,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.25 ENTITY-LOCK 공통 단일 검색 + 대상·주제 이중 검증'],score:bestScore,section,kind:topic.kind};
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,finalName,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.26 다국어 동일대상 브리지 + 대상·주제 이중 검증'],score:bestScore,section,kind:topic.kind};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER',
+ version:'MASTER V28 · NS90.26 MULTILINGUAL ENTITY BRIDGE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2302,7 +2335,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.26 MULTILINGUAL ENTITY BRIDGE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
