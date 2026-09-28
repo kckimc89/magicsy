@@ -1590,7 +1590,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.46 ART TITLE IDENTITY BRIDGE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.47 ART SEARCH DIAGNOSTIC · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1771,11 +1771,12 @@ async function ns9046ArtTitleBridge(clean,topic){
   let chosen=p, chosenDesc=desc;
   const ko=await oneKoPageFromEntity(qid);
   if(ko&&ko.missing===undefined){const kd=(ko.extract||'').replace(/\s+/g,' ').trim();if(kd.length>=45){chosen=ko;chosenDesc=kd}}
-  return {p:chosen,desc:chosenDesc,score:120,identityTitle:p.title||spec.en,entityId:qid,bridgePhoto:photo};
+  return {p:chosen,desc:chosenDesc,score:1000,identityTitle:p.title||spec.en,entityId:qid,bridgePhoto:photo,artCanonical:true};
  }
  return null;
 }
 async function oneResolve(section,name,forcedKind=''){
+ window.NS9047_DIAG={name:String(name||''),section,stage:'start'};
  const clean=String(name||'').replace(/^(동물|식물)\s*[—\-:]\s*/,'').replace(/\s+/g,' ').trim();
  const topic=oneTopic(section,name); if(forcedKind)topic.kind=forcedKind;
  // NS90.22: 모든 카테고리가 이 한 검색 파이프라인과 동일한 대상 일치 검증을 사용한다. 대표후보 데이터만 보강한다.
@@ -1785,9 +1786,9 @@ async function oneResolve(section,name,forcedKind=''){
  // 이 단계도 모든 카테고리가 공통으로 사용하며, 통과 기준은 동일한 주제 검증이다.
  const aliases=sharedAliases(clean);
  const artTitleBridged=await ns9046ArtTitleBridge(clean,topic);
- if(artTitleBridged){best=artTitleBridged;bestScore=artTitleBridged.score;}
+ if(artTitleBridged){best=artTitleBridged;bestScore=artTitleBridged.score;window.NS9047_DIAG={name:clean,section,stage:'canonical-title-ok',identity:artTitleBridged.identityTitle,qid:artTitleBridged.entityId||'',photo:!!artTitleBridged.bridgePhoto};}
  const bridged=await oneForeignExactBridge(clean,topic,aliases);
- if(bridged){best=bridged;bestScore=bridged.score;}
+ if(bridged && bridged.score>bestScore){best=bridged;bestScore=bridged.score;}
  for(const exact of aliases.slice(0,6)){
   const p=await onePage(exact); if(!p||p.missing!==undefined)continue;
   const desc=(p.extract||'').replace(/\s+/g,' ').trim(); if(desc.length<45)continue;
@@ -1815,7 +1816,7 @@ async function oneResolve(section,name,forcedKind=''){
  }
  // NS90.44 second-stage bridge: exact multilingual entity -> page image/P18.
  if(!best){const wb=await oneWikidataPhotoBridge(clean,topic,aliases);if(wb){best=wb;bestScore=wb.score||0;}}
- if(!best)return null;
+ if(!best){window.NS9047_DIAG={name:clean,section,stage:'no-entity'};return null;}
  // NS90.44 ART IDENTITY DIAG AUTO RECOVERY: a candidate is not ready until a real representative image URL is secured.
  // First use the resolved Wikipedia thumbnail. If it is absent (common for artworks),
  // fetch P18 from the exact same Wikidata entity and resolve that Commons file.
@@ -1847,6 +1848,7 @@ async function oneResolve(section,name,forcedKind=''){
  // Purple ◆ means description + identity + type + representative photo are all ready.
  // No-photo items stay white ○ and can be retried; this rule is shared by every category.
  const photoOk=!!photo;
+ window.NS9047_DIAG={name:clean,section,stage:'quality-gate',identityTitle,finalName,identityOk,typeOk,descOk,photoOk,qid:best.entityId||best.p.pageprops?.wikibase_item||'',canonical:!!best.artCanonical};
  if(!identityOk||!typeOk||!descOk||!photoOk)return null;
  // ===== NS90.29 KOREAN PREVIEW FALLBACK =====
  // Prefer Korean text for the exact same Wikidata entity. If no Korean article exists,
@@ -2469,7 +2471,7 @@ function v16PaintRow(section,row,panel){
      openRepresentativePreview(section,shown,verified,panel);
    }else{
      row.ok=false; row.verified=null;
-     if(pv)pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p><button type="button" class="ns9018-retry">↻ 다시 찾기</button></div>`;
+     if(pv){const d=window.NS9047_DIAG||{};const dg=d.name===shown?`<div class="note" style="margin-top:10px">진단: ${esc(d.stage||'unknown')} · 이름 ${d.identityOk===false?'실패':d.identityOk===true?'통과':'-'} · 종류 ${d.typeOk===false?'실패':d.typeOk===true?'통과':'-'} · 설명 ${d.descOk===false?'실패':d.descOk===true?'통과':'-'} · 사진 ${d.photoOk===false?'실패':d.photoOk===true?'통과':'-'}</div>`:'';pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p>${dg}<button type="button" class="ns9018-retry">↻ 다시 찾기</button></div>`;}
      const retry=pv?.querySelector('.ns9018-retry'); if(retry)retry.onclick=()=>b.click();
    }
    // NS90.41: keep successful searches purple. Failed searches return to white ○.
