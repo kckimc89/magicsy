@@ -119,7 +119,12 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER</div>
+
+<style id="ns9035-auto-precheck-style">
+.rep-card-btn-v5.ready-card{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
+.rep-card-btn-v5.prechecking{background:#f7f7fa!important;border:1.5px dashed #aeb5c2!important;color:#777!important}
+</style>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1442,7 +1447,7 @@ async function V3_J(u){
 const V3_KIND_KO={food:'음식',fruit:'과일',animal:'동물',plant:'식물',place:'장소',culture:'문화',person:'인물',art:'예술작품'};
 const V3_ALIAS={
  '하몽 이베리코':['하몬 이베리코','jamón ibérico','jamon iberico'],
- '스페인아이벡스':['스페인 아이벡스','Spanish ibex'],
+ '스페인아이벡스':['스페인 아이벡스','Spanish ibex','Iberian ibex','Capra pyrenaica'],
  '스페인제국수리':['스페인 제국수리','Spanish imperial eagle'],
  '올리브나무':['올리브 나무','olive tree','Olea europaea'],
  '코르크참나무':['코르크 참나무','cork oak','Quercus suber'],
@@ -1581,7 +1586,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1851,10 +1856,10 @@ async function oneResolve(section,name,forcedKind=''){
  // Append country context only AFTER that layer so it cannot be shortened away.
  const entityDesc=v13CardDescription(descForCard.trim(),clean,topic.kind);
  const cardDesc=(entityDesc+(countryContext?`\n\n${countries?.[COUNTRY]?.flag||'🌍'} ${countries?.[COUNTRY]?.name||'이 나라'}에서는\n${countryContext.replace(/^\s*[^에]+에서는\s*/, ' ')}`:'')).trim();
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.35 전체 카테고리 자동 사전검사 + NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER',
+ version:'MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2294,7 +2299,7 @@ function v16PaintStatus(section){
  const pending=rows.filter(x=>x.pending).length;
  const done=rows.length-pending;
  const si=v20StorageInfo();
- status.textContent=`후보 ${rows.length}개 · ◆ 카드 ${reg}개 · 하나씩 눌러 찾기 · 저장 ${si.mb}MB`;
+ status.textContent=`후보 ${rows.length}개 · ◆ 가능 ${good}개 · 저장카드 ${reg}개 · 자동확인 ${done}/${rows.length} · 저장 ${si.mb}MB`;
 }
 
 
@@ -2341,11 +2346,12 @@ function v16PaintRow(section,row,panel){
  const registered=hasIdentity(shown,existing);
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
- b.textContent=(registered?'◆ ':'○ ')+shown;
- b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':'can-make');
- // NS90.19: purple means saved, not disabled. Every representative name remains clickable.
+ const ready=!registered && row.ok && row.verified;
+ b.textContent=(registered?'◆ ':ready?'◆ ':row.pending?'… ':'○ ')+shown;
+ b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'ready-card':row.pending?'prechecking':'can-make');
+ // NS90.35: purple diamond means the automatic precheck confirmed that a card can be made.
  b.disabled=false;
- b.title=registered?'저장된 카드를 미리 봅니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
+ b.title=registered?'저장된 카드를 미리 봅니다.':ready?'자동 확인 완료 · 누르면 바로 미리 봅니다.':row.pending?'자동으로 카드 가능 여부를 확인하고 있습니다.':'아직 확인되지 않았습니다. 누르면 직접 다시 찾습니다.';
  b.onclick=async()=>{
    if(b.dataset.busy==='1')return;
    if(registered){
@@ -2367,6 +2373,10 @@ function v16PaintRow(section,row,panel){
      }
      return;
    }
+   if(row.ok&&row.verified){
+     openRepresentativePreview(section,shown,row.verified,panel);
+     return;
+   }
    b.dataset.busy='1'; b.disabled=true; b.textContent='… '+shown;
    let pv=panel.querySelector('.rep-preview-v5');
    if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
@@ -2385,8 +2395,8 @@ function v16PaintRow(section,row,panel){
      if(pv)pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p><button type="button" class="ns9018-retry">↻ 다시 찾기</button></div>`;
      const retry=pv?.querySelector('.ns9018-retry'); if(retry)retry.onclick=()=>b.click();
    }
-   // Do not repaint the clicked button here. Repainting replaces onclick while the event is finishing on Safari/Edge.
-   b.textContent='○ '+shown; b.disabled=false; b.className='rep-card-btn-v5 can-make';
+   // Keep the automatic availability color after the direct check.
+   b.textContent=(row.ok?'◆ ':'○ ')+shown; b.disabled=false; b.className='rep-card-btn-v5 '+(row.ok?'ready-card':'can-make');
  };
 }
 function v15CachedRepresentative(section,name){
@@ -2441,13 +2451,46 @@ async function renderRepresentativeCardButtonsV5(section){
   if(!st.rows.has(req.key)){
    const hasRepAlternatives=finalName!==cardInputName(name)||!!V24_REP_ALTERNATIVES?.[COUNTRY]?.[section]?.[cardInputName(name)];
    const cached=hasRepAlternatives?null:v15CachedRepresentative(section,finalName);
-   st.rows.set(req.key,{key:req.key,name,pending:false,ok:!!cached,verified:cached?.verified||null,resolvedName:finalName});
+   st.rows.set(req.key,{key:req.key,name,pending:!cached,ok:!!cached,verified:cached?.verified||null,resolvedName:finalName});
   }
  }
  // Never clear innerHTML here: existing buttons and preview stay visible.
  for(const row of st.rows.values())v16PaintRow(section,row,panel);
  v16PaintStatus(section);
- // NS90.16: no automatic queue. A network search starts only when the user clicks one candidate.
+ // NS90.35: country-open auto precheck is started by the global sequential scheduler below.
+}
+// ===== NS90.35 AUTO PRECHECK =====
+// Open a country -> verify every representative candidate across all card categories.
+// Searches run one-by-one to protect Safari and do NOT write transient search results to localStorage.
+let NS9035_PRECHECK_TOKEN=0;
+async function ns9035PrecheckRow(section,row,token){
+ if(token!==NS9035_PRECHECK_TOKEN)return;
+ const st=v16State(section);
+ if(!row.pending)return;
+ let choice={display:cardInputName(row.name),original:cardInputName(row.name),changed:false};
+ try{choice=await v24ResolveRepresentative(section,row.name)}catch(e){}
+ row.resolvedName=choice.display; row.repChoice=choice;
+ let verified=null;
+ try{verified=await ONE_CARD_ENGINE.resolve({section,name:choice.display})}catch(e){console.warn('[NS90.35 precheck]',section,choice.display,e)}
+ if(token!==NS9035_PRECHECK_TOKEN)return;
+ row.pending=false; row.ok=!!(verified&&verified.desc&&((verified.photo)||verified.photos?.length)); row.verified=row.ok?verified:null;
+ const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
+ if(panel&&panel.dataset.country===String(COUNTRY||'')){v16PaintRow(section,row,panel);v16PaintStatus(section)}
+}
+async function ns9035AutoPrecheckAll(){
+ const token=++NS9035_PRECHECK_TOKEN, country=String(COUNTRY||'');
+ for(const section of REP_SECTIONS){
+  if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
+  const st=v16State(section); st.running=true;
+  try{
+   for(const row of st.rows.values()){
+    if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
+    if(row.pending)await ns9035PrecheckRow(section,row,token);
+    await new Promise(r=>setTimeout(r,90));
+   }
+   st.finished=true;
+  }finally{st.running=false;v16PaintStatus(section)}
+ }
 }
 function renderAllRepresentativeCardButtonsV5(){
  // Compatibility helper; render visible sections without resetting their state.
@@ -2457,11 +2500,11 @@ const __v5OpenCountry=openCountry;
 openCountry=function(code){
  const r=__v5OpenCountry(code);
  // Let normal section rendering finish; representative panels attach once and keep their jobs.
- setTimeout(()=>{renderCountryOverviews();renderAllRepresentativeCardButtonsV5();REP_SECTIONS.forEach(v26RefreshOverviewRep)},80);
+ setTimeout(()=>{renderCountryOverviews();renderAllRepresentativeCardButtonsV5();REP_SECTIONS.forEach(v26RefreshOverviewRep);setTimeout(ns9035AutoPrecheckAll,120)},80);
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
