@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.46 ART TITLE IDENTITY BRIDGE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.49 ART PHOTO SEARCH FALLBACK · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1590,7 +1590,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.48 ART PHOTO QUALITY GATE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.49 ART PHOTO SEARCH FALLBACK · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1752,9 +1752,27 @@ async function oneWikidataPhotoBridge(clean,topic,aliases){
 // Artwork titles are unusually multilingual. Resolve the canonical English title first,
 // then keep the same entity while Korean text/photo recovery runs through the common engine.
 const NS9046_ART_CANON={
- '기억의 지속':{en:'The Persistence of Memory',alts:['La persistencia de la memoria','La persistance de la mémoire']},
- '아비뇽의 처녀들':{en:"Les Demoiselles d'Avignon",alts:["Les Demoiselles d’Avignon"]}
+ '기억의 지속':{en:'The Persistence of Memory',alts:['La persistencia de la memoria','La persistance de la mémoire','Salvador Dali Persistence of Memory']},
+ '아비뇽의 처녀들':{en:"Les Demoiselles d'Avignon",alts:["Les Demoiselles d’Avignon",'Pablo Picasso Demoiselles Avignon']},
+ '십자가의 성 요한의 그리스도':{en:'Christ of Saint John of the Cross',alts:['Christ of St John of the Cross','Salvador Dali Christ of Saint John of the Cross']},
+ '옷을 벗은 마하':{en:'The Nude Maja',alts:['La maja desnuda','Francisco Goya The Nude Maja']},
+ '옷을 입은 마하':{en:'The Clothed Maja',alts:['La maja vestida','Francisco Goya The Clothed Maja']}
 };
+async function ns9049ArtPhotoSearchFallback(clean,topic,titles){
+ if(topic.kind!=='art')return '';
+ const qs=[...new Set((titles||[]).filter(Boolean))];
+ for(const q of qs.slice(0,8))try{
+  const u='https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent('intitle:"'+q+'"')+'&gsrlimit=5&prop=pageimages|pageprops&ppprop=wikibase_item&pithumbsize=1200&format=json&origin=*';
+  const j=await (await fetch(u)).json();
+  for(const pg of Object.values(j.query?.pages||{})){
+   const title=pg.title||'';
+   if(oneNameSimilarity(q,title)<0.70 && !oneEntityNameGate(clean,title,sharedAliases(clean)))continue;
+   const photo=pg.thumbnail?.source||pg.original?.source||'';
+   if(photo)return photo;
+  }
+ }catch(e){console.warn('[NS90.49 art search fallback]',e)}
+ return '';
+}
 async function ns9046ArtTitleBridge(clean,topic){
  if(topic.kind!=='art'||!NS9046_ART_CANON[clean])return null;
  const spec=NS9046_ART_CANON[clean], titles=[spec.en,...spec.alts];
@@ -1763,7 +1781,7 @@ async function ns9046ArtTitleBridge(clean,topic){
   const desc=(p.extract||'').replace(/\s+/g,' ').trim();
   if(desc.length<45||sharedTypeFit('art',p.title||title,desc)<=0)continue;
   let photo=p.thumbnail?.source||p.original?.source||'';
-  // NS90.48: some copyrighted artworks expose their representative image through
+  // NS90.49: artwork photo search fallback. Some artworks expose a representative image through
   // Wikipedia REST summary even when action=query pageimages returns no thumbnail.
   // Keep the already-verified canonical title/entity and recover only its image.
   if(!photo){
@@ -1771,12 +1789,13 @@ async function ns9046ArtTitleBridge(clean,topic){
     const ru='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent((p.title||title).replace(/ /g,'_'));
     const rj=await (await fetch(ru)).json();
     photo=rj?.thumbnail?.source||rj?.originalimage?.source||'';
-   }catch(e){console.warn('[NS90.48 art REST photo]',e)}
+   }catch(e){console.warn('[NS90.49 art REST photo]',e)}
   }
   const qid=p.pageprops?.wikibase_item||'';
   if(!photo&&qid){
    try{const e=(await V3_wd([qid]))?.[qid],fn=V3_claim(e,'P18')[0];if(fn)photo=await V3_fileUrl(fn)}catch(e){}
   }
+  if(!photo) photo=await ns9049ArtPhotoSearchFallback(clean,topic,[p.title||title,spec.en,...spec.alts]);
   // Keep English identity even when Korean display text is available.
   let chosen=p, chosenDesc=desc;
   const ko=await oneKoPageFromEntity(qid);
@@ -1949,7 +1968,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.46 ART TITLE IDENTITY BRIDGE · ONE MASTER',
+ version:'MASTER V28 · NS90.49 ART PHOTO SEARCH FALLBACK · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2562,7 +2581,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.46 ART TITLE IDENTITY BRIDGE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.49 ART PHOTO SEARCH FALLBACK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
