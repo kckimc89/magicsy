@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -605,7 +605,7 @@ function setDeletedBase(s,a){localStorage.setItem(deletedBaseKey(s),JSON.stringi
 function getCustom(s){try{return JSON.parse(localStorage.getItem(key(s))||'[]')}catch{return[]}}
 function isQuotaError(e){return !!e&&(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22||e.code===1014)}
 function clearExpendableSearchCaches(){
- // NS90.53: preserve verified candidates compactly, then remove regenerable heavy resolver caches.
+ // NS90.54: preserve verified candidates compactly, then remove regenerable heavy resolver caches.
  try{if(typeof ns9053StorageCleanup==='function')return ns9053StorageCleanup()}catch(e){}
  const disposable=['magicwand_photo_','place_desc_v30_','rebuilt_','autophoto_','trial_candidates_used_'];
  const legacyEntity=['magic_v13_entity_','magic_v14_entity_','magic_v15_entity_','magic_v16_entity_','magic_v28_entity_'];
@@ -1591,7 +1591,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1989,7 +1989,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER',
+ version:'MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2186,6 +2186,32 @@ function v12Request(section,rawName,forcedKind=''){
  const display=cardInputName(rawName),kind=forcedKind||cardInputKind(section,rawName);
  return {section,rawName:String(rawName||''),name:display,kind,key:['NS90.15-ONE',section,kind,display].join('|')};
 }
+// ===== NS90.54 LEGACY PHOTO MIGRATION + PREVIEW REUSE =====
+// Older Safari builds could fall back to localStorage for user photos. Those base64 images can
+// consume almost the entire localStorage quota. Move them to IndexedDB without deleting photos.
+async function ns9054MigrateLegacyPhotos(){
+ const prefix='photo_'+DATA_NS, keys=[];
+ try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(k.startsWith(prefix))keys.push(k)}}catch(e){}
+ let moved=0;
+ for(const k of keys){
+   try{
+     const v=localStorage.getItem(k)||''; if(!v)continue;
+     // setUserPhoto writes to IndexedDB when available. Verify before removing the legacy copy.
+     await setUserPhoto(k,v);
+     const check=await getUserPhoto(k);
+     if(check===v){localStorage.removeItem(k);moved++;}
+   }catch(e){console.warn('[NS90.54] legacy photo migration skipped',k,e)}
+ }
+ if(moved)console.info('[NS90.54] migrated legacy photos to IndexedDB',moved);
+ return moved;
+}
+async function ns9054PrepareStorage(){
+ try{await ns9054MigrateLegacyPhotos()}catch(e){}
+ try{ns9053StorageCleanup()}catch(e){}
+ try{localStorage.setItem('magic_ns9054_storage_ready',String(Date.now()))}catch(e){}
+}
+setTimeout(()=>ns9054PrepareStorage(),0);
+
 // ===== NS90.53 COMPACT READY SNAPSHOT + SAFE STORAGE CLEANUP =====
 // Purple-ready candidates keep only the small, reusable preview data.
 // Regenerable resolver caches can then be removed without losing purple readiness.
@@ -2239,6 +2265,7 @@ async function precheckRepresentative(section,name){
  repAvailabilityCache.set(req.key,result);return result;
 }
 function openRepresentativePreview(section,name,verified,panel){
+ ns9053SaveReady(v12Request(section,name),verified);
  let pv=panel.querySelector('.rep-preview-v5');
  if(!pv){pv=document.createElement('div');pv.className='rep-preview-v5';panel.appendChild(pv);}
  // Reuse the verified snapshot; do not search a second time.
@@ -2260,8 +2287,8 @@ function openRepresentativePreview(section,name,verified,panel){
      const saved=JSON.parse(raw).some(x=>x.id===item.id);
      if(ok!==true||!saved)throw new Error('primary card save verification failed');
    }catch(e){
-     console.error('[NS90.53] primary card save failed',e);
-     if(isQuotaError(e)){try{ns9053StorageCleanup(v12Request(section,name).key);const ok2=setCustom(section,[...a,item]);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
+     console.error('[NS90.54] primary card save failed',e);
+     if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=setCustom(section,[...a,item]);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
      alert(isQuotaError(e)?'저장공간을 자동 정리했지만 카드 저장에 필요한 공간이 아직 부족합니다. 기존 카드는 지우지 않았습니다. 백업 후 다시 확인해 주세요.':'카드 저장 중 오류가 발생했습니다. 다시 한 번 눌러 주세요.');
      return;
    }
@@ -2647,7 +2674,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
