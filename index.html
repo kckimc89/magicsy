@@ -36,7 +36,11 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .v21-big-nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
 .v21-big-nav button{font-size:1rem;padding:10px 14px;border-radius:12px}
 @media(max-width:700px){body.view-cards #detail .cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.v21-manage,.v22-category-choice,.v22-suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}.v21-manage{padding-top:12px;border-top:1px solid #eee}.v21-manage button{padding:9px 12px;border-radius:11px}</style>
+.v21-manage,.v22-category-choice,.v22-suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}.v21-manage{padding-top:12px;border-top:1px solid #eee}.v21-manage button{padding:9px 12px;border-radius:11px}
+/* NS90.34: keep the existing preview UI, but preserve line breaks in the shared description
+   so every category can show “나라에서는” as a readable second block. */
+.preview-card > p{white-space:pre-line}
+</style>
 <style>
 [id*="DeletedNames"], [id*="deletedNames"], .deleted-names,
 [id*="recommend"], [id*="Recommend"], .recommend, .recommend-box,
@@ -115,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.33 VERIFIED COUNTRY CONTEXT · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1577,7 +1581,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.33 VERIFIED COUNTRY CONTEXT · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1791,8 +1795,16 @@ async function oneResolve(section,name,forcedKind=''){
      facts.push(`${clean}은(는) 이 나라와 관련해 알아볼 만한 장소입니다. 위치와 만들어진 배경, 눈에 띄는 모습을 함께 살펴보면 이해하기 쉽습니다.`);
      facts.push(`사진에서 건물·자연환경·주변 풍경의 특징을 찾아보고 왜 알려진 곳인지 살펴보세요.`);
    }else if(topic.kind==='person'){
-     facts.push(`${clean}은(는) 이 나라와 관련된 인물입니다. 어떤 분야에서 활동했고 무엇으로 알려졌는지를 중심으로 살펴보세요.`);
-     facts.push(`활동한 시대와 대표적인 일, 사람들에게 알려진 이유를 함께 보면 인물을 이해하기 쉽습니다.`);
+     if(section==='singers'){
+       facts.push(`${clean}은(는) 이 나라와 연결된 음악인입니다. 주로 어떤 장르에서 활동했는지와 대표적인 음악 활동을 중심으로 살펴보세요.`);
+       facts.push(`활동한 시대와 음악적 특징, 이 나라의 음악 문화와 어떤 관계가 있는지를 함께 보면 이해하기 쉽습니다.`);
+     }else if(section==='athletes'){
+       facts.push(`${clean}은(는) 이 나라와 연결된 운동선수입니다. 종목과 포지션·주요 대회 또는 소속팀에서의 활동을 중심으로 살펴보세요.`);
+       facts.push(`어떤 기록이나 활약으로 알려졌는지, 이 나라의 스포츠와 어떤 관계가 있는지도 함께 살펴보세요.`);
+     }else{
+       facts.push(`${clean}은(는) 이 나라의 역사와 연결해 살펴볼 인물입니다. 활동한 시대와 역할, 대표적인 일을 중심으로 알아보세요.`);
+       facts.push(`그 인물이 당시 사회와 역사에 어떤 흔적을 남겼는지 함께 보면 이해하기 쉽습니다.`);
+     }
    }else if(topic.kind==='food'){
      facts.push(`${clean}은(는) 이 지역에서 만날 수 있는 음식입니다. 주재료와 만드는 방법에 따라 맛·향·모양에 특징이 생깁니다.`);
      facts.push(`사진에서 재료와 조리 모습을 찾아보고 언제, 어떻게 먹는 음식인지 살펴보세요.`);
@@ -1805,7 +1817,7 @@ async function oneResolve(section,name,forcedKind=''){
    descForCard=facts.join(' ');
    if(descForCard.length<70) descForCard=`${clean}에 대해 사진과 함께 생김새, 쓰임, 배경과 특징을 차근차근 살펴보세요.`;
  }
- // ===== NS90.33 VERIFIED COUNTRY CONTEXT =====
+ // ===== NS90.34 ALL CATEGORY BRIDGE =====
  // Add country context without changing the resolved entity, photo, candidate list or UI.
  // The context comes from the same country/section overview already used by the encyclopedia,
  // so this remains one shared engine rather than per-item exception code.
@@ -1839,10 +1851,10 @@ async function oneResolve(section,name,forcedKind=''){
  // Append country context only AFTER that layer so it cannot be shortened away.
  const entityDesc=v13CardDescription(descForCard.trim(),clean,topic.kind);
  const cardDesc=(entityDesc+(countryContext?`\n\n${countries?.[COUNTRY]?.flag||'🌍'} ${countries?.[COUNTRY]?.name||'이 나라'}에서는\n${countryContext.replace(/^\s*[^에]+에서는\s*/, ' ')}`:'')).trim();
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified}};
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.33 VERIFIED COUNTRY CONTEXT · ONE MASTER',
+ version:'MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2449,7 +2461,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.33 VERIFIED COUNTRY CONTEXT · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.34 ALL CATEGORY BRIDGE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
