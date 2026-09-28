@@ -124,7 +124,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.ready-card{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.prechecking{background:#f7f7fa!important;border:1.5px dashed #aeb5c2!important;color:#777!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1586,7 +1586,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1859,7 +1859,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.35 전체 카테고리 자동 사전검사 + NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER',
+ version:'MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2627,7 +2627,7 @@ async function ns9035AutoPrecheckAll(){
   }finally{st.running=false;v16PaintStatus(section)}
  }
 }
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -2640,4 +2640,96 @@ window.__MAGIC_V7_DIAGNOSTIC={
  availability:'V3 result with description + photo'
 };
 </script>
-<div id="v21Modal" class="v21-modal hidden" role="dialog" aria-modal="true"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div></body></html>
+<div id="v21Modal" class="v21-modal hidden" role="dialog" aria-modal="true"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div>
+
+// ===== NS90.38 SINGLE MASTER STATE =====
+// One authority for card state: the cards actually saved in this country/section.
+// Search state is secondary and can never override a saved card.
+function ns9038DomSaved(section){
+ const list=document.getElementById(section+'List'), out=[];
+ if(!list)return out;
+ list.querySelectorAll('.item').forEach(card=>{
+   const name=card.querySelector('h3')?.textContent?.trim();
+   const id=card.dataset.itemId||'';
+   if(name)out.push({name,id,__dom:true,card});
+ });
+ return out;
+}
+function ns9038SavedMatch(section,row){
+ const aliases=[row?.name,row?.resolvedName,row?.repChoice?.original,row?.repChoice?.display].filter(Boolean).flatMap(ns9037AliasNames);
+ const keys=new Set(aliases.map(ns9037LooseName).filter(Boolean));
+ // DOM is the visible truth. Use item id to recover the underlying saved record when possible.
+ for(const d of ns9038DomSaved(section)){
+   if(ns9037AliasNames(d.name).map(ns9037LooseName).some(k=>keys.has(k))){
+     return getCustom(section).find(x=>String(x.id)===String(d.id)) || getCustom(section).find(x=>ns9037LooseName(x.name)===ns9037LooseName(d.name)) || d;
+   }
+ }
+ // Then check persistent cards, including aliases.
+ for(const x of getCustom(section)){
+   if(ns9037AliasNames(x.name).map(ns9037LooseName).some(k=>keys.has(k)))return x;
+ }
+ return null;
+}
+function v16RegisteredMatch(section,row){return ns9038SavedMatch(section,row)}
+
+// Exact alias fallback through the same V3 entity engine. This is generic: aliases -> one entity -> one description/photo set.
+async function ns9038ExactAliasFallback(section,displayName){
+ const kind=cardInputKind(section,displayName);
+ for(const alias of ns9037AliasNames(displayName)){
+   try{
+     const found=await V3_findSubject(alias,kind);
+     if(!found?.e)continue;
+     const e=found.e;
+     const koTitle=e.sitelinks?.kowiki?.title||'';
+     const enTitle=e.sitelinks?.enwiki?.title||found.p?.title||'';
+     const ko=koTitle?await V3_page('ko',koTitle):null;
+     const en=enTitle?await V3_page('en',enTitle):null;
+     const photos=await V3_photos(alias,kind,e,ko,en);
+     if(!photos.length)continue;
+     let desc=V3_description(displayName,e,ko,en);
+     if(typeof ns9030RichKoreanDescription==='function')try{desc=ns9030RichKoreanDescription(displayName,kind,desc)||desc}catch(e){}
+     return {title:ko?.title||en?.title||displayName,desc,photo:photos[0],photos,entityId:e.id||'',sources:['Wikipedia','Wikidata'],aliasResolved:alias};
+   }catch(e){}
+ }
+ return null;
+}
+async function ns9037ResolveAliasAware(section,name){
+ const names=ns9037AliasNames(name);
+ for(const n of names){const c=v15CachedRepresentative(section,n);if(c?.verified?.desc)return c.verified;}
+ for(const n of names){
+   try{const v=await v12ResolveRequest(v12Request(section,n));if(v&&v.desc&&(v.photo||v.photos?.length))return v;}catch(e){}
+ }
+ return await ns9038ExactAliasFallback(section,name);
+}
+
+// Paint from MASTER state every time. A saved card is always green, regardless of old precheck state.
+const __ns9038PaintRow=v16PaintRow;
+v16PaintRow=function(section,row,panel){
+ const saved=ns9038SavedMatch(section,row);
+ if(saved){
+   row.registered=true;row.pending=false;row.ok=true;
+   const shown=cardInputName(row.resolvedName||row.name);
+   let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
+   if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
+   b.textContent='✓ '+shown;b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=false;b.title='이미 카드로 등록되어 있습니다.';
+   b.onclick=()=>{
+     const dom=ns9038DomSaved(section).find(d=>ns9037LooseName(d.name)===ns9037LooseName(saved.name||shown));
+     if(dom?.card){dom.card.scrollIntoView({behavior:'smooth',block:'center'});dom.card.animate?.([{opacity:.55},{opacity:1}],{duration:500});return;}
+     const pv=panel.querySelector('.rep-preview-v5');if(pv)pv.innerHTML=`<div class="preview-card"><h3>${esc(saved.name||shown)}</h3><p>${esc(saved.desc||'이미 저장된 카드입니다.')}</p><button type="button" class="rep-close-v5">닫기</button></div>`;
+   };
+   return;
+ }
+ return __ns9038PaintRow(section,row,panel);
+};
+
+// Repaint after every section render so newly created/deleted cards and representative chips cannot disagree.
+const __ns9038RenderSection=renderSection;
+renderSection=async function(section){
+ const r=await __ns9038RenderSection(section);
+ const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
+ if(panel){const st=v16State(section);for(const row of st.rows.values())v16PaintRow(section,row,panel);v16PaintStatus(section);}
+ return r;
+};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'saved card MASTER -> alias entity -> one resolver'};
+
+</body></html>
