@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.55 CARD STORAGE REBUILD · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -602,7 +602,13 @@ function confirmedDescKey(country,s,id){return `${DATA_NS}confirmed_${country}_$
 function deletedBaseKey(s){return `${DATA_NS}deleted_${COUNTRY}_${s}`}
 function getDeletedBase(s){try{return JSON.parse(localStorage.getItem(deletedBaseKey(s))||'[]')}catch{return[]}}
 function setDeletedBase(s,a){localStorage.setItem(deletedBaseKey(s),JSON.stringify([...new Set(a)]))}
-function getCustom(s){try{return JSON.parse(localStorage.getItem(key(s))||'[]')}catch{return[]}}
+// NS90.55: card metadata is mirrored in IndexedDB so cards no longer depend on the nearly-full localStorage quota.
+const CARD_DB='magic_wand_cards_ns9055', CARD_STORE='cards', CARD_MEM=new Map();
+function cardStoreKey(country,s){return String(country||COUNTRY)+'|'+String(s)}
+function openCardDB(){return new Promise((resolve,reject)=>{const q=indexedDB.open(CARD_DB,1);q.onupgradeneeded=()=>{const db=q.result;if(!db.objectStoreNames.contains(CARD_STORE))db.createObjectStore(CARD_STORE)};q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)})}
+async function cardDBPut(country,s,a){const db=await openCardDB();return await new Promise((resolve,reject)=>{const tx=db.transaction(CARD_STORE,'readwrite');tx.objectStore(CARD_STORE).put(a,cardStoreKey(country,s));tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error)})}
+async function cardDBGet(country,s){try{const db=await openCardDB();return await new Promise((resolve,reject)=>{const tx=db.transaction(CARD_STORE,'readonly');const q=tx.objectStore(CARD_STORE).get(cardStoreKey(country,s));q.onsuccess=()=>resolve(Array.isArray(q.result)?q.result:[]);q.onerror=()=>reject(q.error)})}catch(e){return[]}}
+function getCustom(s){const mk=cardStoreKey(COUNTRY,s);if(CARD_MEM.has(mk))return CARD_MEM.get(mk).map(x=>({...x}));try{return JSON.parse(localStorage.getItem(key(s))||'[]')}catch{return[]}}
 function isQuotaError(e){return !!e&&(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22||e.code===1014)}
 function clearExpendableSearchCaches(){
  // NS90.54: preserve verified candidates compactly, then remove regenerable heavy resolver caches.
@@ -621,15 +627,27 @@ function v20StorageInfo(){
  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'',v=localStorage.getItem(k)||'',n=(k.length+v.length)*2;bytes+=n;if(k.startsWith(DATA_NS))userBytes+=n;else cacheBytes+=n}
  return {bytes,userBytes,cacheBytes,mb:(bytes/1048576).toFixed(2)};
 }
+function ns9055CompactCardForLocal(x){const y={...x};if(/^data:/i.test(String(y.photoRemote||'')))y.photoRemote='';return y}
 function setCustom(s,a){
- const k=key(s),payload=JSON.stringify(a);
- try{localStorage.setItem(k,payload);return true}catch(e){
-  if(!isQuotaError(e))throw e;
-  // 검색 결과 캐시는 다시 만들 수 있으므로 지우고, 사용자가 만든 카드 데이터는 건드리지 않는다.
-  clearExpendableSearchCaches();
-  localStorage.setItem(k,payload);return true;
- }
+ const country=String(COUNTRY||''), mk=cardStoreKey(country,s), copy=a.map(x=>({...x})); CARD_MEM.set(mk,copy);
+ // IndexedDB is the authoritative card store from NS90.55 onward.
+ cardDBPut(country,s,copy).catch(e=>console.error('[NS90.55] IndexedDB card save failed',e));
+ // Keep only a compact compatibility mirror when localStorage has room. Failure here is no longer a card-save failure.
+ const k=key(s),payload=JSON.stringify(copy.map(ns9055CompactCardForLocal));
+ try{localStorage.setItem(k,payload)}catch(e){if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(k,payload)}catch(_){}}else console.warn('[NS90.55] local mirror skipped',e)}
+ return true;
 }
+async function ns9055SetCustomDurable(s,a){const country=String(COUNTRY||''),copy=a.map(x=>({...x}));CARD_MEM.set(cardStoreKey(country,s),copy);await cardDBPut(country,s,copy);setCustom(s,copy);return true}
+async function ns9055HydrateCards(){
+ const sections=['food','animals','fruit','places','culture','singers','athletes','people','art'], countries=['ES','JP','US'];
+ for(const c of countries)for(const sec of sections){
+  let db=await cardDBGet(c,sec);let legacy=[];try{legacy=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${c}_${sec}`)||'[]')}catch(e){}
+  const arr=db.length?db:legacy; if(arr.length){CARD_MEM.set(cardStoreKey(c,sec),arr);if(!db.length)try{await cardDBPut(c,sec,arr)}catch(e){}}
+ }
+ try{if(!document.getElementById('detail').classList.contains('hidden'))for(const sec of sections)await renderSection(sec)}catch(e){}
+ console.info('[NS90.55] card storage hydrated');
+}
+setTimeout(()=>ns9055HydrateCards(),20);
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function newItemId(){try{if(globalThis.crypto&&typeof globalThis.crypto.randomUUID==='function')return 'u_'+Date.now().toString(36)+'_'+globalThis.crypto.randomUUID()}catch(e){}return 'u_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)+'_'+Math.random().toString(36).slice(2)}
 
@@ -1140,7 +1158,7 @@ async function previewCandidate(s,target,box){
       sources:Array.isArray(verified.sources)?verified.sources.map(String):[]
     };
     if(!item.name||!item.desc)throw new Error('snapshot incomplete');
-    a.push(item);setCustom(s,a);
+    a.push(item);await ns9055SetCustomDurable(s,a);
     // 실제 저장되었는지 즉시 확인한다.
     saved=getCustom(s).some(x=>x.id===item.id);
     if(!saved)throw new Error('local save failed');
@@ -1591,7 +1609,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.55 CARD STORAGE REBUILD · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1989,7 +2007,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER',
+ version:'MASTER V28 · NS90.55 CARD STORAGE REBUILD · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2282,13 +2300,12 @@ function openRepresentativePreview(section,name,verified,panel){
      sources:Array.isArray(verified.sources)?verified.sources.map(String):[]};
    const saveCountry=String(COUNTRY||'');
    try{
-     const ok=setCustom(section,[...a,item]);
-     const raw=localStorage.getItem(`${DATA_NS}custom_${saveCountry}_${section}`)||'[]';
-     const saved=JSON.parse(raw).some(x=>x.id===item.id);
+     const ok=await ns9055SetCustomDurable(section,[...a,item]);
+     const saved=getCustom(section).some(x=>x.id===item.id);
      if(ok!==true||!saved)throw new Error('primary card save verification failed');
    }catch(e){
-     console.error('[NS90.54] primary card save failed',e);
-     if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=setCustom(section,[...a,item]);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
+     console.error('[NS90.55] primary card save failed',e);
+     if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=await ns9055SetCustomDurable(section,[...a,item]);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
      alert(isQuotaError(e)?'저장공간을 자동 정리했지만 카드 저장에 필요한 공간이 아직 부족합니다. 기존 카드는 지우지 않았습니다. 백업 후 다시 확인해 주세요.':'카드 저장 중 오류가 발생했습니다. 다시 한 번 눌러 주세요.');
      return;
    }
@@ -2438,7 +2455,7 @@ async function v22SearchHits(name,section){
 async function v22SuggestOtherSection(name,current){let corpus=name;try{const u='https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(name)+'&srlimit=6&format=json&origin=*';const r=await fetch(u);if(r.ok){const j=await r.json();corpus+=' '+(j.query?.search||[]).map(x=>x.title+' '+x.snippet.replace(/<[^>]+>/g,' ')).join(' ')}}catch(e){}const cur=v22SectionScore(current,corpus);let best=null;for(const s of Object.keys(V22_SECTION_LABEL)){if(s===current)continue;const score=v22SectionScore(s,corpus);if(!best||score>best.score)best={section:s,score}}return best&&best.score>=2&&best.score>cur+1?best:null}
 function v22ScrollToSection(section){const el=document.getElementById(section);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.getElementById(section+'List')?.querySelector('.item:last-child')?.scrollIntoView({behavior:'smooth',block:'center'}),350)}}
 async function v18ManualAssist(section,typedName){const name=String(typedName||'').trim();if(!name)return;const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(!panel)return alert('검색도움 화면을 준비하지 못했습니다.');const pv=panel.querySelector('.rep-preview-v5');if(!pv)return;const other=await v22SuggestOtherSection(name,section);if(other){pv.innerHTML=`<div class="preview-card"><h3>🧭 카테고리를 확인해 주세요</h3><p><b>${esc(name)}</b>은(는) ‘${esc(v22SectionLabel(section))}’보다 ‘${esc(v22SectionLabel(other.section))}’에 더 가까워 보여요.</p><div class="v22-category-choice"><button class="v22-move">📂 ${esc(v22SectionLabel(other.section))}에서 찾아보기</button><button class="v22-stay">🔎 ${esc(v22SectionLabel(section))}에서 계속 찾기</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-move').onclick=()=>{pv.innerHTML='';document.getElementById(other.section)?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>v18ManualAssist(other.section,name),300)};pv.querySelector('.v22-stay').onclick=()=>v22ShowAssistResults(section,name,pv);pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}return v22ShowAssistResults(section,name,pv)}
-async function v22ShowAssistResults(section,name,pv){pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(v22SectionLabel(section))}</b> 범위에서 후보를 찾고 있어요…</div>`;const hits=await v22SearchHits(name,section);if(!hits.length){pv.innerHTML='<div class="preview-card"><b>관련 후보를 찾지 못했습니다.</b><button class="rep-close-v5">닫기</button></div>';pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}const good=hits.filter(h=>h.catScore>0),shown=(good.length>=3?good:hits).slice(0,8);const renderList=()=>{pv.innerHTML=`<div class="preview-card"><h3>🔎 ${esc(v22SectionLabel(section))} 후보</h3><p>하나씩 확인하고, 맞지 않으면 <b>← 다른 후보 보기</b>로 돌아오세요.</p><div class="v22-suggestions"></div><button class="rep-close-v5">닫기</button></div>`;const host=pv.querySelector('.v22-suggestions');for(const h of shown){const b=document.createElement('button');b.className='rep-card-btn-v5 can-make';b.textContent=h.title;host.appendChild(b);b.onclick=()=>preview(h)}pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML=''};const preview=async h=>{pv.innerHTML='<div class="preview-card">🔎 선택한 대상을 확인하고 있어요…</div>';let exact=null;try{exact=await v23ExactSelectedSnapshot(h.title,section)}catch(e){};let found=exact?{desc:exact.desc}:null;if(!found&&h.summary?.text&&h.catScore>0)found={desc:h.summary.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')};if(!found){pv.innerHTML='<div class="preview-card"><b>이 카테고리의 항목으로 충분히 확인하지 못했습니다.</b><p>비슷한 이름은 보여드리지만, 정확한 대상을 확인하지 못한 카드는 억지로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:''}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:h.title,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||''),entityTitle:String(exact?.title||h.title),pageId:exact?.pageId==null?'':String(exact.pageId)};try{setCustom(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,h.title);v22ScrollToSection(section)}};renderList()}
+async function v22ShowAssistResults(section,name,pv){pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(v22SectionLabel(section))}</b> 범위에서 후보를 찾고 있어요…</div>`;const hits=await v22SearchHits(name,section);if(!hits.length){pv.innerHTML='<div class="preview-card"><b>관련 후보를 찾지 못했습니다.</b><button class="rep-close-v5">닫기</button></div>';pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}const good=hits.filter(h=>h.catScore>0),shown=(good.length>=3?good:hits).slice(0,8);const renderList=()=>{pv.innerHTML=`<div class="preview-card"><h3>🔎 ${esc(v22SectionLabel(section))} 후보</h3><p>하나씩 확인하고, 맞지 않으면 <b>← 다른 후보 보기</b>로 돌아오세요.</p><div class="v22-suggestions"></div><button class="rep-close-v5">닫기</button></div>`;const host=pv.querySelector('.v22-suggestions');for(const h of shown){const b=document.createElement('button');b.className='rep-card-btn-v5 can-make';b.textContent=h.title;host.appendChild(b);b.onclick=()=>preview(h)}pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML=''};const preview=async h=>{pv.innerHTML='<div class="preview-card">🔎 선택한 대상을 확인하고 있어요…</div>';let exact=null;try{exact=await v23ExactSelectedSnapshot(h.title,section)}catch(e){};let found=exact?{desc:exact.desc}:null;if(!found&&h.summary?.text&&h.catScore>0)found={desc:h.summary.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')};if(!found){pv.innerHTML='<div class="preview-card"><b>이 카테고리의 항목으로 충분히 확인하지 못했습니다.</b><p>비슷한 이름은 보여드리지만, 정확한 대상을 확인하지 못한 카드는 억지로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:''}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:h.title,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||''),entityTitle:String(exact?.title||h.title),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,h.title);v22ScrollToSection(section)}};renderList()}
 function manualRepresentative(section,name){
  // "자동 카드 불가" means the strict automatic gate failed, not that the name is unknown.
  // Use assisted search instead of silently creating a manual card.
@@ -2674,7 +2691,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.54 PHOTO MIGRATION + PREVIEW REUSE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.55 CARD STORAGE REBUILD · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
