@@ -115,7 +115,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.30 RICH KOREAN DESCRIPTION · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.31 COUNTRY CONTEXT DESCRIPTION · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1577,7 +1577,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.30 RICH KOREAN DESCRIPTION · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.31 COUNTRY CONTEXT DESCRIPTION · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1805,11 +1805,28 @@ async function oneResolve(section,name,forcedKind=''){
    descForCard=facts.join(' ');
    if(descForCard.length<70) descForCard=`${clean}에 대해 사진과 함께 생김새, 쓰임, 배경과 특징을 차근차근 살펴보세요.`;
  }
- const cardDesc=v13CardDescription(descForCard,clean,topic.kind);
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true}};
+ // ===== NS90.31 COUNTRY CONTEXT DESCRIPTION =====
+ // Add country context without changing the resolved entity, photo, candidate list or UI.
+ // The context comes from the same country/section overview already used by the encyclopedia,
+ // so this remains one shared engine rather than per-item exception code.
+ let countryContext='';
+ try{
+   const countryName=countries?.[COUNTRY]?.name||'';
+   const ov=COUNTRY_OVERVIEWS?.[COUNTRY]?.[section];
+   const intro=typeof ov==='string'?ov:(ov?.intro||'');
+   const first=(intro.match(/[^.!?。！？]+[.!?。！？]?/)||[])[0]?.trim()||'';
+   const listed=typeof ov==='object'?(ov?.names||''):'';
+   const inList=listed && listed.split(/[·,]/).map(x=>x.trim()).some(x=>normalizeItemName(x)===normalizeItemName(clean));
+   if(countryName && first){
+     countryContext=` ${countryName}에서는 ${first.replace(new RegExp('^'+countryName+'(?:은|는|이|가)?\\s*'), '').trim()}`;
+     if(inList) countryContext+=` 그래서 ${clean}도 ${countryName}에서 함께 살펴볼 만한 ${topic.kind==='fruit'?'과일':topic.kind==='food'?'음식':topic.kind==='animal'?'동식물':topic.kind==='place'?'명소':topic.kind==='culture'?'문화':topic.kind==='person'?'인물':'항목'} 후보에 들어 있습니다.`;
+   }
+ }catch(e){}
+ const cardDesc=v13CardDescription((descForCard+countryContext).trim(),clean,topic.kind);
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.31 나라 연결 설명 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.30 RICH KOREAN DESCRIPTION · ONE MASTER',
+ version:'MASTER V28 · NS90.31 COUNTRY CONTEXT DESCRIPTION · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2416,7 +2433,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.30 RICH KOREAN DESCRIPTION · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.31 COUNTRY CONTEXT DESCRIPTION · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
