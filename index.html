@@ -36,11 +36,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .v21-big-nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
 .v21-big-nav button{font-size:1rem;padding:10px 14px;border-radius:12px}
 @media(max-width:700px){body.view-cards #detail .cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.v21-manage,.v22-category-choice,.v22-suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}.v21-manage{padding-top:12px;border-top:1px solid #eee}.v21-manage button{padding:9px 12px;border-radius:11px}
-/* NS90.34: keep the existing preview UI, but preserve line breaks in the shared description
-   so every category can show “나라에서는” as a readable second block. */
-.preview-card > p{white-space:pre-line}
-</style>
+.v21-manage,.v22-category-choice,.v22-suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}.v21-manage{padding-top:12px;border-top:1px solid #eee}.v21-manage button{padding:9px 12px;border-radius:11px}</style>
 <style>
 [id*="DeletedNames"], [id*="deletedNames"], .deleted-names,
 [id*="recommend"], [id*="Recommend"], .recommend, .recommend-box,
@@ -117,14 +113,9 @@ body.view-cards #detail .cards .item>.actions{display:none}
 /* NS90.17: neutral = not made, purple diamond = completed card */
 .rep-card-btn-v5.can-make{background:#fff!important;border:1.5px solid #aeb5c2!important;color:#333!important;box-shadow:none!important;opacity:1!important}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
-.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e5f6e8!important;border:2px solid #4f9b62!important;color:#225f32!important;opacity:1!important;box-shadow:0 2px 7px rgba(55,130,75,.12)!important}
+.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-
-<style id="ns9035-auto-precheck-style">
-.rep-card-btn-v5.ready-card{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
-.rep-card-btn-v5.prechecking{background:#f7f7fa!important;border:1.5px dashed #aeb5c2!important;color:#777!important}
-</style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1447,7 +1438,7 @@ async function V3_J(u){
 const V3_KIND_KO={food:'음식',fruit:'과일',animal:'동물',plant:'식물',place:'장소',culture:'문화',person:'인물',art:'예술작품'};
 const V3_ALIAS={
  '하몽 이베리코':['하몬 이베리코','jamón ibérico','jamon iberico'],
- '스페인아이벡스':['스페인 아이벡스','Spanish ibex','Iberian ibex','Capra pyrenaica'],
+ '스페인아이벡스':['스페인 아이벡스','Spanish ibex'],
  '스페인제국수리':['스페인 제국수리','Spanish imperial eagle'],
  '올리브나무':['올리브 나무','olive tree','Olea europaea'],
  '코르크참나무':['코르크 참나무','cork oak','Quercus suber'],
@@ -1586,7 +1577,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1800,16 +1791,8 @@ async function oneResolve(section,name,forcedKind=''){
      facts.push(`${clean}은(는) 이 나라와 관련해 알아볼 만한 장소입니다. 위치와 만들어진 배경, 눈에 띄는 모습을 함께 살펴보면 이해하기 쉽습니다.`);
      facts.push(`사진에서 건물·자연환경·주변 풍경의 특징을 찾아보고 왜 알려진 곳인지 살펴보세요.`);
    }else if(topic.kind==='person'){
-     if(section==='singers'){
-       facts.push(`${clean}은(는) 이 나라와 연결된 음악인입니다. 주로 어떤 장르에서 활동했는지와 대표적인 음악 활동을 중심으로 살펴보세요.`);
-       facts.push(`활동한 시대와 음악적 특징, 이 나라의 음악 문화와 어떤 관계가 있는지를 함께 보면 이해하기 쉽습니다.`);
-     }else if(section==='athletes'){
-       facts.push(`${clean}은(는) 이 나라와 연결된 운동선수입니다. 종목과 포지션·주요 대회 또는 소속팀에서의 활동을 중심으로 살펴보세요.`);
-       facts.push(`어떤 기록이나 활약으로 알려졌는지, 이 나라의 스포츠와 어떤 관계가 있는지도 함께 살펴보세요.`);
-     }else{
-       facts.push(`${clean}은(는) 이 나라의 역사와 연결해 살펴볼 인물입니다. 활동한 시대와 역할, 대표적인 일을 중심으로 알아보세요.`);
-       facts.push(`그 인물이 당시 사회와 역사에 어떤 흔적을 남겼는지 함께 보면 이해하기 쉽습니다.`);
-     }
+     facts.push(`${clean}은(는) 이 나라와 관련된 인물입니다. 어떤 분야에서 활동했고 무엇으로 알려졌는지를 중심으로 살펴보세요.`);
+     facts.push(`활동한 시대와 대표적인 일, 사람들에게 알려진 이유를 함께 보면 인물을 이해하기 쉽습니다.`);
    }else if(topic.kind==='food'){
      facts.push(`${clean}은(는) 이 지역에서 만날 수 있는 음식입니다. 주재료와 만드는 방법에 따라 맛·향·모양에 특징이 생깁니다.`);
      facts.push(`사진에서 재료와 조리 모습을 찾아보고 언제, 어떻게 먹는 음식인지 살펴보세요.`);
@@ -1822,7 +1805,7 @@ async function oneResolve(section,name,forcedKind=''){
    descForCard=facts.join(' ');
    if(descForCard.length<70) descForCard=`${clean}에 대해 사진과 함께 생김새, 쓰임, 배경과 특징을 차근차근 살펴보세요.`;
  }
- // ===== NS90.34 ALL CATEGORY BRIDGE =====
+ // ===== NS90.39 SEARCH RECOVERY BASE =====
  // Add country context without changing the resolved entity, photo, candidate list or UI.
  // The context comes from the same country/section overview already used by the encyclopedia,
  // so this remains one shared engine rather than per-item exception code.
@@ -1856,10 +1839,10 @@ async function oneResolve(section,name,forcedKind=''){
  // Append country context only AFTER that layer so it cannot be shortened away.
  const entityDesc=v13CardDescription(descForCard.trim(),clean,topic.kind);
  const cardDesc=(entityDesc+(countryContext?`\n\n${countries?.[COUNTRY]?.flag||'🌍'} ${countries?.[COUNTRY]?.name||'이 나라'}에서는\n${countryContext.replace(/^\s*[^에]+에서는\s*/, ' ')}`:'')).trim();
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.35 전체 카테고리 자동 사전검사 + NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER',
+ version:'MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2286,7 +2269,7 @@ function v16MarkRegisteredInPlace(section,name){
  const sec=document.getElementById(section),panel=sec?.querySelector('.rep-card-panel-v5');if(!panel||panel.dataset.country!==String(COUNTRY||''))return;
  const key=v12Request(section,name).key;
  const b=panel.querySelector(`[data-rep-key="${CSS.escape(key)}"]`);
- if(b){b.textContent='✓ '+cardInputName(name);b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=false;b.title='이미 카드로 등록되어 있습니다. 누르면 저장된 카드를 봅니다.';}
+ if(b){b.textContent='◆ '+cardInputName(name);b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=true;b.title='이미 카드로 등록되어 있습니다.';}
  const st=v16State(section); const row=st.rows.get(key); if(row)row.registered=true;
  v16PaintStatus(section);
 }
@@ -2294,12 +2277,12 @@ function v16PaintStatus(section){
  const sec=document.getElementById(section),panel=sec?.querySelector('.rep-card-panel-v5'),status=panel?.querySelector('.rep-status-v5');if(!status)return;
  const st=v16State(section), rows=[...st.rows.values()];
  const existing=getCustom(section);
- const reg=rows.filter(x=>!!v16RegisteredMatch(section,x)).length;
- const good=rows.filter(x=>x.ok&&!v16RegisteredMatch(section,x)).length;
+ const reg=rows.filter(x=>hasIdentity(cardInputName(x.name),existing)).length;
+ const good=rows.filter(x=>x.ok&&!hasIdentity(cardInputName(x.name),existing)).length;
  const pending=rows.filter(x=>x.pending).length;
  const done=rows.length-pending;
  const si=v20StorageInfo();
- status.textContent=`후보 ${rows.length}개 · ✓ 카드 ${reg}개 · ◆ 가능 ${good}개 · 자동확인 ${done}/${rows.length} · 저장 ${si.mb}MB`;
+ status.textContent=`후보 ${rows.length}개 · ◆ 카드 ${reg}개 · 하나씩 눌러 찾기 · 저장 ${si.mb}MB`;
 }
 
 
@@ -2341,27 +2324,20 @@ function v26RefreshOverviewRep(section){
  const txt=v26FinalRepText(section);if(!txt)return;
  rep.innerHTML='<b>대표적으로 알아둘 이름</b><br>'+txt;
 }
-function v16RegisteredMatch(section,row){
- const existing=getCustom(section);
- const names=[row?.name,row?.resolvedName,row?.repChoice?.original,row?.repChoice?.display].map(cardInputName).filter(Boolean);
- return existing.find(x=>names.some(n=>sameIdentity(n,x.name)))||null;
-}
 function v16PaintRow(section,row,panel){
  const shown=cardInputName(row.resolvedName||row.name), existing=getCustom(section);
- const registeredItem=v16RegisteredMatch(section,row);
- const registered=!!registeredItem;
+ const registered=hasIdentity(shown,existing);
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
- const ready=!registered && row.ok && row.verified;
- b.textContent=(registered?'✓ ':ready?'◆ ':row.pending?'… ':'○ ')+shown;
- b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'ready-card':row.pending?'prechecking':'can-make');
- // NS90.36: green check = saved card, purple diamond = the automatic precheck confirmed that a card can be made.
+ b.textContent=(registered?'◆ ':'○ ')+shown;
+ b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':'can-make');
+ // NS90.19: purple means saved, not disabled. Every representative name remains clickable.
  b.disabled=false;
- b.title=registered?'저장된 카드를 미리 봅니다.':ready?'자동 확인 완료 · 누르면 바로 미리 봅니다.':row.pending?'자동으로 카드 가능 여부를 확인하고 있습니다.':'아직 확인되지 않았습니다. 누르면 직접 다시 찾습니다.';
+ b.title=registered?'저장된 카드를 미리 봅니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
  b.onclick=async()=>{
    if(b.dataset.busy==='1')return;
    if(registered){
-     const saved=v16RegisteredMatch(section,row)||getCustom(section).find(x=>sameIdentity(shown,x.name));
+     const saved=getCustom(section).find(x=>sameIdentity(shown,x.name));
      let pv=panel.querySelector('.rep-preview-v5');
      if(saved&&pv){
        const photo=String(saved.photoRemote||'');
@@ -2371,16 +2347,12 @@ function v16PaintRow(section,row,panel){
        pv.querySelector('.ns9019-research').onclick=async()=>{
          b.dataset.busy='1'; b.textContent='… '+shown;
          pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 다시 찾고 있어요…</div>`;
-         let verified=null;try{verified=await v12ResolveRequest(v12Request(section,shown))}catch(e){console.warn('[NS90.19 research]',e)}
-         b.dataset.busy='0';b.textContent='✓ '+shown;
+         let verified=null;try{verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown})}catch(e){console.warn('[NS90.19 research]',e)}
+         b.dataset.busy='0';b.textContent='◆ '+shown;
          if(verified&&verified.desc)openRepresentativePreview(section,shown,verified,panel);
          else pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p></div>`;
        };
      }
-     return;
-   }
-   if(row.ok&&row.verified){
-     openRepresentativePreview(section,shown,row.verified,panel);
      return;
    }
    b.dataset.busy='1'; b.disabled=true; b.textContent='… '+shown;
@@ -2390,7 +2362,7 @@ function v16PaintRow(section,row,panel){
    try{
      // NS90.18: every category takes the exact same direct path.
      // No category precheck/repair bridge is allowed between a click and the common engine.
-     verified=await v12ResolveRequest(v12Request(section,shown));
+     verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown});
    }catch(e){console.warn('[NS90.18 direct click resolve]',e)}
    b.dataset.busy='0'; b.disabled=false;
    if(verified&&verified.desc){
@@ -2401,14 +2373,14 @@ function v16PaintRow(section,row,panel){
      if(pv)pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p><button type="button" class="ns9018-retry">↻ 다시 찾기</button></div>`;
      const retry=pv?.querySelector('.ns9018-retry'); if(retry)retry.onclick=()=>b.click();
    }
-   // Keep the automatic availability color after the direct check.
-   b.textContent=(row.ok?'◆ ':'○ ')+shown; b.disabled=false; b.className='rep-card-btn-v5 '+(row.ok?'ready-card':'can-make');
+   // Do not repaint the clicked button here. Repainting replaces onclick while the event is finishing on Safari/Edge.
+   b.textContent='○ '+shown; b.disabled=false; b.className='rep-card-btn-v5 can-make';
  };
 }
 function v15CachedRepresentative(section,name){
  const req=v12Request(section,name);
  // Reuse both V14 and current resolver persistent successes.
- for(const prefix of ['magic_v28_entity_','magic_v14_entity_','magic_v15_entity_','magic_v16_entity_']){
+ for(const prefix of ['magic_v14_entity_','magic_v15_entity_','magic_v16_entity_']){
   try{const c=localStorage.getItem(prefix+req.key);if(c){const j=JSON.parse(c);if(j&&j.desc)return {ok:true,verified:j,cached:true}}}catch(e){}
  }
  // v12ResolveRequest also has its own memory cache; don't force network here.
@@ -2457,63 +2429,13 @@ async function renderRepresentativeCardButtonsV5(section){
   if(!st.rows.has(req.key)){
    const hasRepAlternatives=finalName!==cardInputName(name)||!!V24_REP_ALTERNATIVES?.[COUNTRY]?.[section]?.[cardInputName(name)];
    const cached=hasRepAlternatives?null:v15CachedRepresentative(section,finalName);
-   st.rows.set(req.key,{key:req.key,name,pending:!cached,ok:!!cached,verified:cached?.verified||null,resolvedName:finalName});
+   st.rows.set(req.key,{key:req.key,name,pending:false,ok:!!cached,verified:cached?.verified||null,resolvedName:finalName});
   }
  }
  // Never clear innerHTML here: existing buttons and preview stay visible.
  for(const row of st.rows.values())v16PaintRow(section,row,panel);
  v16PaintStatus(section);
- // NS90.35: country-open auto precheck is started by the global sequential scheduler below.
-}
-// ===== NS90.36 UNIFIED FAST PRECHECK =====
-// Open a country -> verify every representative candidate across all card categories.
-// Searches run one-by-one to protect Safari and do NOT write transient search results to localStorage.
-let NS9035_PRECHECK_TOKEN=0;
-async function ns9035PrecheckRow(section,row,token){
- if(token!==NS9035_PRECHECK_TOKEN)return;
- if(!row.pending)return;
- // Saved cards are known-good. Mark them green immediately and never search them again.
- if(v16RegisteredMatch(section,row)){
-   row.pending=false; row.ok=true; row.verified=null;
-   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
-   if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
-   return;
- }
- let choice={display:cardInputName(row.name),original:cardInputName(row.name),changed:false};
- try{choice=await v24ResolveRepresentative(section,row.name)}catch(e){}
- row.resolvedName=choice.display; row.repChoice=choice;
- // A representative may resolve to the name of an already-saved card.
- if(v16RegisteredMatch(section,row)){
-   row.pending=false; row.ok=true; row.verified=null;
-   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
-   if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
-   return;
- }
- let verified=null;
- try{
-   // NS90.36: auto check and tap use the SAME cached resolver path.
-   // Old successful cards (magic_v28 cache) are reused before any network request.
-   verified=await v12ResolveRequest(v12Request(section,choice.display));
- }catch(e){console.warn('[NS90.36 unified precheck]',section,choice.display,e)}
- if(token!==NS9035_PRECHECK_TOKEN)return;
- row.pending=false; row.ok=!!(verified&&verified.desc&&((verified.photo)||verified.photos?.length)); row.verified=row.ok?verified:null;
- const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
- if(panel&&panel.dataset.country===String(COUNTRY||'')){v16PaintRow(section,row,panel);v16PaintStatus(section)}
-}
-async function ns9035AutoPrecheckAll(){
- const token=++NS9035_PRECHECK_TOKEN, country=String(COUNTRY||'');
- for(const section of REP_SECTIONS){
-  if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
-  const st=v16State(section); st.running=true;
-  try{
-   for(const row of st.rows.values()){
-    if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
-    if(row.pending)await ns9035PrecheckRow(section,row,token);
-    await new Promise(r=>setTimeout(r,90));
-   }
-   st.finished=true;
-  }finally{st.running=false;v16PaintStatus(section)}
- }
+ // NS90.16: no automatic queue. A network search starts only when the user clicks one candidate.
 }
 function renderAllRepresentativeCardButtonsV5(){
  // Compatibility helper; render visible sections without resetting their state.
@@ -2523,111 +2445,11 @@ const __v5OpenCountry=openCountry;
 openCountry=function(code){
  const r=__v5OpenCountry(code);
  // Let normal section rendering finish; representative panels attach once and keep their jobs.
- setTimeout(()=>{renderCountryOverviews();renderAllRepresentativeCardButtonsV5();REP_SECTIONS.forEach(v26RefreshOverviewRep);setTimeout(ns9035AutoPrecheckAll,120)},80);
+ setTimeout(()=>{renderCountryOverviews();renderAllRepresentativeCardButtonsV5();REP_SECTIONS.forEach(v26RefreshOverviewRep)},80);
  return r;
 };
 
-
-// ===== NS90.37 IDENTITY-FIRST PRECHECK =====
-// Regression targets: saved Patatas Bravas must be green; saved Iberian lynx green;
-// Spanish ibex must use the same alias-aware resolver as a direct tap.
-function ns9037LooseName(v){
- return String(v||'').normalize('NFKC').toLowerCase()
-  .replace(/브라바스/g,'브라바스').replace(/아이벡스/g,'아이벡스')
-  .replace(/[^0-9a-z가-힣]/g,'');
-}
-function ns9037SavedCards(section){
- const out=[...getCustom(section)];
- // The rendered cards are the final authority too. This repairs old saved records whose internal
- // id/name spelling differs slightly from the representative label.
- const list=document.getElementById(section+'List');
- if(list) list.querySelectorAll('.item').forEach(card=>{
-   const name=card.querySelector('h3')?.textContent?.trim();
-   if(name&&!out.some(x=>ns9037LooseName(x.name)===ns9037LooseName(name)))out.push({name,__dom:true});
- });
- return out;
-}
-function ns9037AliasNames(name){
- const n=cardInputName(name), out=[n];
- try{out.push(...V3_aliases(n))}catch(e){}
- const groups={
-  '파타타스 브라바스':['파타타스 브라바스','patatas bravas','patatasbravas'],
-  '스페인아이벡스':['스페인아이벡스','스페인 아이벡스','Spanish ibex','Iberian ibex','Capra pyrenaica'],
-  '이베리아스라소니':['이베리아스라소니','이베리아 스라소니','Iberian lynx','Lynx pardinus']
- };
- for(const vals of Object.values(groups)) if(vals.some(x=>ns9037LooseName(x)===ns9037LooseName(n)))out.push(...vals);
- return [...new Set(out.filter(Boolean))];
-}
-function v16RegisteredMatch(section,row){
- const saved=ns9037SavedCards(section);
- const names=[row?.name,row?.resolvedName,row?.repChoice?.original,row?.repChoice?.display].filter(Boolean).flatMap(ns9037AliasNames);
- const keys=new Set(names.map(ns9037LooseName).filter(Boolean));
- return saved.find(x=>{
-   const xkeys=ns9037AliasNames(x.name).map(ns9037LooseName);
-   return xkeys.some(k=>keys.has(k));
- })||null;
-}
-async function ns9037ResolveAliasAware(section,name){
- const names=ns9037AliasNames(name);
- // First reuse any successful persistent result under any alias.
- for(const n of names){const c=v15CachedRepresentative(section,n);if(c?.verified?.desc)return c.verified;}
- // Then use the exact same resolver as a tap, trying aliases one at a time.
- for(const n of names){
-   try{const v=await v12ResolveRequest(v12Request(section,n));if(v&&v.desc&&(v.photo||v.photos?.length))return v;}catch(e){}
- }
- return null;
-}
-async function ns9035PrecheckRow(section,row,token){
- if(token!==NS9035_PRECHECK_TOKEN||!row.pending)return;
- if(v16RegisteredMatch(section,row)){
-   row.pending=false;row.ok=true;row.verified=null;
-   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
-   return;
- }
- let choice={display:cardInputName(row.name),original:cardInputName(row.name),changed:false};
- try{choice=await v24ResolveRepresentative(section,row.name)}catch(e){}
- row.resolvedName=choice.display;row.repChoice=choice;
- if(v16RegisteredMatch(section,row)){
-   row.pending=false;row.ok=true;row.verified=null;
-   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
-   return;
- }
- let verified=null;try{verified=await ns9037ResolveAliasAware(section,choice.display)}catch(e){}
- if(token!==NS9035_PRECHECK_TOKEN)return;
- row.pending=false;row.ok=!!verified;row.verified=verified;
- const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel&&panel.dataset.country===String(COUNTRY||'')){v16PaintRow(section,row,panel);v16PaintStatus(section)}
-}
-// Prioritize the category the child is looking at. Other categories continue only after it.
-let NS9037_ACTIVE_SECTION='food';
-const __ns9037RenderRep=renderRepresentativeCardButtonsV5;
-renderRepresentativeCardButtonsV5=async function(section){
- NS9037_ACTIVE_SECTION=section||NS9037_ACTIVE_SECTION;
- const r=await __ns9037RenderRep(section);
- // Saved cards should turn green immediately, before any network work.
- const st=v16State(section),panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
- if(panel){for(const row of st.rows.values())v16PaintRow(section,row,panel);v16PaintStatus(section)}
- return r;
-};
-async function ns9035AutoPrecheckAll(){
- const token=++NS9035_PRECHECK_TOKEN,country=String(COUNTRY||'');
- const ordered=[NS9037_ACTIVE_SECTION,...REP_SECTIONS.filter(s=>s!==NS9037_ACTIVE_SECTION)];
- for(const section of ordered){
-  if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
-  const st=v16State(section);st.running=true;
-  try{
-   // Paint all saved cards first. Network only for the rest.
-   for(const row of st.rows.values())if(row.pending&&v16RegisteredMatch(section,row)){row.pending=false;row.ok=true;row.verified=null;const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel)v16PaintRow(section,row,panel)}
-   v16PaintStatus(section);
-   for(const row of st.rows.values()){
-    if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
-    if(row.pending)await ns9035PrecheckRow(section,row,token);
-    await new Promise(r=>setTimeout(r,45));
-   }
-   st.finished=true;
-  }finally{st.running=false;v16PaintStatus(section)}
- }
-}
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -2640,96 +2462,4 @@ window.__MAGIC_V7_DIAGNOSTIC={
  availability:'V3 result with description + photo'
 };
 </script>
-<div id="v21Modal" class="v21-modal hidden" role="dialog" aria-modal="true"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div>
-
-// ===== NS90.38 SINGLE MASTER STATE =====
-// One authority for card state: the cards actually saved in this country/section.
-// Search state is secondary and can never override a saved card.
-function ns9038DomSaved(section){
- const list=document.getElementById(section+'List'), out=[];
- if(!list)return out;
- list.querySelectorAll('.item').forEach(card=>{
-   const name=card.querySelector('h3')?.textContent?.trim();
-   const id=card.dataset.itemId||'';
-   if(name)out.push({name,id,__dom:true,card});
- });
- return out;
-}
-function ns9038SavedMatch(section,row){
- const aliases=[row?.name,row?.resolvedName,row?.repChoice?.original,row?.repChoice?.display].filter(Boolean).flatMap(ns9037AliasNames);
- const keys=new Set(aliases.map(ns9037LooseName).filter(Boolean));
- // DOM is the visible truth. Use item id to recover the underlying saved record when possible.
- for(const d of ns9038DomSaved(section)){
-   if(ns9037AliasNames(d.name).map(ns9037LooseName).some(k=>keys.has(k))){
-     return getCustom(section).find(x=>String(x.id)===String(d.id)) || getCustom(section).find(x=>ns9037LooseName(x.name)===ns9037LooseName(d.name)) || d;
-   }
- }
- // Then check persistent cards, including aliases.
- for(const x of getCustom(section)){
-   if(ns9037AliasNames(x.name).map(ns9037LooseName).some(k=>keys.has(k)))return x;
- }
- return null;
-}
-function v16RegisteredMatch(section,row){return ns9038SavedMatch(section,row)}
-
-// Exact alias fallback through the same V3 entity engine. This is generic: aliases -> one entity -> one description/photo set.
-async function ns9038ExactAliasFallback(section,displayName){
- const kind=cardInputKind(section,displayName);
- for(const alias of ns9037AliasNames(displayName)){
-   try{
-     const found=await V3_findSubject(alias,kind);
-     if(!found?.e)continue;
-     const e=found.e;
-     const koTitle=e.sitelinks?.kowiki?.title||'';
-     const enTitle=e.sitelinks?.enwiki?.title||found.p?.title||'';
-     const ko=koTitle?await V3_page('ko',koTitle):null;
-     const en=enTitle?await V3_page('en',enTitle):null;
-     const photos=await V3_photos(alias,kind,e,ko,en);
-     if(!photos.length)continue;
-     let desc=V3_description(displayName,e,ko,en);
-     if(typeof ns9030RichKoreanDescription==='function')try{desc=ns9030RichKoreanDescription(displayName,kind,desc)||desc}catch(e){}
-     return {title:ko?.title||en?.title||displayName,desc,photo:photos[0],photos,entityId:e.id||'',sources:['Wikipedia','Wikidata'],aliasResolved:alias};
-   }catch(e){}
- }
- return null;
-}
-async function ns9037ResolveAliasAware(section,name){
- const names=ns9037AliasNames(name);
- for(const n of names){const c=v15CachedRepresentative(section,n);if(c?.verified?.desc)return c.verified;}
- for(const n of names){
-   try{const v=await v12ResolveRequest(v12Request(section,n));if(v&&v.desc&&(v.photo||v.photos?.length))return v;}catch(e){}
- }
- return await ns9038ExactAliasFallback(section,name);
-}
-
-// Paint from MASTER state every time. A saved card is always green, regardless of old precheck state.
-const __ns9038PaintRow=v16PaintRow;
-v16PaintRow=function(section,row,panel){
- const saved=ns9038SavedMatch(section,row);
- if(saved){
-   row.registered=true;row.pending=false;row.ok=true;
-   const shown=cardInputName(row.resolvedName||row.name);
-   let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
-   if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
-   b.textContent='✓ '+shown;b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=false;b.title='이미 카드로 등록되어 있습니다.';
-   b.onclick=()=>{
-     const dom=ns9038DomSaved(section).find(d=>ns9037LooseName(d.name)===ns9037LooseName(saved.name||shown));
-     if(dom?.card){dom.card.scrollIntoView({behavior:'smooth',block:'center'});dom.card.animate?.([{opacity:.55},{opacity:1}],{duration:500});return;}
-     const pv=panel.querySelector('.rep-preview-v5');if(pv)pv.innerHTML=`<div class="preview-card"><h3>${esc(saved.name||shown)}</h3><p>${esc(saved.desc||'이미 저장된 카드입니다.')}</p><button type="button" class="rep-close-v5">닫기</button></div>`;
-   };
-   return;
- }
- return __ns9038PaintRow(section,row,panel);
-};
-
-// Repaint after every section render so newly created/deleted cards and representative chips cannot disagree.
-const __ns9038RenderSection=renderSection;
-renderSection=async function(section){
- const r=await __ns9038RenderSection(section);
- const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
- if(panel){const st=v16State(section);for(const row of st.rows.values())v16PaintRow(section,row,panel);v16PaintStatus(section);}
- return r;
-};
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.38 SINGLE MASTER STATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'saved card MASTER -> alias entity -> one resolver'};
-
-</body></html>
+<div id="v21Modal" class="v21-modal hidden" role="dialog" aria-modal="true"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div></body></html>
