@@ -1590,7 +1590,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.47 ART SEARCH DIAGNOSTIC · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.48 ART PHOTO QUALITY GATE · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1763,6 +1763,16 @@ async function ns9046ArtTitleBridge(clean,topic){
   const desc=(p.extract||'').replace(/\s+/g,' ').trim();
   if(desc.length<45||sharedTypeFit('art',p.title||title,desc)<=0)continue;
   let photo=p.thumbnail?.source||p.original?.source||'';
+  // NS90.48: some copyrighted artworks expose their representative image through
+  // Wikipedia REST summary even when action=query pageimages returns no thumbnail.
+  // Keep the already-verified canonical title/entity and recover only its image.
+  if(!photo){
+   try{
+    const ru='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent((p.title||title).replace(/ /g,'_'));
+    const rj=await (await fetch(ru)).json();
+    photo=rj?.thumbnail?.source||rj?.originalimage?.source||'';
+   }catch(e){console.warn('[NS90.48 art REST photo]',e)}
+  }
   const qid=p.pageprops?.wikibase_item||'';
   if(!photo&&qid){
    try{const e=(await V3_wd([qid]))?.[qid],fn=V3_claim(e,'P18')[0];if(fn)photo=await V3_fileUrl(fn)}catch(e){}
@@ -1848,7 +1858,7 @@ async function oneResolve(section,name,forcedKind=''){
  // Purple ◆ means description + identity + type + representative photo are all ready.
  // No-photo items stay white ○ and can be retried; this rule is shared by every category.
  const photoOk=!!photo;
- window.NS9047_DIAG={name:clean,section,stage:'quality-gate',identityTitle,finalName,identityOk,typeOk,descOk,photoOk,qid:best.entityId||best.p.pageprops?.wikibase_item||'',canonical:!!best.artCanonical};
+ window.NS9047_DIAG={name:clean,section,stage:(best.artCanonical&&!photoOk?'art-photo-quality-gate':'quality-gate'),identityTitle,finalName,identityOk,typeOk,descOk,photoOk,qid:best.entityId||best.p.pageprops?.wikibase_item||'',canonical:!!best.artCanonical};
  if(!identityOk||!typeOk||!descOk||!photoOk)return null;
  // ===== NS90.29 KOREAN PREVIEW FALLBACK =====
  // Prefer Korean text for the exact same Wikidata entity. If no Korean article exists,
