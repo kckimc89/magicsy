@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.51 CANDIDATE STATE PERSISTENCE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -605,9 +605,10 @@ function setDeletedBase(s,a){localStorage.setItem(deletedBaseKey(s),JSON.stringi
 function getCustom(s){try{return JSON.parse(localStorage.getItem(key(s))||'[]')}catch{return[]}}
 function isQuotaError(e){return !!e&&(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22||e.code===1014)}
 function clearExpendableSearchCaches(){
- // V20: delete only regenerable caches. Never touch DATA_NS user cards, title, favorites, backup metadata or IndexedDB photos.
+ // NS90.53: preserve verified candidates compactly, then remove regenerable heavy resolver caches.
+ try{if(typeof ns9053StorageCleanup==='function')return ns9053StorageCleanup()}catch(e){}
  const disposable=['magicwand_photo_','place_desc_v30_','rebuilt_','autophoto_','trial_candidates_used_'];
- const legacyEntity=['magic_v13_entity_','magic_v14_entity_','magic_v15_entity_','magic_v16_entity_'];
+ const legacyEntity=['magic_v13_entity_','magic_v14_entity_','magic_v15_entity_','magic_v16_entity_','magic_v28_entity_'];
  const keys=[];
  for(let i=0;i<localStorage.length;i++){
    const k=localStorage.key(i);if(!k)continue;
@@ -1590,7 +1591,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.51 CANDIDATE STATE PERSISTENCE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1988,7 +1989,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.51 CANDIDATE STATE PERSISTENCE · ONE MASTER',
+ version:'MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2185,15 +2186,43 @@ function v12Request(section,rawName,forcedKind=''){
  const display=cardInputName(rawName),kind=forcedKind||cardInputKind(section,rawName);
  return {section,rawName:String(rawName||''),name:display,kind,key:['NS90.15-ONE',section,kind,display].join('|')};
 }
+// ===== NS90.53 COMPACT READY SNAPSHOT + SAFE STORAGE CLEANUP =====
+// Purple-ready candidates keep only the small, reusable preview data.
+// Regenerable resolver caches can then be removed without losing purple readiness.
+const NS9053_READY_PREFIX='magic_ready_9053_';
+function ns9053CompactVerified(v){
+ if(!v||!v.desc)return null;
+ const photo=String(v.photo||((Array.isArray(v.photos)&&v.photos[0])||''));
+ return {desc:String(v.desc||''),photo,photos:photo?[photo]:[],entityId:String(v.entityId||''),title:String(v.title||''),pageId:v.pageId==null?'':String(v.pageId),sources:Array.isArray(v.sources)?v.sources.slice(0,3).map(String):[]};
+}
+function ns9053ReadyKey(req){return NS9053_READY_PREFIX+req.key}
+function ns9053LoadReady(req){try{const j=JSON.parse(localStorage.getItem(ns9053ReadyKey(req))||'null');return j&&j.desc?j:null}catch(e){return null}}
+function ns9053SaveReady(req,v){const c=ns9053CompactVerified(v);if(!c)return;try{localStorage.setItem(ns9053ReadyKey(req),JSON.stringify(c))}catch(e){if(isQuotaError(e)){ns9053StorageCleanup(req.key);try{localStorage.setItem(ns9053ReadyKey(req),JSON.stringify(c))}catch(_){}}}}
+function ns9053StorageCleanup(keepReqKey=''){
+ const remove=[];
+ for(let i=0;i<localStorage.length;i++){
+  const k=localStorage.key(i)||'';
+  if(k.startsWith('magic_v28_entity_')||k.startsWith('magic_v13_entity_')||k.startsWith('magic_v14_entity_')||k.startsWith('magic_v15_entity_')||k.startsWith('magic_v16_entity_')||k.startsWith('magicwand_photo_')||k.startsWith('place_desc_v30_')||k.startsWith('rebuilt_')||k.startsWith('autophoto_')||k.startsWith('trial_candidates_used_')) remove.push(k);
+ }
+ // Before deleting current V28 resolver caches, preserve every successful result as a compact ready snapshot.
+ for(const k of remove){
+  if(k.startsWith('magic_v28_entity_')){try{const j=JSON.parse(localStorage.getItem(k)||'null');if(j&&j.desc){const reqKey=k.slice('magic_v28_entity_'.length);const c=ns9053CompactVerified(j);if(c)localStorage.setItem(NS9053_READY_PREFIX+reqKey,JSON.stringify(c))}}catch(e){}}
+ }
+ remove.forEach(k=>localStorage.removeItem(k));
+ return remove.length;
+}
+function ns9053EnsureStorage(){try{if(!localStorage.getItem('magic_ns9053_cleanup_done')){const n=ns9053StorageCleanup();localStorage.setItem('magic_ns9053_cleanup_done',String(Date.now()));console.info('[NS90.53] cleaned regenerable caches',n)}}catch(e){}}
+setTimeout(ns9053EnsureStorage,0);
 async function v12ResolveRequest(req){
- try{const c=localStorage.getItem('magic_v28_entity_'+req.key);if(c){const j=JSON.parse(c);if(j&&j.desc)return j}}catch(e){}
+ const compact=ns9053LoadReady(req);if(compact)return compact;
+ try{const c=localStorage.getItem('magic_v28_entity_'+req.key);if(c){const j=JSON.parse(c);if(j&&j.desc){ns9053SaveReady(req,j);return j}}}catch(e){}
  try{
    const legacyKey=['V14-SAFE',req.section,req.kind,req.name].join('|');
    const c=localStorage.getItem('magic_v14_entity_'+legacyKey);
    if(c){const j=JSON.parse(c);if(j&&j.desc)return j}
  }catch(e){}
  const result=await ONE_CARD_ENGINE.resolve({section:req.section,name:req.name});
- if(result&&result.desc){try{localStorage.setItem('magic_v28_entity_'+req.key,JSON.stringify(result))}catch(e){};return result}
+ if(result&&result.desc){ns9053SaveReady(req,result);return result}
  return null;
 }
 async function v12CountryResolve(section,rawName){return await v12ResolveRequest(v12Request(section,rawName))}
@@ -2231,8 +2260,9 @@ function openRepresentativePreview(section,name,verified,panel){
      const saved=JSON.parse(raw).some(x=>x.id===item.id);
      if(ok!==true||!saved)throw new Error('primary card save verification failed');
    }catch(e){
-     console.error('[V19] primary card save failed',e);
-     alert(isQuotaError(e)?'카드 저장공간이 부족합니다. 재생성 가능한 검색 임시자료를 정리했지만 공간이 더 필요합니다. 백업 후 확인해 주세요.':'카드 저장 중 오류가 발생했습니다. 다시 한 번 눌러 주세요.');
+     console.error('[NS90.53] primary card save failed',e);
+     if(isQuotaError(e)){try{ns9053StorageCleanup(v12Request(section,name).key);const ok2=setCustom(section,[...a,item]);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
+     alert(isQuotaError(e)?'저장공간을 자동 정리했지만 카드 저장에 필요한 공간이 아직 부족합니다. 기존 카드는 지우지 않았습니다. 백업 후 다시 확인해 주세요.':'카드 저장 중 오류가 발생했습니다. 다시 한 번 눌러 주세요.');
      return;
    }
    // Secondary bookkeeping must never turn a successful card save into a false failure.
@@ -2503,6 +2533,12 @@ function v16PaintRow(section,row,panel){
      }
      return;
    }
+   // NS90.52: purple means the verified snapshot is already ready. Reopen it directly;
+   // never start a new network search merely because the saved card was deleted.
+   if(ready && row.verified && row.verified.desc){
+     openRepresentativePreview(section,shown,row.verified,panel);
+     return;
+   }
    b.dataset.busy='1'; b.disabled=true; b.textContent='… '+shown;
    let pv=panel.querySelector('.rep-preview-v5');
    if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
@@ -2514,6 +2550,7 @@ function v16PaintRow(section,row,panel){
    }catch(e){console.warn('[NS90.18 direct click resolve]',e)}
    b.dataset.busy='0'; b.disabled=false;
    if(verified&&verified.desc){
+     ns9053SaveReady(v12Request(section,shown),verified);
      row.ok=true; row.verified=verified;
      // NS90.41: a successful direct search is immediately visible as a purple ◆ ready item.
      // It becomes green only after the card is actually saved.
@@ -2533,6 +2570,7 @@ function v16PaintRow(section,row,panel){
 }
 function v15CachedRepresentative(section,name){
  const req=v12Request(section,name);
+ const compact=ns9053LoadReady(req);if(compact)return {ok:true,verified:compact,cached:true};
  // NS90.51: verified readiness survives card creation/deletion and page reloads.
  // The current resolver stores its successful verified snapshot under magic_v28_entity_.
  for(const prefix of ['magic_v28_entity_','magic_v15_entity_','magic_v16_entity_']){
@@ -2609,7 +2647,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.51 CANDIDATE STATE PERSISTENCE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.53 STORAGE CLEANUP · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
