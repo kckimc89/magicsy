@@ -124,7 +124,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.ready-card{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.prechecking{background:#f7f7fa!important;border:1.5px dashed #aeb5c2!important;color:#777!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1586,7 +1586,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1859,7 +1859,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.35 전체 카테고리 자동 사전검사 + NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER',
+ version:'MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2527,7 +2527,107 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+
+// ===== NS90.37 IDENTITY-FIRST PRECHECK =====
+// Regression targets: saved Patatas Bravas must be green; saved Iberian lynx green;
+// Spanish ibex must use the same alias-aware resolver as a direct tap.
+function ns9037LooseName(v){
+ return String(v||'').normalize('NFKC').toLowerCase()
+  .replace(/브라바스/g,'브라바스').replace(/아이벡스/g,'아이벡스')
+  .replace(/[^0-9a-z가-힣]/g,'');
+}
+function ns9037SavedCards(section){
+ const out=[...getCustom(section)];
+ // The rendered cards are the final authority too. This repairs old saved records whose internal
+ // id/name spelling differs slightly from the representative label.
+ const list=document.getElementById(section+'List');
+ if(list) list.querySelectorAll('.item').forEach(card=>{
+   const name=card.querySelector('h3')?.textContent?.trim();
+   if(name&&!out.some(x=>ns9037LooseName(x.name)===ns9037LooseName(name)))out.push({name,__dom:true});
+ });
+ return out;
+}
+function ns9037AliasNames(name){
+ const n=cardInputName(name), out=[n];
+ try{out.push(...V3_aliases(n))}catch(e){}
+ const groups={
+  '파타타스 브라바스':['파타타스 브라바스','patatas bravas','patatasbravas'],
+  '스페인아이벡스':['스페인아이벡스','스페인 아이벡스','Spanish ibex','Iberian ibex','Capra pyrenaica'],
+  '이베리아스라소니':['이베리아스라소니','이베리아 스라소니','Iberian lynx','Lynx pardinus']
+ };
+ for(const vals of Object.values(groups)) if(vals.some(x=>ns9037LooseName(x)===ns9037LooseName(n)))out.push(...vals);
+ return [...new Set(out.filter(Boolean))];
+}
+function v16RegisteredMatch(section,row){
+ const saved=ns9037SavedCards(section);
+ const names=[row?.name,row?.resolvedName,row?.repChoice?.original,row?.repChoice?.display].filter(Boolean).flatMap(ns9037AliasNames);
+ const keys=new Set(names.map(ns9037LooseName).filter(Boolean));
+ return saved.find(x=>{
+   const xkeys=ns9037AliasNames(x.name).map(ns9037LooseName);
+   return xkeys.some(k=>keys.has(k));
+ })||null;
+}
+async function ns9037ResolveAliasAware(section,name){
+ const names=ns9037AliasNames(name);
+ // First reuse any successful persistent result under any alias.
+ for(const n of names){const c=v15CachedRepresentative(section,n);if(c?.verified?.desc)return c.verified;}
+ // Then use the exact same resolver as a tap, trying aliases one at a time.
+ for(const n of names){
+   try{const v=await v12ResolveRequest(v12Request(section,n));if(v&&v.desc&&(v.photo||v.photos?.length))return v;}catch(e){}
+ }
+ return null;
+}
+async function ns9035PrecheckRow(section,row,token){
+ if(token!==NS9035_PRECHECK_TOKEN||!row.pending)return;
+ if(v16RegisteredMatch(section,row)){
+   row.pending=false;row.ok=true;row.verified=null;
+   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
+   return;
+ }
+ let choice={display:cardInputName(row.name),original:cardInputName(row.name),changed:false};
+ try{choice=await v24ResolveRepresentative(section,row.name)}catch(e){}
+ row.resolvedName=choice.display;row.repChoice=choice;
+ if(v16RegisteredMatch(section,row)){
+   row.pending=false;row.ok=true;row.verified=null;
+   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
+   return;
+ }
+ let verified=null;try{verified=await ns9037ResolveAliasAware(section,choice.display)}catch(e){}
+ if(token!==NS9035_PRECHECK_TOKEN)return;
+ row.pending=false;row.ok=!!verified;row.verified=verified;
+ const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel&&panel.dataset.country===String(COUNTRY||'')){v16PaintRow(section,row,panel);v16PaintStatus(section)}
+}
+// Prioritize the category the child is looking at. Other categories continue only after it.
+let NS9037_ACTIVE_SECTION='food';
+const __ns9037RenderRep=renderRepresentativeCardButtonsV5;
+renderRepresentativeCardButtonsV5=async function(section){
+ NS9037_ACTIVE_SECTION=section||NS9037_ACTIVE_SECTION;
+ const r=await __ns9037RenderRep(section);
+ // Saved cards should turn green immediately, before any network work.
+ const st=v16State(section),panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
+ if(panel){for(const row of st.rows.values())v16PaintRow(section,row,panel);v16PaintStatus(section)}
+ return r;
+};
+async function ns9035AutoPrecheckAll(){
+ const token=++NS9035_PRECHECK_TOKEN,country=String(COUNTRY||'');
+ const ordered=[NS9037_ACTIVE_SECTION,...REP_SECTIONS.filter(s=>s!==NS9037_ACTIVE_SECTION)];
+ for(const section of ordered){
+  if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
+  const st=v16State(section);st.running=true;
+  try{
+   // Paint all saved cards first. Network only for the rest.
+   for(const row of st.rows.values())if(row.pending&&v16RegisteredMatch(section,row)){row.pending=false;row.ok=true;row.verified=null;const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel)v16PaintRow(section,row,panel)}
+   v16PaintStatus(section);
+   for(const row of st.rows.values()){
+    if(token!==NS9035_PRECHECK_TOKEN||country!==String(COUNTRY||''))return;
+    if(row.pending)await ns9035PrecheckRow(section,row,token);
+    await new Promise(r=>setTimeout(r,45));
+   }
+   st.finished=true;
+  }finally{st.running=false;v16PaintStatus(section)}
+ }
+}
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.37 IDENTITY FIRST PRECHECK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
