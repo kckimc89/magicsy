@@ -117,14 +117,14 @@ body.view-cards #detail .cards .item>.actions{display:none}
 /* NS90.17: neutral = not made, purple diamond = completed card */
 .rep-card-btn-v5.can-make{background:#fff!important;border:1.5px solid #aeb5c2!important;color:#333!important;box-shadow:none!important;opacity:1!important}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
-.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
+.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e5f6e8!important;border:2px solid #4f9b62!important;color:#225f32!important;opacity:1!important;box-shadow:0 2px 7px rgba(55,130,75,.12)!important}
 </style>
 
 <style id="ns9035-auto-precheck-style">
 .rep-card-btn-v5.ready-card{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.prechecking{background:#f7f7fa!important;border:1.5px dashed #aeb5c2!important;color:#777!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1586,7 +1586,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1859,7 +1859,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.35 전체 카테고리 자동 사전검사 + NS90.34 전체 카테고리 공통 브리지 + NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified,allCategoryBridge:true}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER',
+ version:'MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2286,7 +2286,7 @@ function v16MarkRegisteredInPlace(section,name){
  const sec=document.getElementById(section),panel=sec?.querySelector('.rep-card-panel-v5');if(!panel||panel.dataset.country!==String(COUNTRY||''))return;
  const key=v12Request(section,name).key;
  const b=panel.querySelector(`[data-rep-key="${CSS.escape(key)}"]`);
- if(b){b.textContent='◆ '+cardInputName(name);b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=true;b.title='이미 카드로 등록되어 있습니다.';}
+ if(b){b.textContent='✓ '+cardInputName(name);b.className='rep-card-btn-v5 registered ns9017-done';b.disabled=false;b.title='이미 카드로 등록되어 있습니다. 누르면 저장된 카드를 봅니다.';}
  const st=v16State(section); const row=st.rows.get(key); if(row)row.registered=true;
  v16PaintStatus(section);
 }
@@ -2294,12 +2294,12 @@ function v16PaintStatus(section){
  const sec=document.getElementById(section),panel=sec?.querySelector('.rep-card-panel-v5'),status=panel?.querySelector('.rep-status-v5');if(!status)return;
  const st=v16State(section), rows=[...st.rows.values()];
  const existing=getCustom(section);
- const reg=rows.filter(x=>hasIdentity(cardInputName(x.name),existing)).length;
- const good=rows.filter(x=>x.ok&&!hasIdentity(cardInputName(x.name),existing)).length;
+ const reg=rows.filter(x=>!!v16RegisteredMatch(section,x)).length;
+ const good=rows.filter(x=>x.ok&&!v16RegisteredMatch(section,x)).length;
  const pending=rows.filter(x=>x.pending).length;
  const done=rows.length-pending;
  const si=v20StorageInfo();
- status.textContent=`후보 ${rows.length}개 · ◆ 가능 ${good}개 · 저장카드 ${reg}개 · 자동확인 ${done}/${rows.length} · 저장 ${si.mb}MB`;
+ status.textContent=`후보 ${rows.length}개 · ✓ 카드 ${reg}개 · ◆ 가능 ${good}개 · 자동확인 ${done}/${rows.length} · 저장 ${si.mb}MB`;
 }
 
 
@@ -2341,21 +2341,27 @@ function v26RefreshOverviewRep(section){
  const txt=v26FinalRepText(section);if(!txt)return;
  rep.innerHTML='<b>대표적으로 알아둘 이름</b><br>'+txt;
 }
+function v16RegisteredMatch(section,row){
+ const existing=getCustom(section);
+ const names=[row?.name,row?.resolvedName,row?.repChoice?.original,row?.repChoice?.display].map(cardInputName).filter(Boolean);
+ return existing.find(x=>names.some(n=>sameIdentity(n,x.name)))||null;
+}
 function v16PaintRow(section,row,panel){
  const shown=cardInputName(row.resolvedName||row.name), existing=getCustom(section);
- const registered=hasIdentity(shown,existing);
+ const registeredItem=v16RegisteredMatch(section,row);
+ const registered=!!registeredItem;
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
  const ready=!registered && row.ok && row.verified;
- b.textContent=(registered?'◆ ':ready?'◆ ':row.pending?'… ':'○ ')+shown;
+ b.textContent=(registered?'✓ ':ready?'◆ ':row.pending?'… ':'○ ')+shown;
  b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'ready-card':row.pending?'prechecking':'can-make');
- // NS90.35: purple diamond means the automatic precheck confirmed that a card can be made.
+ // NS90.36: green check = saved card, purple diamond = the automatic precheck confirmed that a card can be made.
  b.disabled=false;
  b.title=registered?'저장된 카드를 미리 봅니다.':ready?'자동 확인 완료 · 누르면 바로 미리 봅니다.':row.pending?'자동으로 카드 가능 여부를 확인하고 있습니다.':'아직 확인되지 않았습니다. 누르면 직접 다시 찾습니다.';
  b.onclick=async()=>{
    if(b.dataset.busy==='1')return;
    if(registered){
-     const saved=getCustom(section).find(x=>sameIdentity(shown,x.name));
+     const saved=v16RegisteredMatch(section,row)||getCustom(section).find(x=>sameIdentity(shown,x.name));
      let pv=panel.querySelector('.rep-preview-v5');
      if(saved&&pv){
        const photo=String(saved.photoRemote||'');
@@ -2365,8 +2371,8 @@ function v16PaintRow(section,row,panel){
        pv.querySelector('.ns9019-research').onclick=async()=>{
          b.dataset.busy='1'; b.textContent='… '+shown;
          pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 다시 찾고 있어요…</div>`;
-         let verified=null;try{verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown})}catch(e){console.warn('[NS90.19 research]',e)}
-         b.dataset.busy='0';b.textContent='◆ '+shown;
+         let verified=null;try{verified=await v12ResolveRequest(v12Request(section,shown))}catch(e){console.warn('[NS90.19 research]',e)}
+         b.dataset.busy='0';b.textContent='✓ '+shown;
          if(verified&&verified.desc)openRepresentativePreview(section,shown,verified,panel);
          else pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p></div>`;
        };
@@ -2384,7 +2390,7 @@ function v16PaintRow(section,row,panel){
    try{
      // NS90.18: every category takes the exact same direct path.
      // No category precheck/repair bridge is allowed between a click and the common engine.
-     verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown});
+     verified=await v12ResolveRequest(v12Request(section,shown));
    }catch(e){console.warn('[NS90.18 direct click resolve]',e)}
    b.dataset.busy='0'; b.disabled=false;
    if(verified&&verified.desc){
@@ -2402,7 +2408,7 @@ function v16PaintRow(section,row,panel){
 function v15CachedRepresentative(section,name){
  const req=v12Request(section,name);
  // Reuse both V14 and current resolver persistent successes.
- for(const prefix of ['magic_v14_entity_','magic_v15_entity_','magic_v16_entity_']){
+ for(const prefix of ['magic_v28_entity_','magic_v14_entity_','magic_v15_entity_','magic_v16_entity_']){
   try{const c=localStorage.getItem(prefix+req.key);if(c){const j=JSON.parse(c);if(j&&j.desc)return {ok:true,verified:j,cached:true}}}catch(e){}
  }
  // v12ResolveRequest also has its own memory cache; don't force network here.
@@ -2459,19 +2465,36 @@ async function renderRepresentativeCardButtonsV5(section){
  v16PaintStatus(section);
  // NS90.35: country-open auto precheck is started by the global sequential scheduler below.
 }
-// ===== NS90.35 AUTO PRECHECK =====
+// ===== NS90.36 UNIFIED FAST PRECHECK =====
 // Open a country -> verify every representative candidate across all card categories.
 // Searches run one-by-one to protect Safari and do NOT write transient search results to localStorage.
 let NS9035_PRECHECK_TOKEN=0;
 async function ns9035PrecheckRow(section,row,token){
  if(token!==NS9035_PRECHECK_TOKEN)return;
- const st=v16State(section);
  if(!row.pending)return;
+ // Saved cards are known-good. Mark them green immediately and never search them again.
+ if(v16RegisteredMatch(section,row)){
+   row.pending=false; row.ok=true; row.verified=null;
+   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
+   if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
+   return;
+ }
  let choice={display:cardInputName(row.name),original:cardInputName(row.name),changed:false};
  try{choice=await v24ResolveRepresentative(section,row.name)}catch(e){}
  row.resolvedName=choice.display; row.repChoice=choice;
+ // A representative may resolve to the name of an already-saved card.
+ if(v16RegisteredMatch(section,row)){
+   row.pending=false; row.ok=true; row.verified=null;
+   const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
+   if(panel){v16PaintRow(section,row,panel);v16PaintStatus(section)}
+   return;
+ }
  let verified=null;
- try{verified=await ONE_CARD_ENGINE.resolve({section,name:choice.display})}catch(e){console.warn('[NS90.35 precheck]',section,choice.display,e)}
+ try{
+   // NS90.36: auto check and tap use the SAME cached resolver path.
+   // Old successful cards (magic_v28 cache) are reused before any network request.
+   verified=await v12ResolveRequest(v12Request(section,choice.display));
+ }catch(e){console.warn('[NS90.36 unified precheck]',section,choice.display,e)}
  if(token!==NS9035_PRECHECK_TOKEN)return;
  row.pending=false; row.ok=!!(verified&&verified.desc&&((verified.photo)||verified.photos?.length)); row.verified=row.ok?verified:null;
  const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
@@ -2504,7 +2527,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.35 AUTO PRECHECK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.36 UNIFIED FAST PRECHECK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
