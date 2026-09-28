@@ -115,7 +115,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.24 EXACT-FIRST TOPIC SEARCH · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -173,7 +173,7 @@ async function kbWikiSearch(name,type){
  return hits;
 }
 async function kbPage(title){
- try{const u='https://ko.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&pithumbsize=900&titles='+encodeURIComponent(title)+'&format=json&origin=*';const r=await fetch(u),j=await r.json();return Object.values(j.query?.pages||{})[0]||null}catch(_){return null}
+ try{const u='https://ko.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&pithumbsize=900&titles='+encodeURIComponent(title)+'&redirects=1&format=json&origin=*';const r=await fetch(u),j=await r.json();return Object.values(j.query?.pages||{})[0]||null}catch(_){return null}
 }
 function kbSection(type){return {food:'food',animal:'animals',plant:'animals',art:'art'}[type]||type}
 async function kbCardPipeline(type,name){const raw=type==='plant'?'식물 — '+name:type==='animal'?'동물 — '+name:name;return await cardPipeline(kbSection(type),raw)}
@@ -1577,7 +1577,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.24 EXACT-FIRST TOPIC SEARCH · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1632,10 +1632,21 @@ function oneNameFit(q,title){
  return 0;
 }
 function oneEntityNameGate(query,title,aliases){
+ // NS90.25 ENTITY-LOCK: 비슷한 상위개념을 같은 대상으로 인정하지 않는다.
+ // 예: 천도복숭아→복숭아, 석류→석류석, 만다린→동명이물 차단.
+ const q=oneNormName(query), t=oneNormName(title);
  const all=[query,...(aliases||[])].filter(Boolean);
- let best=0;
- for(const a of all)best=Math.max(best,oneNameSimilarity(a,title));
- return best>=0.58;
+ if(!q||!t)return false;
+ // 후보명 자체가 다른 문서명의 단순 확장형인 경우는 불합격.
+ if(q!==t && q.includes(t) && t.length>=2)return false;
+ for(const a of all){
+   const an=oneNormName(a);
+   if(!an)continue;
+   if(an===t)return true;
+   // 공백/표기 차이는 허용하되 부분 포함만으로는 통과시키지 않는다.
+   if(oneNameSimilarity(a,title)>=0.82 && !(an!==t && (an.includes(t)||t.includes(an))))return true;
+ }
+ return false;
 }
 function sharedTypeFit(type,title,desc){
  const x=(String(title||'')+' '+String(desc||'')).toLowerCase();
@@ -1661,7 +1672,7 @@ async function oneWikiSearch(name,topic){
  return hits;
 }
 async function onePage(title){try{
- const u='https://ko.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&pithumbsize=1200&titles='+encodeURIComponent(title)+'&format=json&origin=*';
+ const u='https://ko.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&pithumbsize=1200&titles='+encodeURIComponent(title)+'&redirects=1&format=json&origin=*';
  const r=await fetch(u),j=await r.json();return Object.values(j.query?.pages||{})[0]||null;
 }catch(e){return null}}
 async function oneResolve(section,name,forcedKind=''){
@@ -1679,7 +1690,7 @@ async function oneResolve(section,name,forcedKind=''){
   const tf=sharedTypeFit(topic.kind,p.title||exact,desc);
   if(tf<=0)continue;
   const nf=Math.max(...aliases.map(a=>oneNameFit(a,p.title||exact)));
-  if(!oneEntityNameGate(clean,p.title||exact,aliases) && nf<8)continue;
+  if(!oneEntityNameGate(clean,p.title||exact,aliases))continue;
   const score=nf+tf+12+(p.thumbnail?.source?2:0)+(desc.length>90?1:0);
   if(score>bestScore){bestScore=score;best={p,desc}}
  }
@@ -1701,10 +1712,10 @@ async function oneResolve(section,name,forcedKind=''){
  if(!best)return null;
  const photo=best.p.thumbnail?.source||'';
  const finalName=best.p.title||clean;
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,finalName,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.24 EXACT-FIRST 공통 단일 검색 + 주제 일치 검증'],score:bestScore,section,kind:topic.kind};
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:v13CardDescription(best.desc,finalName,topic.kind),photo,photos:photo?[photo]:[],sources:['NS90.25 ENTITY-LOCK 공통 단일 검색 + 대상·주제 이중 검증'],score:bestScore,section,kind:topic.kind};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.24 EXACT-FIRST TOPIC SEARCH · ONE MASTER',
+ version:'MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2291,7 +2302,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.24 EXACT-FIRST TOPIC SEARCH · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.25 ENTITY-LOCK SEARCH · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
