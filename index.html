@@ -115,7 +115,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.40 MULTILINGUAL IDENTITY FIX · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1438,7 +1438,7 @@ async function V3_J(u){
 const V3_KIND_KO={food:'음식',fruit:'과일',animal:'동물',plant:'식물',place:'장소',culture:'문화',person:'인물',art:'예술작품'};
 const V3_ALIAS={
  '하몽 이베리코':['하몬 이베리코','jamón ibérico','jamon iberico'],
- '스페인아이벡스':['스페인 아이벡스','Spanish ibex'],
+ '스페인아이벡스':['스페인 아이벡스','Spanish ibex','Iberian ibex','Capra pyrenaica'],
  '스페인제국수리':['스페인 제국수리','Spanish imperial eagle'],
  '올리브나무':['올리브 나무','olive tree','Olea europaea'],
  '코르크참나무':['코르크 참나무','cork oak','Quercus suber'],
@@ -1446,7 +1446,8 @@ const V3_ALIAS={
  '포도나무':['포도 나무','grapevine','Vitis vinifera'],
  '라벤더':['lavender','Lavandula'],
  '노 (일본 전통극)':['노 (연극)','노가쿠','Noh'],
- '크로케타':['크로켓','croqueta','croquette'],
+ '파타타스 브라바스':['patatas bravas','papas bravas','bravas'],
+  '크로케타':['크로켓','croqueta','croquette'],
  '추로스':['추로','churros','churro'],
  '파에야':['paella'],
  '만다린':['만다린 오렌지','mandarin orange','Citrus reticulata'],
@@ -1577,7 +1578,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.40 MULTILINGUAL IDENTITY FIX · ONE MASTER';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
  animals:{kind:'animal',ko:'동식물'}, places:{kind:'place',ko:'명소'}, culture:{kind:'culture',ko:'문화'},
@@ -1749,7 +1750,13 @@ async function oneResolve(section,name,forcedKind=''){
  // Keep the NS90.26 screen/representative-item UI unchanged.
  // This gate only blocks an obviously mismatched resolved entity before a card is offered.
  const rawDesc=(best.desc||'').replace(/\s+/g,' ').trim();
- const identityOk=oneEntityNameGate(clean,finalName,aliases);
+ // NS90.40: when an English/scientific exact alias resolves to the same Wikidata entity
+ // and we then swap in its Korean sitelink for display, validate identity against the
+ // exact foreign identity title as well as the Korean display title. This fixes valid
+ // multilingual entities without weakening the entity lock for unrelated homonyms.
+ const identityTitle=String(best.identityTitle||'');
+ const identityOk=oneEntityNameGate(clean,finalName,aliases) ||
+   (identityTitle && oneEntityNameGate(clean,identityTitle,aliases));
  const typeOk=sharedTypeFit(topic.kind,finalName,rawDesc)>0;
  const descOk=rawDesc.length>=45;
  if(!identityOk||!typeOk||!descOk)return null;
@@ -1805,7 +1812,7 @@ async function oneResolve(section,name,forcedKind=''){
    descForCard=facts.join(' ');
    if(descForCard.length<70) descForCard=`${clean}에 대해 사진과 함께 생김새, 쓰임, 배경과 특징을 차근차근 살펴보세요.`;
  }
- // ===== NS90.39 SEARCH RECOVERY BASE =====
+ // ===== NS90.40 MULTILINGUAL IDENTITY FIX =====
  // Add country context without changing the resolved entity, photo, candidate list or UI.
  // The context comes from the same country/section overview already used by the encyclopedia,
  // so this remains one shared engine rather than per-item exception code.
@@ -1842,7 +1849,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER',
+ version:'MASTER V28 · NS90.40 MULTILINGUAL IDENTITY FIX · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2449,7 +2456,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.39 SEARCH RECOVERY BASE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.40 MULTILINGUAL IDENTITY FIX · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
