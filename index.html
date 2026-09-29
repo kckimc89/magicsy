@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2168,7 +2168,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER',
+ version:'MASTER V28 · NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2939,7 +2939,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -2955,4 +2955,91 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <div id="v21Modal" class="v21-modal hidden" role="dialog" aria-modal="true"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div>
 <!-- NS90.59: Preserve NS90.56 durable card store; unify representative/manual identity aliases and regression bridges across all card categories. -->
+
+<script id="ns9070-active-name-entity-photo-recovery">
+// ===== NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY =====
+// The ONE shared card engine is preserved. This layer runs only after its normal path fails.
+const NS9070_PERSON_SECTIONS=new Set(['singers','athletes','people']);
+function ns9070ClaimId(e,p){return e?.claims?.[p]?.[0]?.mainsnak?.datavalue?.value?.id||''}
+function ns9070CommonsPhoto(e){
+ const fn=e?.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+ return fn?'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(fn)+'?width=900':'';
+}
+function ns9070Label(e,lang){return e?.labels?.[lang]?.value||''}
+function ns9070Desc(e,lang){return e?.descriptions?.[lang]?.value||''}
+function ns9070Sitelink(e,lang){return e?.sitelinks?.[lang+'wiki']?.title||''}
+async function ns9070Entity(id){
+ if(!id)return null;
+ try{const u='https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+encodeURIComponent(id)+'&props=claims|labels|descriptions|sitelinks&languages=ko|en|ja&format=json&origin=*';const r=await fetch(u);if(!r.ok)return null;const j=await r.json();return j.entities?.[id]||null}catch(e){return null}
+}
+async function ns9070SearchIds(term,lang){
+ try{const u='https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encodeURIComponent(term)+'&language='+lang+'&uselang=ko&type=item&limit=12&format=json&origin=*';const r=await fetch(u);if(!r.ok)return[];const j=await r.json();return (j.search||[]).map(x=>x.id)}catch(e){return[]}
+}
+function ns9070SameIdentity(name,e,section){
+ const compact=x=>String(x||'').toLowerCase().replace(/[\s·ㆍ()\[\]{}「」『』'"“”‘’.,:;!?_\-]/g,'');
+ const q=compact(name), vals=[ns9070Label(e,'ko'),ns9070Label(e,'en'),ns9070Label(e,'ja'),ns9070Sitelink(e,'ko'),ns9070Sitelink(e,'en'),ns9070Sitelink(e,'ja')].filter(Boolean);
+ if(vals.some(v=>{const z=compact(v);return q&&z&&(q===z||q.includes(z)||z.includes(q))}))return true;
+ // Person identity may have changed names; human + a Korean description mentioning the query is strong enough.
+ const kd=compact(ns9070Desc(e,'ko')); if(NS9070_PERSON_SECTIONS.has(section)&&kd&&q&&kd.includes(q))return true;
+ return false;
+}
+async function ns9070ActiveDiscovery(name,section){
+ const ctx=v27AssistContext(name,section), seeds=[ctx.original,ctx.base];
+ try{if(typeof V3_aliases==='function')seeds.push(...V3_aliases(ctx.original).slice(0,8))}catch(e){}
+ const ids=[],seen=new Set();
+ for(const seed of [...new Set(seeds.filter(Boolean))]) for(const lang of ['ko','ja','en']) for(const id of await ns9070SearchIds(seed,lang)){if(!seen.has(id)){seen.add(id);ids.push(id)}}
+ const out=[];
+ for(const id of ids.slice(0,28)){
+  const e=await ns9070Entity(id); if(!e)continue;
+  const human=ns9069IsHumanEntity(e); if(NS9070_PERSON_SECTIONS.has(section)&&!human)continue;
+  const labels=[ns9070Label(e,'ko'),ns9070Label(e,'ja'),ns9070Label(e,'en')].filter(Boolean);
+  const title=ns9070Sitelink(e,'ko')||ns9070Label(e,'ko')||ns9070Sitelink(e,'ja')||ns9070Label(e,'ja')||ns9070Sitelink(e,'en')||ns9070Label(e,'en'); if(!title)continue;
+  const corpus=[title,...labels,ns9070Desc(e,'ko'),ns9070Desc(e,'ja'),ns9070Desc(e,'en')].join(' ');
+  const topic=oneTopic(section,name); const cat=v22SectionScore(section,corpus); const type=sharedTypeFit(topic.kind,title,corpus);
+  // Do not force broad category words. Identity and entity type are primary in recovery.
+  if(!ns9070SameIdentity(name,e,section) && Number(identityScore(name,title)||0)<4)continue;
+  if(!NS9070_PERSON_SECTIONS.has(section) && cat<=0 && type<=0)continue;
+  out.push({title,summary:{description:ns9070Desc(e,'ko')||ns9070Desc(e,'en'),text:ns9070Desc(e,'ko')||ns9070Desc(e,'en')},catScore:Math.max(1,cat),identity:12,contextScore:10,secondPass:true,wikibaseId:id,entity:e,entityPhoto:ns9070CommonsPhoto(e)});
+ }
+ return out;
+}
+async function ns9070Snapshot(h,section,originName){
+ const e=h.entity||await ns9070Entity(h.wikibaseId||'');
+ if(NS9070_PERSON_SECTIONS.has(section)){
+  if(!e||!ns9069IsHumanEntity(e))return null;
+  // P18 is an image claim on the person entity itself; never substitute a book/novel cover.
+  const photo=ns9070CommonsPhoto(e);
+  let desc=ns9070Desc(e,'ko');
+  const koTitle=ns9070Sitelink(e,'ko');
+  if(koTitle){try{const sm=await wikiSummaryByTitle(koTitle,'ko');if(sm?.text&&isMostlyKorean(sm.text))desc=sm.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')}catch(_){} }
+  if(!desc)desc=`${originName}에 관한 역사 인물입니다.`;
+  return {title:koTitle||ns9070Label(e,'ko')||h.title,desc,photo,entityId:h.wikibaseId||'',pageId:''};
+ }
+ // For non-person entities prefer exact Korean page; otherwise use entity's own P18 + Korean entity description.
+ let exact=null;try{exact=await v23ExactSelectedSnapshot(h.title,section)}catch(_){}
+ if(exact)return exact;
+ const photo=e?ns9070CommonsPhoto(e):''; const d=e?ns9070Desc(e,'ko'):'';
+ if(e&&d)return {title:ns9070Label(e,'ko')||h.title,desc:d,photo,entityId:h.wikibaseId||'',pageId:''};
+ return null;
+}
+// Upgrade only the assisted failure path; normal representative-card success still uses the established ONE engine.
+const ns9070_old_v22ShowAssistResults=v22ShowAssistResults;
+v22ShowAssistResults=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(v22SectionLabel(section))}</b> 범위에서 기존 공통엔진으로 먼저 찾고 있어요…</div>`;
+ let hits=await v22SearchHits(name,section); const topic=oneTopic(section,name);
+ const normal=hits.filter(h=>{const corpus=(h.title||'')+' '+(h.summary?.description||'')+' '+(h.summary?.text||'');return h.catScore>0&&sharedTypeFit(topic.kind,h.title||'',corpus)>0&&ns9068SemanticCandidateFit(name,section,h)});
+ let shown=normal.slice(0,8), recovery=false;
+ if(!shown.length){pv.innerHTML='<div class="preview-card">🔎 첫 이름으로 맞는 후보가 없어 원어명·영문명·다른 표기를 능동적으로 찾고 있어요…</div>';shown=(await ns9070ActiveDiscovery(name,section)).slice(0,8);recovery=true}
+ if(!shown.length){pv.innerHTML=`<div class="preview-card"><b>${esc(v22SectionLabel(section))}에서 같은 대상으로 확인되는 후보를 찾지 못했습니다.</b><p>관계없는 후보를 억지로 보여주지 않았습니다.</p><button class="rep-close-v5">닫기</button></div>`;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}
+ const renderList=()=>{pv.innerHTML=`<div class="preview-card"><h3>🔎 ${esc(v22SectionLabel(section))} 후보${recovery?' · 이름 확장 검색':''}</h3><p>같은 대상으로 확인되는 후보만 보여드려요.</p><div class="v22-suggestions"></div><button class="rep-close-v5">닫기</button></div>`;const host=pv.querySelector('.v22-suggestions');for(const h of shown){const b=document.createElement('button');b.className='rep-card-btn-v5 can-make';b.textContent=h.title;host.appendChild(b);b.onclick=()=>preview(h)}pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML=''};
+ const preview=async h=>{pv.innerHTML='<div class="preview-card">🔎 대상과 대표 사진이 서로 맞는지 확인하고 있어요…</div>';let exact=recovery?await ns9070Snapshot(h,section,originName):await v23ExactSelectedSnapshot(h.title,section);if(!exact&&recovery)exact=await ns9070Snapshot(h,section,originName);
+  if(!exact){pv.innerHTML='<div class="preview-card"><b>대상 자체로 확인되지 않아 제외했습니다.</b><p>책·작품·장소처럼 관련만 있는 결과는 카드로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
+  const photo=exact.photo||''; const person=NS9070_PERSON_SECTIONS.has(section);
+  if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
+  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
+};
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY · ONE MASTER';
+</script>
+
 </body></html>
