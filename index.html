@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.63 ALL CATEGORY UNIVERSAL RESOLVER · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.64 ATHLETE NAME NORMALIZER · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1668,7 +1668,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.63 ALL CATEGORY UNIVERSAL RESOLVER · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.64 ATHLETE NAME NORMALIZER · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1761,7 +1761,7 @@ function sharedTypeFit(type,title,desc){
  const bad={food:['선수','athlete'],fruit:['영화','소설','가수','그룹','음반','노래','만화','애니메이션','게임','광물','보석','석류석','배우','인물','film','novel','singer','band','album','song','comic','animation','game','mineral','gem','garnet','person'],animal:['회화','오일'],plant:['회화','오일','기름'],place:['가수','선수'],culture:['식물','동물'],person:['작품','영화','책'],art:['가수','선수','singer','athlete']}[type]||[];
  return good.filter(k=>x.includes(k)).length*2-bad.filter(k=>x.includes(k)).length*3;
 }
-// ===== NS90.63 ALL CATEGORY UNIVERSAL RESOLVER =====
+// ===== NS90.64 ATHLETE NAME NORMALIZER =====
 // Resolve broad/specialized category words without item-specific exceptions.
 // Strong positive evidence wins; negative words only reject when no positive category evidence exists.
 function ns9062TypeFit(type,title,desc){
@@ -2134,7 +2134,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.63 ALL CATEGORY UNIVERSAL RESOLVER · ONE MASTER',
+ version:'MASTER V28 · NS90.64 ATHLETE NAME NORMALIZER · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2235,12 +2235,21 @@ function repTextFor(section){
  if(Array.isArray(ov)) return ov[2]||'';
  return ov.names||'';
 }
-function parseRepNames(text){
+// ===== NS90.64 ATHLETE NAME NORMALIZER =====
+// Representative athlete labels intentionally show "name — sport" for learning,
+// but the shared card resolver must receive the person's identity only.
+// The sport remains display/context metadata and is never appended to the entity name.
+function ns9064RepresentativeIdentity(section,value){
+ let n=String(value||'').trim();
+ if(section==='athletes') n=n.replace(/\s*[—–-]\s*(테니스|축구|농구|야구|수영|체조|유도|스모|피겨스케이팅|배드민턴|배구|골프|사이클|자동차\s*경주|모터스포츠|레이싱|미식축구|아이스하키|탁구|육상)\s*$/i,'').trim();
+ return n;
+}
+function parseRepNames(text,section=''){
  const src=String(text||'').replace(/<[^>]+>/g,' '),out=[];
  for(const group of src.split('/')){
   let prefix='';if(/^\s*동물\s*[—\-:]/.test(group))prefix='동물 — ';if(/^\s*식물\s*[—\-:]/.test(group))prefix='식물 — ';
   const cleaned=group.replace(/^\s*(동물|식물)\s*[—\-:]\s*/,'');
-  for(const x of cleaned.split('·')){const n=x.trim();if(n)out.push(prefix+n)}
+  for(const x of cleaned.split('·')){const n=ns9064RepresentativeIdentity(section,x);if(n)out.push(prefix+n)}
  }
  return out
 }
@@ -2654,7 +2663,7 @@ function v26FinalRepText(section){
  const raw=Array.isArray(ov)?(ov[2]||''):(ov?.names||'');
  if(!raw)return '';
  let out=String(raw);
- for(const rep of parseRepNames(raw)){
+ for(const rep of parseRepNames(raw,section)){
    const original=cardInputName(rep),finalName=v28RepresentativeName(section,rep);
    if(original&&finalName&&original!==finalName)out=out.replace(original,finalName);
  }
@@ -2791,7 +2800,7 @@ async function renderRepresentativeCardButtonsV5(section){
   panel.innerHTML='<div class="rep-title-v5">⭐ 대표 이름으로 카드 만들기</div><div class="rep-status-v5"></div><div class="rep-card-buttons-v5"></div><div class="rep-preview-v5"></div>';
   sec.appendChild(panel);
  }
- const st=v16State(section),names=parseRepNames(repTextFor(section));
+ const st=v16State(section),names=parseRepNames(repTextFor(section),section);
  for(const name of names){
   const finalName=v28RepresentativeName(section,name);
   const req=v12Request(section,finalName);
@@ -2818,7 +2827,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.63 ALL CATEGORY UNIVERSAL RESOLVER · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.64 ATHLETE NAME NORMALIZER · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
