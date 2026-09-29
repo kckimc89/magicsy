@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.68 SEMANTIC CANDIDATE GATE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.68 SEMANTIC CANDIDATE GATE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2168,7 +2168,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.68 SEMANTIC CANDIDATE GATE · ONE MASTER',
+ version:'MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2534,6 +2534,35 @@ window.v23ChooseAmongComparable=v23ChooseAmongComparable;
 
 // Exact selected-page snapshot for assisted search.
 // This prevents "selected Yutoku title + Fushimi photo" style drift.
+// ===== NS90.69 SECOND PASS IDENTITY + PHOTO GATE =====
+// One shared engine remains unchanged. These helpers only strengthen the failure/recovery path.
+async function ns9069WikidataEntity(id){
+ if(!id)return null;
+ try{const u='https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+encodeURIComponent(id)+'&props=claims|labels|descriptions|sitelinks&languages=ko|en|ja&sitefilter=kowiki&format=json&origin=*';const r=await fetch(u);if(!r.ok)return null;const j=await r.json();return j.entities?.[id]||null}catch(e){return null}
+}
+function ns9069IsHumanEntity(e){return !!(e?.claims?.P31||[]).some(c=>c?.mainsnak?.datavalue?.value?.id==='Q5')}
+async function ns9069StrictEntityType(section,wikibaseId){
+ // Person-like sections must resolve to an actual human, not a novel/book/place that merely mentions a person.
+ if(!['singers','athletes','people'].includes(section))return true;
+ const e=await ns9069WikidataEntity(wikibaseId);return ns9069IsHumanEntity(e)
+}
+async function ns9069WikidataHits(name,section){
+ const langs=['ko','en','ja'], ids=[], seen=new Set(), out=[];
+ for(const lang of langs){
+  try{const u='https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encodeURIComponent(name)+'&language='+lang+'&uselang=ko&type=item&limit=10&format=json&origin=*';const r=await fetch(u);if(!r.ok)continue;const j=await r.json();for(const x of j.search||[]){if(!seen.has(x.id)){seen.add(x.id);ids.push(x.id)}}}catch(e){}
+ }
+ for(const id of ids.slice(0,18)){
+  const e=await ns9069WikidataEntity(id);if(!e)continue;
+  if(['singers','athletes','people'].includes(section)&&!ns9069IsHumanEntity(e))continue;
+  const title=e.sitelinks?.kowiki?.title||'';if(!title)continue;
+  let sm=null;try{sm=await wikiSummaryByTitle(title,'ko')}catch(e){}
+  const corpus=title+' '+(sm?.description||'')+' '+(sm?.text||'');
+  const cat=v22SectionScore(section,corpus), topic=oneTopic(section,name);
+  if(cat<=0||sharedTypeFit(topic.kind,title,corpus)<=0)continue;
+  out.push({title,summary:sm,catScore:cat,identity:12,contextScore:8,secondPass:true,wikibaseId:id});
+ }
+ return out;
+}
 async function v23ExactSelectedSnapshot(title,section){
  let j=null;
  try{
@@ -2541,6 +2570,7 @@ async function v23ExactSelectedSnapshot(title,section){
    if(!r.ok)return null;j=await r.json();
  }catch(e){return null}
  if(!j||j.type==='disambiguation'||!j.extract)return null;
+ if(!(await ns9069StrictEntityType(section,j.wikibase_item||'')))return null;
  const desc=stripHtml(j.extract||'').replace(/\s+/g,' ').trim();
  if(desc.length<45||!isMostlyKorean(desc))return null;
  const corpus=(j.title+' '+(j.description||'')+' '+desc);
@@ -2662,7 +2692,25 @@ function ns9068SemanticCandidateFit(name,section,h){
  if(Number(h?.identity||0)>=8)return true;
  return false;
 }
-async function v22ShowAssistResults(section,name,pv,originName){originName=cardInputName(originName||name);pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(v22SectionLabel(section))}</b> 범위에서 후보를 찾고 있어요…</div>`;const hits=await v22SearchHits(name,section);if(!hits.length){pv.innerHTML='<div class="preview-card"><b>관련 후보를 찾지 못했습니다.</b><button class="rep-close-v5">닫기</button></div>';pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}const topic=oneTopic(section,name);const good=hits.filter(h=>{const corpus=(h.title||'')+' '+(h.summary?.description||'')+' '+(h.summary?.text||'');return h.catScore>0&&sharedTypeFit(topic.kind,h.title||'',corpus)>0&&ns9068SemanticCandidateFit(name,section,h)}),shown=good.slice(0,8);if(!shown.length){pv.innerHTML=`<div class="preview-card"><b>${esc(v22SectionLabel(section))} 카테고리에 맞는 후보를 찾지 못했습니다.</b><p>이름이 비슷해도 다른 종류의 항목은 후보에서 제외했습니다.</p><button class="rep-close-v5">닫기</button></div>`;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}const renderList=()=>{pv.innerHTML=`<div class="preview-card"><h3>🔎 ${esc(v22SectionLabel(section))} 후보</h3><p>하나씩 확인하고, 맞지 않으면 <b>← 다른 후보 보기</b>로 돌아오세요.</p><div class="v22-suggestions"></div><button class="rep-close-v5">닫기</button></div>`;const host=pv.querySelector('.v22-suggestions');for(const h of shown){const b=document.createElement('button');b.className='rep-card-btn-v5 can-make';b.textContent=h.title;host.appendChild(b);b.onclick=()=>preview(h)}pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML=''};const preview=async h=>{pv.innerHTML='<div class="preview-card">🔎 선택한 대상을 확인하고 있어요…</div>';let exact=null;try{exact=await v23ExactSelectedSnapshot(h.title,section)}catch(e){};let found=exact?{desc:exact.desc}:null;if(!found&&h.summary?.text&&h.catScore>0)found={desc:h.summary.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')};if(!found){pv.innerHTML='<div class="preview-card"><b>이 카테고리의 항목으로 충분히 확인하지 못했습니다.</b><p>비슷한 이름은 보여드리지만, 정확한 대상을 확인하지 못한 카드는 억지로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:''}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);const displayName=originName||h.title;if(hasIdentity(displayName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:displayName,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||''),entityTitle:String(exact?.title||h.title),searchAlias:String(h.title||''),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList()}
+async function v22ShowAssistResults(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(v22SectionLabel(section))}</b> 범위에서 후보를 찾고 있어요…</div>`;
+ let hits=await v22SearchHits(name,section); const topic=oneTopic(section,name);
+ const filterGood=rows=>rows.filter(h=>{const corpus=(h.title||'')+' '+(h.summary?.description||'')+' '+(h.summary?.text||'');return h.catScore>0&&sharedTypeFit(topic.kind,h.title||'',corpus)>0&&(h.secondPass||ns9068SemanticCandidateFit(name,section,h))});
+ let good=filterGood(hits), usedSecond=false;
+ // NS90.69: only after the normal shared engine/recovery path has no useful candidate,
+ // discover alternate/multilingual identities through Wikidata, then send them back through the same gates.
+ if(!good.length){pv.innerHTML=`<div class="preview-card">🔎 첫 이름으로 맞는 후보가 없어 다른 표기·언어 이름을 한 번 더 찾고 있어요…</div>`;const second=await ns9069WikidataHits(name,section);good=filterGood(second);usedSecond=true}
+ const shown=good.slice(0,8);
+ if(!shown.length){pv.innerHTML=`<div class="preview-card"><b>${esc(v22SectionLabel(section))}에서 같은 대상으로 확인되는 후보를 찾지 못했습니다.</b><p>다른 종류이거나 의미가 맞지 않는 후보는 보여주지 않았습니다.</p><button class="rep-close-v5">닫기</button></div>`;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}
+ const renderList=()=>{pv.innerHTML=`<div class="preview-card"><h3>🔎 ${esc(v22SectionLabel(section))} 후보${usedSecond?' · 다른 이름까지 확인':''}</h3><p>같은 대상으로 확인되는 후보만 보여드려요.</p><div class="v22-suggestions"></div><button class="rep-close-v5">닫기</button></div>`;const host=pv.querySelector('.v22-suggestions');for(const h of shown){const b=document.createElement('button');b.className='rep-card-btn-v5 can-make';b.textContent=h.title;host.appendChild(b);b.onclick=()=>preview(h)}pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML=''};
+ const preview=async h=>{pv.innerHTML='<div class="preview-card">🔎 선택한 대상과 사진을 확인하고 있어요…</div>';let exact=null;try{exact=await v23ExactSelectedSnapshot(h.title,section)}catch(e){};
+  // For person categories, never fall back to a text-only result from a non-human page.
+  if(!exact&&['singers','athletes','people'].includes(section)){pv.innerHTML='<div class="preview-card"><b>인물 자체로 확인되지 않아 제외했습니다.</b><p>책·작품·장소처럼 인물과 관련만 있는 결과는 카드로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
+  let found=exact?{desc:exact.desc}:null;if(!found&&h.summary?.text&&h.catScore>0)found={desc:h.summary.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')};
+  if(!found){pv.innerHTML='<div class="preview-card"><b>이 카테고리의 항목으로 충분히 확인하지 못했습니다.</b><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
+  let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(originName||h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대상과 일치하는 대표 사진을 확인하지 못해 사진 없이 보여드려요.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);const displayName=originName||h.title;if(hasIdentity(displayName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:displayName,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||h.wikibaseId||''),entityTitle:String(exact?.title||h.title),searchAlias:String(h.title||''),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList()
+}
 function manualRepresentative(section,name){
  // "자동 카드 불가" means the strict automatic gate failed, not that the name is unknown.
  // Use assisted search instead of silently creating a manual card.
@@ -2891,7 +2939,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.68 SEMANTIC CANDIDATE GATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.69 SECOND PASS IDENTITY + PHOTO GATE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
