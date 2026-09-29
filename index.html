@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.61 MULTILINGUAL NAME RESOLVER · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.62 UNIVERSAL TYPE RESOLVER · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1668,7 +1668,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.61 MULTILINGUAL NAME RESOLVER · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.62 UNIVERSAL TYPE RESOLVER · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1756,6 +1756,26 @@ function sharedTypeFit(type,title,desc){
  const good={food:['요리','음식','식품','햄','돼지고기','육가공','dish','food','cuisine','ham','pork','cured','charcuterie'],fruit:['과일','열매','과실','과육','과수','감귤','감귤류','장미과','운향과','포도과','박과','석류과','감나무과','뽕나무과','복숭아','천도복숭아','자두','살구','체리','사과','배','멜론','수박','석류','무화과','감','딸기','오렌지','레몬','포도','만다린','fruit','berry','citrus','peach','nectarine','plum','cherry','pomegranate','fig','persimmon','pear','melon','watermelon','apricot','orange','lemon','grape','mandarin'],animal:['동물','포유류','조류','어류','파충류','염소','소과','산양','아이벡스','동물종','animal','bird','mammal','species','goat','ibex','capra','bovid','bovidae'],plant:['식물','나무','꽃','관목','plant','tree','species'],place:['건축','성당','궁전','공원','박물관','산','광장','building','cathedral','palace','park','museum'],culture:['문화','전통','축제','춤','음악','culture','tradition','festival','dance','music'],person:['가수','선수','작가','인물','배우','음악가','기타리스트','성악가','human','person','singer','athlete','writer','musician','guitarist','composer','vocalist','soprano','tenor','baritone','opera singer','operatic'],art:['회화','작품','그림','미술','painting','artwork','sculpture']}[type]||[];
  const bad={food:['선수','athlete'],fruit:['영화','소설','가수','그룹','음반','노래','만화','애니메이션','게임','광물','보석','석류석','배우','인물','film','novel','singer','band','album','song','comic','animation','game','mineral','gem','garnet','person'],animal:['회화','오일'],plant:['회화','오일','기름'],place:['가수','선수'],culture:['식물','동물'],person:['작품','영화','책'],art:['가수','선수','singer','athlete']}[type]||[];
  return good.filter(k=>x.includes(k)).length*2-bad.filter(k=>x.includes(k)).length*3;
+}
+// ===== NS90.62 UNIVERSAL TYPE RESOLVER =====
+// Resolve broad/specialized category words without item-specific exceptions.
+// Strong positive evidence wins; negative words only reject when no positive category evidence exists.
+function ns9062TypeFit(type,title,desc){
+ const x=(' '+String(title||'')+' '+String(desc||'')+' ').toLowerCase();
+ const groups={
+  food:['요리','음식','식품','햄','소시지','돼지고기','육가공','전채','수프','빵','디저트','dish','food','cuisine','ham','pork','cured','charcuterie','stew','soup'],
+  fruit:['과일','열매','과실','과육','과수','감귤','감귤류','장미과','운향과','포도과','박과','fruit','berry','citrus','peach','nectarine','plum','cherry','pomegranate','fig','persimmon','pear','melon','watermelon','apricot','orange','lemon','grape','mandarin'],
+  animal:['동물','포유류','조류','새','어류','파충류','양서류','곤충','염소','소과','산양','아이벡스','늑대','스라소니','독수리','사슴','animal','bird','mammal','reptile','amphibian','insect','species','goat','ibex','capra','bovid','bovidae','wolf','lynx','eagle','deer'],
+  plant:['식물','나무','꽃','관목','초본','침엽수','상록수','전나무','참나무','plant','tree','flower','shrub','herb','fir','oak','evergreen','species'],
+  place:['건축','건축물','성당','대성당','궁전','공원','박물관','산','광장','교회','수도원','요새','성','유적','세계유산','모스크','랜드마크','building','cathedral','palace','park','museum','mountain','square','church','monastery','fortress','castle','heritage','mosque','landmark'],
+  culture:['문화','전통','축제','춤','음악','풍습','의식','행사','민속','플라멩코','기타','타파스','culture','tradition','festival','dance','music','custom','ritual','celebration','folklore','flamenco'],
+  person:['가수','성악가','소프라노','메조소프라노','테너','바리톤','베이스','오페라 가수','오페라 성악가','음악가','기타리스트','작곡가','연주자','배우','선수','운동선수','축구선수','레이싱 드라이버','작가','소설가','시인','화가','탐험가','항해가','왕','여왕','황제','인물','singer','soprano','mezzo-soprano','mezzo soprano','tenor','baritone','bass','opera singer','operatic soprano','vocalist','musician','guitarist','composer','performer','actor','athlete','footballer','football player','racing driver','writer','novelist','poet','painter','explorer','navigator','king','queen','emperor','human','person'],
+  art:['회화','작품','그림','미술','유화','캔버스','조각','제단화','프레스코','painting','artwork','work of art','oil on canvas','canvas','sculpture','altarpiece','fresco']
+ };
+ const bad={food:['선수','athlete'],fruit:['영화','소설','가수','음반','노래','광물','보석','film','novel','singer','album','song','mineral','gem'],animal:['회화','그림','painting','artwork'],plant:['회화','그림','기름','painting','artwork','oil painting'],place:['가수','선수','singer','athlete'],culture:['식물종','동물종'],person:['소설 작품','영화 작품','회화 작품','novel is','film is','painting is'],art:['가수','선수','singer','athlete']}[type]||[];
+ const good=(groups[type]||[]).filter(k=>x.includes(k));
+ if(good.length) return Math.max(2,good.length*2); // specialized valid subtype is enough
+ return -bad.filter(k=>x.includes(k)).length*3;
 }
 async function oneWikiSearch(name,topic){
  const names=sharedAliases(name), queries=[];
@@ -1935,7 +1955,7 @@ async function ns9059StagedRetry(clean,topic,aliases){
    for(const p of pages){
     const desc=(p.extract||'').replace(/\s+/g,' ').trim();if(desc.length<35)continue;
     if(!oneEntityNameGate(clean,p.title||'',aliases))continue;
-    const tf=sharedTypeFit(topic.kind,p.title||'',desc);if(tf<=0)continue;
+    const tf=ns9062TypeFit(topic.kind,p.title||'',desc);if(tf<=0)continue;
     let chosen=p,chosenDesc=desc;
     const qid=p.pageprops?.wikibase_item||'';
     if(qid){const ko=await oneKoPageFromEntity(qid);if(ko&&ko.missing===undefined){const kd=(ko.extract||'').replace(/\s+/g,' ').trim();if(kd.length>=45){chosen=ko;chosenDesc=kd}}}
@@ -2014,7 +2034,7 @@ async function oneResolve(section,name,forcedKind=''){
  const identityTitle=String(best.identityTitle||'');
  const identityOk=oneEntityNameGate(clean,finalName,aliases) ||
    (identityTitle && oneEntityNameGate(clean,identityTitle,aliases));
- const typeOk=sharedTypeFit(topic.kind,finalName,rawDesc)>0;
+ const typeOk=ns9062TypeFit(topic.kind,finalName,rawDesc)>0;
  const descOk=rawDesc.length>=45;
  // Purple ◆ means description + identity + type + representative photo are all ready.
  // No-photo items stay white ○ and can be retried; this rule is shared by every category.
@@ -2110,7 +2130,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.61 MULTILINGUAL NAME RESOLVER · ONE MASTER',
+ version:'MASTER V28 · NS90.62 UNIVERSAL TYPE RESOLVER · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2794,7 +2814,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.61 MULTILINGUAL NAME RESOLVER · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.62 UNIVERSAL TYPE RESOLVER · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
