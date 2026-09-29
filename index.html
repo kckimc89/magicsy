@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2168,7 +2168,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER',
+ version:'MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2939,7 +2939,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3039,7 +3039,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 <script id="ns9071-entity-first-same-identity-gate">
@@ -3101,7 +3101,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 
@@ -3160,7 +3160,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 
@@ -3240,7 +3240,7 @@ renderRepresentativeCardButtonsV5=async function(section){
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 
@@ -3309,7 +3309,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 
@@ -3366,7 +3366,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 
@@ -3438,7 +3438,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 
@@ -3474,7 +3474,55 @@ ns9076ContextFit=function(name,section,e,sourceText=''){
  if(!ns9077_prev_ns9076ContextFit(name,section,e,sourceText))return false;
  return ns9077StrictSectionIdentity(section,e,sourceText);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
+</script>
+
+
+<script id="ns9078-subject-anchor">
+// ===== NS90.78 SUBJECT ANCHOR =====
+// The representative name is always the subject. Country/category are validation
+// context only; they can never replace the subject with a broad parent concept.
+function ns9078Compact(v){return String(v||'').toLowerCase().replace(/[\s·ㆍ()\[\]{}「」『』'"“”‘’.,:;!?_\-]/g,'')}
+function ns9078NameAnchor(name,e,hit){
+ const q=ns9078Compact(cardInputName(name)); if(!q)return false;
+ const names=ns9074Names(e||{});
+ const direct=names.some(v=>{const z=ns9078Compact(v);return z&&(z===q||z.includes(q)||q.includes(z)||Number(identityScore(name,v)||0)>=4)});
+ if(direct)return true;
+ // A Wikipedia result may expose the requested transliteration in its title/snippet
+ // even when Wikidata's Korean label is absent. This is still subject evidence,
+ // unlike country/category words which are deliberately ignored here.
+ const h=ns9078Compact((hit?.title||'')+' '+(hit?.snippet||''));
+ return !!(q&&h.includes(q));
+}
+async function ns9078InterpretName(name,section){
+ const n=cardInputName(name); if(!n)return null;
+ const country=ns9076CountryWords()[0]||'';
+ const label=v22SectionLabel(section)||section;
+ const queries=[`${n} ${country}`,`${n} ${country} ${label}`,`${n} ${label}`,n].filter(Boolean);
+ const seen=new Set(), candidates=[];
+ for(const q of queries){for(const lang of ['ko','ja','en']){for(const h of await ns9076WikiSearch(q,lang,8)){const k=lang+'|'+h.title;if(seen.has(k))continue;seen.add(k);candidates.push(h)}}}
+ const accepted=[];
+ for(const h of candidates.slice(0,40)){
+   const e=await ns9076EntityFromWikiTitle(h.title,h.lang); if(!e)continue;
+   // SUBJECT FIRST: broad category/country hits are rejected before category fit.
+   if(!ns9078NameAnchor(n,e,h))continue;
+   if(!ns9077StrictSectionIdentity(section,e,h.snippet))continue;
+   // Keep the established universal type/context checks as validators, never names.
+   const names=ns9074Names(e), title=ns9070Sitelink(e,'ko')||ns9070Label(e,'ko')||ns9070Sitelink(e,'ja')||ns9070Label(e,'ja')||ns9070Sitelink(e,'en')||ns9070Label(e,'en');
+   if(!title)continue;
+   const corpus=[title,...names,ns9070Desc(e,'ko'),ns9070Desc(e,'ja'),ns9070Desc(e,'en'),h.snippet].join(' ');
+   const cat=v22SectionScore(section,corpus), topic=oneTopic(section,n), type=sharedTypeFit(topic.kind,title,corpus);
+   if(NS9070_PERSON_SECTIONS.has(section)&&!ns9069IsHumanEntity(e))continue;
+   if(!NS9070_PERSON_SECTIONS.has(section) && cat<=0 && type<=0)continue;
+   const score=(ns9078Compact(title)===ns9078Compact(n)?100:0)+Math.max(0,Number(identityScore(n,title)||0))*10+Math.max(0,cat)+Math.max(0,type);
+   accepted.push({score,title,entity:e,wikibaseId:String(e.id||''),summary:{description:ns9070Desc(e,'ko')||ns9070Desc(e,'en')||h.snippet,text:ns9070Desc(e,'ko')||ns9070Desc(e,'en')||h.snippet},entityPhoto:ns9070CommonsPhoto(e),ns9076Interpreted:true,ns9078SubjectAnchored:true});
+ }
+ accepted.sort((a,b)=>b.score-a.score);
+ return accepted[0]||null;
+}
+// Replace only the interpreter selector. The verified preview/save route remains NS90.73–77.
+ns9076InterpretName=ns9078InterpretName;
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.78 SUBJECT ANCHOR · ONE MASTER';
 </script>
 
 </body></html>
