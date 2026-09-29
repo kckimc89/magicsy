@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2168,7 +2168,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER',
+ version:'MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2939,7 +2939,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3039,7 +3039,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 <script id="ns9071-entity-first-same-identity-gate">
@@ -3101,7 +3101,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 
@@ -3160,7 +3160,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 
@@ -3240,7 +3240,7 @@ renderRepresentativeCardButtonsV5=async function(section){
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 
@@ -3309,7 +3309,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 
@@ -3366,7 +3366,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 
@@ -3438,7 +3438,43 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.76 CONTEXT NAME INTERPRETER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
+</script>
+
+
+<script id="ns9077-category-identity-lock">
+// ===== NS90.77 CATEGORY IDENTITY LOCK =====
+// Universal post-interpretation gate.  It does not map individual names.
+// It only prevents an interpreted entity from changing the requested section's
+// identity (for example, a cultural custom becoming the plant associated with it).
+function ns9077Text(e,extra=''){
+ return [ns9070Label(e,'ko'),ns9070Label(e,'ja'),ns9070Label(e,'en'),
+         ns9070Desc(e,'ko'),ns9070Desc(e,'ja'),ns9070Desc(e,'en'),extra].filter(Boolean).join(' ').toLowerCase();
+}
+function ns9077StrictSectionIdentity(section,e,extra=''){
+ const t=ns9077Text(e,extra);
+ if(!t)return false;
+ // Person sections keep the already proven human-entity gate.
+ if(NS9070_PERSON_SECTIONS.has(section)) return ns9069IsHumanEntity(e);
+ // Culture must remain a custom/practice/festival/art/cultural phenomenon.
+ // Biological objects, places, organisations, people and physical products are
+ // not accepted merely because they are strongly related to that culture.
+ if(section==='culture'){
+   const culture=/문화|풍습|관습|전통|축제|행사|의식|예술|공연|놀이|기념|celebrat|festival|custom|tradition|cultur|practice|ceremon|event|art|祭|文化|風習|慣習|伝統|行事|花見/.test(t);
+   const biological=/식물|나무|수목|꽃|속의|종의|낙엽|상록|동물|조류|어류|곤충|plant|tree|flower|species|genus|animal|bird|fish|insect|植物|樹木|樹|花|属|種/.test(t);
+   const unrelatedType=/공항|역사|대학교|학교|기업|회사|방송국|airport|station|university|school|company|airport/.test(t);
+   return culture && !biological && !unrelatedType;
+ }
+ // Other sections continue to use the shared category/type gates already
+ // established in NS90.64–76. This keeps their successful route unchanged.
+ return true;
+}
+const ns9077_prev_ns9076ContextFit=ns9076ContextFit;
+ns9076ContextFit=function(name,section,e,sourceText=''){
+ if(!ns9077_prev_ns9076ContextFit(name,section,e,sourceText))return false;
+ return ns9077StrictSectionIdentity(section,e,sourceText);
+};
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.77 CATEGORY IDENTITY LOCK · ONE MASTER';
 </script>
 
 </body></html>
