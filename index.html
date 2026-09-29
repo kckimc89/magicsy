@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.58 ONE SEARCH PIPELINE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.59 STAGED RETRY BRIDGE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1668,7 +1668,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.58 ONE SEARCH PIPELINE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.59 STAGED RETRY BRIDGE · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1742,7 +1742,7 @@ function oneEntityNameGate(query,title,aliases){
 }
 function sharedTypeFit(type,title,desc){
  const x=(String(title||'')+' '+String(desc||'')).toLowerCase();
- const good={food:['요리','음식','dish','food','cuisine'],fruit:['과일','열매','과실','과육','과수','감귤','감귤류','장미과','운향과','포도과','박과','석류과','감나무과','뽕나무과','복숭아','천도복숭아','자두','살구','체리','사과','배','멜론','수박','석류','무화과','감','딸기','오렌지','레몬','포도','만다린','fruit','berry','citrus','peach','nectarine','plum','cherry','pomegranate','fig','persimmon','pear','melon','watermelon','apricot','orange','lemon','grape','mandarin'],animal:['동물','포유류','조류','어류','파충류','염소','소과','산양','아이벡스','동물종','animal','bird','mammal','species','goat','ibex','capra','bovid','bovidae'],plant:['식물','나무','꽃','관목','plant','tree','species'],place:['건축','성당','궁전','공원','박물관','산','광장','building','cathedral','palace','park','museum'],culture:['문화','전통','축제','춤','음악','culture','tradition','festival','dance','music'],person:['가수','선수','작가','인물','배우','human','person','singer','athlete','writer'],art:['회화','작품','그림','미술','painting','artwork','sculpture']}[type]||[];
+ const good={food:['요리','음식','식품','햄','돼지고기','육가공','dish','food','cuisine','ham','pork','cured','charcuterie'],fruit:['과일','열매','과실','과육','과수','감귤','감귤류','장미과','운향과','포도과','박과','석류과','감나무과','뽕나무과','복숭아','천도복숭아','자두','살구','체리','사과','배','멜론','수박','석류','무화과','감','딸기','오렌지','레몬','포도','만다린','fruit','berry','citrus','peach','nectarine','plum','cherry','pomegranate','fig','persimmon','pear','melon','watermelon','apricot','orange','lemon','grape','mandarin'],animal:['동물','포유류','조류','어류','파충류','염소','소과','산양','아이벡스','동물종','animal','bird','mammal','species','goat','ibex','capra','bovid','bovidae'],plant:['식물','나무','꽃','관목','plant','tree','species'],place:['건축','성당','궁전','공원','박물관','산','광장','building','cathedral','palace','park','museum'],culture:['문화','전통','축제','춤','음악','culture','tradition','festival','dance','music'],person:['가수','선수','작가','인물','배우','음악가','기타리스트','성악가','human','person','singer','athlete','writer','musician','guitarist','composer','vocalist'],art:['회화','작품','그림','미술','painting','artwork','sculpture']}[type]||[];
  const bad={food:['선수','athlete'],fruit:['영화','소설','가수','그룹','음반','노래','만화','애니메이션','게임','광물','보석','석류석','배우','인물','film','novel','singer','band','album','song','comic','animation','game','mineral','gem','garnet','person'],animal:['회화','오일'],plant:['회화','오일','기름'],place:['가수','선수'],culture:['식물','동물'],person:['작품','영화','책'],art:['가수','선수','singer','athlete']}[type]||[];
  return good.filter(k=>x.includes(k)).length*2-bad.filter(k=>x.includes(k)).length*3;
 }
@@ -1902,6 +1902,38 @@ async function ns9046ArtTitleBridge(clean,topic){
  }
  return null;
 }
+
+// ===== NS90.59 STAGED RETRY BRIDGE =====
+// If the exact multilingual identity path misses, retry the SAME aliases with
+// category/country context. This is one shared retry layer, not item-specific engines.
+const NS9059_EN_HINT={food:'Spanish food',fruit:'fruit Spain',animal:'animal Spain',plant:'plant Spain',place:'Spain landmark',culture:'Spanish culture',person:'Spain',art:'Spanish artwork'};
+async function ns9059StagedRetry(clean,topic,aliases){
+ const tries=[];
+ for(const a of aliases){
+  if(!a)continue;
+  tries.push({lang:/[A-Za-z]/.test(a)?'en':'ko',q:a});
+  tries.push({lang:/[A-Za-z]/.test(a)?'en':'ko',q:a+' '+( /[A-Za-z]/.test(a)?(NS9059_EN_HINT[topic.kind]||'Spain'):topic.ko)});
+ }
+ const seen=new Set();
+ for(const t of tries.slice(0,18)){
+  const key=t.lang+'|'+t.q;if(seen.has(key))continue;seen.add(key);
+  try{
+   const u='https://'+t.lang+'.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(t.q)+'&gsrlimit=8&prop=extracts|pageimages|pageprops&ppprop=wikibase_item&exintro=1&explaintext=1&piprop=thumbnail|original&pithumbsize=1200&redirects=1&format=json&origin=*';
+   const j=await (await fetch(u)).json();
+   const pages=Object.values(j.query?.pages||{});
+   for(const p of pages){
+    const desc=(p.extract||'').replace(/\s+/g,' ').trim();if(desc.length<35)continue;
+    if(!oneEntityNameGate(clean,p.title||'',aliases))continue;
+    const tf=sharedTypeFit(topic.kind,p.title||'',desc);if(tf<=0)continue;
+    let chosen=p,chosenDesc=desc;
+    const qid=p.pageprops?.wikibase_item||'';
+    if(qid){const ko=await oneKoPageFromEntity(qid);if(ko&&ko.missing===undefined){const kd=(ko.extract||'').replace(/\s+/g,' ').trim();if(kd.length>=45){chosen=ko;chosenDesc=kd}}}
+    return {p:chosen,desc:chosenDesc,score:900,identityTitle:p.title||t.q,bridgePhoto:p.thumbnail?.source||p.original?.source||chosen.thumbnail?.source||chosen.original?.source||'',entityId:qid};
+   }
+  }catch(e){console.warn('[NS90.59 staged retry]',t.q,e)}
+ }
+ return null;
+}
 async function oneResolve(section,name,forcedKind=''){
  window.NS9047_DIAG={name:String(name||''),section,stage:'start'};
  const clean=String(name||'').replace(/^(동물|식물)\s*[—\-:]\s*/,'').replace(/\s+/g,' ').trim();
@@ -1942,6 +1974,7 @@ async function oneResolve(section,name,forcedKind=''){
   if(score>bestScore){bestScore=score;best={p,desc}}
  }
  // NS90.44 second-stage bridge: exact multilingual entity -> page image/P18.
+ if(!best){const sr=await ns9059StagedRetry(clean,topic,aliases);if(sr){best=sr;bestScore=sr.score||0;window.NS9047_DIAG={name:clean,section,stage:'staged-retry-ok',identity:sr.identityTitle||'',photo:!!sr.bridgePhoto};}}
  if(!best){const wb=await oneWikidataPhotoBridge(clean,topic,aliases);if(wb){best=wb;bestScore=wb.score||0;}}
  if(!best){window.NS9047_DIAG={name:clean,section,stage:'no-entity'};return null;}
  // NS90.44 ART IDENTITY DIAG AUTO RECOVERY: a candidate is not ready until a real representative image URL is secured.
@@ -2066,7 +2099,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.58 ONE SEARCH PIPELINE · ONE MASTER',
+ version:'MASTER V28 · NS90.59 STAGED RETRY BRIDGE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2750,7 +2783,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.58 ONE SEARCH PIPELINE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.59 STAGED RETRY BRIDGE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -2765,5 +2798,5 @@ window.__MAGIC_V7_DIAGNOSTIC={
 };
 </script>
 <div id="v21Modal" class="v21-modal hidden" role="dialog" aria-modal="true"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div>
-<!-- NS90.58: Preserve NS90.56 durable card store; unify representative/manual identity aliases and regression bridges across all card categories. -->
+<!-- NS90.59: Preserve NS90.56 durable card store; unify representative/manual identity aliases and regression bridges across all card categories. -->
 </body></html>
