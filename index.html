@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.111 NON-BLOCKING ARTWORK DISCOVERY · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.112 STABLE SUCCESS BRIDGE · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -5333,6 +5333,69 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
 };
 try{document.getElementById('ns9015Banner').textContent='✅ '+NS90111_VERSION}catch(_){ }
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90111_VERSION;
+</script>
+
+
+<script id="ns90112-stable-success-bridge">
+// ===== NS90.112 STABLE SUCCESS BRIDGE =====
+// Keep NS90.106 append/merge storage and NS90.111 non-blocking discovery.
+// Important change: a verified fallback result is rendered directly; never rediscover it.
+const NS90112_VERSION='MASTER V28 · NS90.112 STABLE SUCCESS BRIDGE · ONE MASTER';
+function ns90112AliasSeeds(origin){
+ const out=[], add=v=>{v=String(v||'').trim();if(v&&!out.includes(v))out.push(v)};
+ add(origin);
+ // Generic title cleanup only: punctuation, spacing, common Korean transcription endings,
+ // and compact/expanded forms. No country/item table is used.
+ add(origin.replace(/[《》〈〉「」『』()\[\]]/g,' '));
+ add(origin.replace(/\s+/g,''));
+ const toks=origin.split(/\s+/).filter(Boolean);
+ if(toks.length>1){ add(toks.join(' ')); add(toks.slice(0,-1).join(' ')); add(toks.slice(-2).join(' ')); }
+ // Korean foreign-title searches sometimes carry a terminal plural/sound marker.
+ // Search both forms, but identity validation still decides whether an entity passes.
+ for(const v of [...out]){ if(/[즈스]$/.test(v))add(v.slice(0,-1)); }
+ return out.slice(0,10);
+}
+const ns90112_prev_fallback=ns90111Fallback;
+ns90111Fallback=async function(origin){
+ let best=await ns90112_prev_fallback(origin); if(best)return best;
+ const deadline=Date.now()+9000, seen=new Set(), hits=[];
+ for(const seed of ns90112AliasSeeds(origin)){
+  for(const lang of ['ko','ja','en','zh']){
+   if(Date.now()>deadline)break;
+   const pair=await Promise.all([ns90111WdHits(seed,lang),ns90111WikiHits(seed,lang)]);
+   for(const h of pair.flat())if(h.id&&!seen.has(h.id)){seen.add(h.id);hits.push({...h,seed})}
+   if(hits.length>=32)break;
+  }
+  if(hits.length>=32||Date.now()>deadline)break;
+ }
+ let pick=null;
+ for(const h of hits){
+  if(Date.now()>deadline)break;
+  const e=await ns90111Entity(h.id); if(!e)continue;
+  const vals=ns90111Vals(e,h), blob=vals.join(' ');
+  if(!ns90111GoodEntity(e,blob))continue;
+  let identity=0; for(const seed of ns90112AliasSeeds(origin))identity=Math.max(identity,ns9094IdentityScore(seed,vals));
+  if(identity<18)continue;
+  const x=await ns90111Hydrate(origin,h,e); if(!x)continue;
+  const score=identity+(e.claims?.P170?22:0)+(e.claims?.P18?20:0)+(e.claims?.P179?14:0)+(ns9097GoodArtworkText(blob)?20:0);
+  if(!pick||score>pick.score)pick={...x,score};
+ }
+ return pick;
+};
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ pv.innerHTML='<div class="preview-card">🎨 <b>작품을 찾고 있어요…</b><p>응답이 늦은 검색은 건너뛰고 다음 검색을 계속합니다.</p></div>';
+ const x=await Promise.race([ns9094ArtworkDiscovery(originName),new Promise(r=>setTimeout(()=>r(null),20000))]);
+ if(x){
+   // NS90.112: use the exact verified object that succeeded. This prevents a second
+   // network search from losing the success and routes save through NS90.106 merge storage.
+   return openRepresentativePreview(section,name,x,pv);
+ }
+ pv.innerHTML='<div class="preview-card"><b>예술작품에서 같은 작품으로 확인되는 대상을 찾지 못했습니다.</b><p>응답이 늦은 검색은 자동으로 건너뛰었습니다. 기존 카드는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';
+ const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90112_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90112_VERSION;
 </script>
 
 </body></html>
