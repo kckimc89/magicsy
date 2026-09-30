@@ -6022,4 +6022,72 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
 try{document.getElementById('ns9015Banner').textContent='✅ '+NS90121_VERSION}catch(_){}
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90121_VERSION;
 </script>
+
+
+<script id="ns90122-artwork-context-first-discovery">
+// ===== NS90.122 ARTWORK CONTEXT-FIRST DISCOVERY =====
+// Failure-only bridge. Preserve every successful NS90.121/120 route.
+// Improve Hangul -> Japanese reading and constrain retrieval to artwork context
+// before candidate hydration, so unrelated people/companies/programs are not flooded in.
+const NS90122_VERSION='MASTER V28 · NS90.122 ARTWORK CONTEXT-FIRST DISCOVERY · ONE MASTER';
+const ns90122_frozen_show=ns9094ShowArtwork;
+function ns90122HangulReading(text){
+ const L=['','k','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+ const V=['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','u','ui','i'];
+ const T=['','k','k','k','n','n','n','t','l','k','m','l','l','p','l','m','p','p','t','t','ng','t','t','k','t','p','h'];
+ const kana=[['kya','キャ'],['kyu','キュ'],['kyo','キョ'],['sha','シャ'],['shu','シュ'],['sho','ショ'],['cha','チャ'],['chu','チュ'],['cho','チョ'],['rya','リャ'],['ryu','リュ'],['ryo','リョ'],['shi','シ'],['chi','チ'],['tsu','ツ'],['ji','ジ'],['ja','ジャ'],['ju','ジュ'],['jo','ジョ'],['fu','フ'],['ka','カ'],['ki','キ'],['ku','ク'],['ke','ケ'],['ko','コ'],['ga','ガ'],['gi','ギ'],['gu','グ'],['ge','ゲ'],['go','ゴ'],['sa','サ'],['su','ス'],['se','セ'],['so','ソ'],['za','ザ'],['zu','ズ'],['ze','ゼ'],['zo','ゾ'],['ta','タ'],['te','テ'],['to','ト'],['da','ダ'],['de','デ'],['do','ド'],['na','ナ'],['ni','ニ'],['nu','ヌ'],['ne','ネ'],['no','ノ'],['ha','ハ'],['hi','ヒ'],['he','ヘ'],['ho','ホ'],['ba','バ'],['bi','ビ'],['bu','ブ'],['be','ベ'],['bo','ボ'],['pa','パ'],['pi','ピ'],['pu','プ'],['pe','ペ'],['po','ポ'],['ma','マ'],['mi','ミ'],['mu','ム'],['me','メ'],['mo','モ'],['ra','ラ'],['ri','リ'],['ru','ル'],['re','レ'],['ro','ロ'],['ya','ヤ'],['yu','ユ'],['yo','ヨ'],['wa','ワ'],['a','ア'],['i','イ'],['u','ウ'],['e','エ'],['o','オ'],['n','ン']];
+ let out='';
+ for(const ch of String(text||'')){
+  const c=ch.charCodeAt(0); if(c<0xAC00||c>0xD7A3){if(/\s/.test(ch))out+=' ';continue}
+  const n=c-0xAC00,li=Math.floor(n/588),vi=Math.floor((n%588)/28),ti=n%28;
+  let z=L[li]+V[vi]+T[ti]; if(/ng$/.test(z))z=z.replace(/ng$/,'n');
+  let k=''; while(z){let hit=false;for(const [r,j] of kana){if(z.startsWith(r)){k+=j;z=z.slice(r.length);hit=true;break}}if(!hit)z=z.slice(1)} out+=k;
+ }
+ return out.replace(/\s+/g,'').trim();
+}
+function ns90122Hiragana(k){return String(k||'').replace(/[ァ-ヶ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60))}
+function ns90122ArtworkText(t){t=String(t||'').toLowerCase();return /(絵画|絵|図|美人画|浮世絵|屏風|版画|painting|artwork|print|ukiyo|museum|美術|博物館|作品)/i.test(t)}
+function ns90122RejectText(t){t=String(t||'').toLowerCase();return /(テレビ|ドラマ|映画|俳優|女優|歌手|会社|企業|放送|アニメ|ゲーム|ライダー|植物|software|company|actor|actress|singer|television|film|anime|game)/i.test(t)}
+async function ns90122ContextHits(origin){
+ const kata=ns90122HangulReading(origin),hira=ns90122Hiragana(kata); if(!kata)return[];
+ const seeds=[hira+' 絵画',hira+' 浮世絵',hira+' 美術',kata+' 絵画',kata+' 浮世絵',hira+' 図'];
+ const out=[],seen=new Set();
+ for(const seed of seeds){
+  let hs=[];try{hs=(await Promise.all([ns90111WdHits(seed,'ja'),ns90111WikiHits(seed,'ja')])).flat()}catch(_){}
+  for(const h of hs){const text=(h.title||'')+' '+(h.desc||'');if(!h?.id||seen.has(h.id)||ns90122RejectText(text))continue;if(!ns90122ArtworkText(text)&&out.length>10)continue;seen.add(h.id);out.push({...h,seed,via:'작품 문맥 우선 검색'})}
+  if(out.length>=18)break;
+ }
+ return out;
+}
+async function ns90122Resolve(origin){
+ const hits=await ns90122ContextHits(origin),rows=[];
+ for(const h of hits.slice(0,18)){
+  let e=null;try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){}
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed],blob=vals.filter(Boolean).join(' ');
+  let bad=ns90122RejectText(blob);try{bad=bad||ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+  const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad),hasImg=!!e?.claims?.P18,work=e?ns90118WorkEvidence(e,blob):0;
+  const row={h,e,vals,blob,identity:0,ev:{hits:0,ratio:0},work,good,hasImg};rows.push(row);
+  if(!good||work<6)continue;
+  let card=null;try{card=await ns90120Card(origin,row)}catch(_){}
+  if(card?.photo)return {card,rows,kata:ns90122HangulReading(origin)};
+ }
+ return {card:null,rows,kata:ns90122HangulReading(origin)};
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90122_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,28000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|건너뛰었습니다|no-entity|작품 엔티티 조건 부족/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🎨 <b>작품 문맥을 먼저 확인하며 원어 제목을 찾고 있어요…</b><p>인물·회사·방송·식물 같은 결과는 후보 단계에서 제외합니다.</p></div>';
+ const result=await Promise.race([ns90122Resolve(originName),new Promise(r=>setTimeout(()=>r({card:null,rows:[],kata:''}),16000))]);
+ if(result.card)return openRepresentativePreview(section,name,result.card,pv);
+ if(result.rows?.length)return ns90117Render(originName,result.rows.map(r=>({label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ja?.value||r.e?.descriptions?.en?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:r.identity||0,hits:0,hasImg:r.hasImg,reasons:[r.good?'작품 후보이나 동일 작품 증거 부족':'작품이 아닌 결과 또는 작품 근거 부족']})),pv);
+ pv.innerHTML='<div class="preview-card"><b>작품 문맥 검색에서도 같은 작품 후보를 확인하지 못했습니다.</b><p>기존 성공 카드는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90122_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90122_VERSION;
+</script>
+
 </body></html>
