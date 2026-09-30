@@ -5489,4 +5489,87 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90114_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90114_VERSION;
 </script>
 
+<script id="ns90115-universal-expanded-title-discovery">
+// ===== NS90.115 UNIVERSAL EXPANDED TITLE DISCOVERY =====
+// Preserve all NS90.114 successes. Only after they fail, discover alternate/native/English
+// titles from multilingual search evidence and send the verified entity through the SAME
+// artwork quality gate. No country or artwork exception table is used.
+const NS90115_VERSION='MASTER V28 · NS90.115 UNIVERSAL EXPANDED TITLE DISCOVERY · ONE MASTER';
+const ns90115_prev_show=ns9094ShowArtwork;
+function ns90115Norm(s){return String(s||'').toLowerCase().normalize('NFKC').replace(/[《》〈〉「」『』()\[\]·・:：,，.。'"“”‘’\-–—_]/g,' ').replace(/\s+/g,' ').trim()}
+function ns90115Tokens(s){return ns90115Norm(s).split(' ').filter(x=>x.length>1)}
+function ns90115Evidence(origin,vals){
+ const a=ns90115Tokens(origin), blob=ns90115Norm(vals.join(' '));
+ let n=0; for(const t of a)if(blob.includes(t))n++;
+ return {hits:n,total:a.length,ratio:a.length?n/a.length:0};
+}
+async function ns90115Search(term,lang){
+ const suffix=lang==='ja'?' 美術 作品 浮世絵 屏風':lang==='en'?' artwork painting print screen':lang==='zh'?' 美术 作品 版画 屏风':' 미술 작품 회화 판화 병풍';
+ const q=String(term||'').trim()+suffix;
+ const pair=await Promise.all([ns90111WdHits(q,lang),ns90111WikiHits(q,lang)]);
+ return pair.flat();
+}
+async function ns90115Expanded(origin){
+ const deadline=Date.now()+12500, seen=new Set(), hits=[], seeds=[];
+ const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
+ ns90112AliasSeeds(origin).forEach(add); try{ns90108Seeds(origin).slice(0,8).forEach(add)}catch(_){ }
+ // Discover candidate entities from the representative label itself first. Candidate
+ // labels/sitelinks then become alternate-title evidence; they are never accepted alone.
+ for(const seed of seeds.slice(0,10)){
+  for(const lang of ['ko','ja','en','zh']){
+   if(Date.now()>deadline)break;
+   const pair=await Promise.all([ns90111WdHits(seed,lang),ns90111WikiHits(seed,lang)]);
+   for(const h of pair.flat())if(h.id&&!seen.has(h.id)){seen.add(h.id);hits.push({...h,seed})}
+  }
+  if(hits.length>=42||Date.now()>deadline)break;
+ }
+ // If literal lookup was sparse, use generic artwork suffixes. This is intentionally
+ // failure-only and bounded so Safari never blocks indefinitely.
+ if(hits.length<12){
+  for(const seed of seeds.slice(0,5))for(const lang of ['ja','en','ko']){
+   if(Date.now()>deadline)break;
+   for(const h of await ns90115Search(seed,lang))if(h.id&&!seen.has(h.id)){seen.add(h.id);hits.push({...h,seed})}
+  }
+ }
+ let best=null;
+ for(const h of hits.slice(0,48)){
+  if(Date.now()>deadline)break;
+  const e=await ns90111Entity(h.id); if(!e)continue;
+  const vals=ns90111Vals(e,h), blob=vals.join(' ');
+  if(!ns90111GoodEntity(e,blob))continue;
+  const ev=ns90115Evidence(origin,vals);
+  let identity=0; for(const s of seeds)identity=Math.max(identity,ns9094IdentityScore(s,vals));
+  // Require meaningful title overlap OR a strong existing identity score. Related artists,
+  // museums and books cannot pass merely because they mention the work.
+  if(identity<18 && !(ev.hits>=1&&ev.ratio>=0.34))continue;
+  const x=await ns90111Hydrate(origin,h,e); if(!x)continue;
+  const score=identity+ev.hits*12+(e.claims?.P170?24:0)+(e.claims?.P18?22:0)+(e.claims?.P179?12:0)+(ns9097GoodArtworkText(blob)?20:0);
+  if(!best||score>best.score)best={...x,score,expandedTitleDiscovery:true};
+ }
+ return best;
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ // Give the entire frozen NS90.114 path first chance. It owns all known successes.
+ let done=false;
+ const proxy=document.createElement('div');
+ try{
+  await Promise.race([ns90115_prev_show(section,name,proxy,originName),new Promise(r=>setTimeout(r,21000))]);
+  // A successful preview contains the card-making action; copy it only if it is a real success.
+  if(proxy.querySelector('button') && !/찾지 못했습니다|건너뛰었습니다/.test(proxy.textContent||'')){
+   pv.innerHTML=''; while(proxy.firstChild)pv.appendChild(proxy.firstChild); done=true;
+  }
+ }catch(_){ }
+ if(done)return;
+ pv.innerHTML='<div class="preview-card">🎨 <b>작품의 다른 이름과 원어 이름을 확인하고 있어요…</b><p>확인된 같은 작품만 보여줍니다.</p></div>';
+ const x=await Promise.race([ns90115Expanded(originName),new Promise(r=>setTimeout(()=>r(null),14000))]);
+ if(x)return openRepresentativePreview(section,name,x,pv);
+ // Preserve the familiar safe failure state.
+ pv.innerHTML='<div class="preview-card"><b>예술작품에서 같은 작품으로 확인되는 대상을 찾지 못했습니다.</b><p>다른 이름·원어 이름까지 확인했지만 같은 작품으로 검증되지 않은 결과는 제외했습니다. 기존 카드는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';
+ const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90115_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90115_VERSION;
+</script>
+
 </body></html>
