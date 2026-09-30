@@ -5449,4 +5449,44 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90113_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90113_VERSION;
 </script>
 
+<script id="ns90114-verified-success-resurrection">
+// ===== NS90.114 VERIFIED SUCCESS RESURRECTION =====
+// Preserve NS90.113 exactly. Before any new artwork network search, try the durable
+// NS90.99 success snapshot, but only after re-validating its entity as an artwork.
+// This is universal: no country/title-specific table or exception is used.
+const NS90114_VERSION='MASTER V28 · NS90.114 VERIFIED SUCCESS RESURRECTION · ONE MASTER';
+const ns90114_prev_show=ns9094ShowArtwork;
+async function ns90114VerifiedMemory(section,origin){
+ let mem=null; try{mem=ns9099LoadResearch(section,origin)}catch(_){return null}
+ if(!mem||!mem.desc)return null;
+ const id=String(mem.entityId||'').trim();
+ if(!id)return null; // Never resurrect an old snapshot whose identity cannot be checked.
+ const e=await Promise.race([ns90111Entity(id),new Promise(r=>setTimeout(()=>r(null),2600))]);
+ if(!e)return null;
+ const vals=ns90111Vals(e,{title:mem.title||origin,desc:mem.desc||''});
+ const blob=vals.join(' ')+' '+String(mem.desc||'');
+ if(ns9097BadArtworkText(blob)||ns9094RejectWords(blob)||!ns90111GoodEntity(e,blob))return null;
+ const entityPhoto=ns9094P18(e)||'';
+ const photo=entityPhoto||String(mem.photo||mem.photos?.[0]||'');
+ if(!photo)return null;
+ const extract=await ns90113WikiExtract(e);
+ return {
+  title:e?.labels?.ko?.value||e?.labels?.ja?.value||e?.labels?.en?.value||mem.title||origin,
+  desc:ns90113Desc(origin,e,mem.desc||'',extract), photo, photos:[photo],
+  photoSource:entityPhoto?'entity-P18':'verified-success-memory', entityId:id,
+  finalEntityVerified:true, finalArtworkVerified:true, qualityGateVerified:true,
+  successResurrection:true
+ };
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ pv.innerHTML='<div class="preview-card">🎨 <b>이전에 확인된 작품 기록과 현재 작품 정보를 확인하고 있어요…</b></div>';
+ const remembered=await ns90114VerifiedMemory(section,originName);
+ if(remembered)return openRepresentativePreview(section,name,remembered,pv);
+ return ns90114_prev_show(section,name,pv,originName);
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90114_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90114_VERSION;
+</script>
+
 </body></html>
