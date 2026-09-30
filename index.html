@@ -6428,4 +6428,42 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
 try{document.getElementById('ns9015Banner').textContent='✅ '+NS90127_VERSION}catch(_){}
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90127_VERSION;
 </script>
+
+<script id="ns90128-regression-safe-research-recall">
+// ===== NS90.128 REGRESSION-SAFE RESEARCH RECALL · ONE MASTER =====
+// Regression repair only. Preserve the ONE MASTER engine and every current success path.
+// A verified research snapshot saved BEFORE deletion is an existing common-engine asset.
+// Reuse it first on delete -> re-search, without any item-specific mapping or new search route.
+const NS90128_VERSION='MASTER V28 · NS90.128 REGRESSION-SAFE RESEARCH RECALL · ONE MASTER';
+const ns90128_frozen_show=ns9094ShowArtwork;
+function ns90128VerifiedRecall(section,name){
+ let mem=null;
+ try{mem=ns9099LoadResearch(section,name)}catch(_){mem=null}
+ if(!mem||!String(mem.desc||'').trim())return null;
+ const photo=String(mem.photo||'').trim();
+ // Artwork recall must retain the verified photo. If an old snapshot lacks it,
+ // do not weaken the quality gate; simply continue through the frozen engine.
+ if(section==='art'&&!photo)return null;
+ return {
+  desc:String(mem.desc||''), photo,
+  photos:Array.isArray(mem.photos)&&mem.photos.length?mem.photos.filter(Boolean):photo?[photo]:[],
+  entityId:String(mem.entityId||''), title:String(mem.title||name),
+  pageId:mem.pageId==null?'':String(mem.pageId),
+  sources:Array.isArray(mem.sources)?mem.sources:[],
+  finalEntityVerified:true, finalArtworkVerified:section==='art', qualityGateVerified:true,
+  durableResearchRecall:true
+ };
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ // Restore the proven NS90.99 contract: deleting a card deletes the card only,
+ // never the verified research memory. This path is generic for every representative item.
+ const recalled=ns90128VerifiedRecall(section,originName);
+ if(recalled)return openRepresentativePreview(section,name,recalled,pv);
+ // No memory: run NS90.127 and every earlier common-engine route byte-for-byte unchanged.
+ return await ns90128_frozen_show(section,name,pv,originName);
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90128_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90128_VERSION;
+</script>
 </body></html>
