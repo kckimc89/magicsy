@@ -5951,69 +5951,43 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 
 
-<!-- NS90.132: failure-only universal original-name discovery; NS90.131 remains frozen. -->
-<script id="ns90132-failure-only-original-name-discovery">
+<!-- NS90.133: NS90.131 LOCKED CORE + completely isolated failure-only fallback. -->
+<script id="ns90133-locked-core-isolated-fallback">
 (()=>{
- const V='MASTER V28 · NS90.132 FAILURE-ONLY ORIGINAL-NAME DISCOVERY · ONE MASTER';
- const frozen131=ns9094ShowArtwork;
- const failRe=/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|확인하지 못했습니다|건너뛰었습니다|엔티티 상세 없음|대표 사진 없음|작품 엔티티 조건 부족|최종 작품 증거 부족|비슷한 이름을 자동으로 찾아봅니다/;
- const successBox=box=>!!(box&&box.querySelector('button')&&!failRe.test(box.textContent||''));
- async function wd(term,lang){
-   const u='https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encodeURIComponent(term)+'&language='+lang+'&uselang='+lang+'&type=item&limit=12&format=json&origin=*';
-   try{return (await ns90120FetchJson(u,3200))?.search||[]}catch(_){return []}
+ const V='MASTER V28 · NS90.133 LOCKED CORE + ISOLATED FALLBACK · ONE MASTER';
+ const LOCKED_CORE=ns9094ShowArtwork; // exact NS90.131 entry point; never replaced internally.
+ function failed(pv){
+   const t=String(pv?.textContent||'');
+   return /찾지 못|확인하지 못|후보 관찰 모드|검색 후보 자체를 확보하지 못|엔티티 상세 없음|대표 사진 없음/.test(t) && !pv.querySelector('button[onclick*="openRepresentativePreview"]');
  }
- async function wiki(term,lang){
-   const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(term)+'&gsrnamespace=0&gsrlimit=12&prop=pageprops|description&format=json&origin=*';
-   try{const j=await ns90120FetchJson(u,3200);return Object.values(j?.query?.pages||{}).map(pg=>({id:pg?.pageprops?.wikibase_item||'',label:pg?.title||'',description:pg?.description||''})).filter(x=>x.id)}catch(_){return []}
- }
- function romanVariants(origin){
-   const out=[];const add=x=>{x=String(x||'').replace(/\s+/g,' ').trim();if(x&&!out.includes(x))out.push(x)};
-   try{for(const x of ns90125RomanVariants(origin)||[])add(x)}catch(_){try{add(ns90124Roman(origin))}catch(__){}}
-   for(const x of [...out]){add(x.replace(/\s+/g,''));add(x+' painting');add(x+' artwork');add(x+' ukiyo-e');add(x+' Japanese art')}
-   return out.slice(0,14);
- }
- async function discover(origin){
-   const seen=new Map();
-   for(const q of romanVariants(origin)){
-     for(const lang of ['en','ja']){
-       for(const x of await wd(q,lang))if(x?.id&&!seen.has(x.id))seen.set(x.id,{id:x.id,label:x.label||'',description:x.description||'',seed:q,via:'Wikidata'});
-       for(const x of await wiki(q,lang))if(x?.id&&!seen.has(x.id))seen.set(x.id,{...x,seed:q,via:'Wikipedia'});
-     }
-     if(seen.size>=30)break;
+ function esc(s){return String(s||'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
+ async function isolated(section,name,pv){
+   // This layer has no write/delete hooks. It can only discover a candidate and hand it
+   // back to the same proven NS90.131 preview/card path.
+   const box=document.createElement('div'); box.className='preview-card';
+   box.innerHTML='<b>🔎 격리된 보조 검색</b><p>기존 공통 엔진과 연구기억은 변경하지 않고 원어명 후보만 확인합니다.</p>';
+   pv.appendChild(box);
+   let rows=[];
+   try{ rows=await Promise.race([ns90119Collect(cardInputName(name)),new Promise(r=>setTimeout(()=>r([]),12000))]); }catch(_){ rows=[]; }
+   let card=null;
+   try{ if(rows.length) card=await ns90120Resolve(cardInputName(name),rows); }catch(_){ card=null; }
+   if(card){
+     box.remove();
+     return openRepresentativePreview(section,name,card,pv);
    }
-   const rows=[];
-   for(const h of [...seen.values()].slice(0,30)){
-     let e=null;try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){ }
-     if(!e)continue;
-     const vals=ns90111Vals(e,h), blob=vals.filter(Boolean).join(' ');
-     let bad=false;try{bad=ns90122RejectText(blob)||ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){ }
-     const good=!!(ns90111GoodEntity(e,blob)&&!bad), work=ns90118WorkEvidence(e,blob), hasImg=!!e?.claims?.P18;
-     const labels=[];const add=x=>{x=String(x||'').trim();if(x&&!labels.includes(x))labels.push(x)};
-     for(const L of Object.values(e.labels||{}))add(L?.value);
-     for(const A of Object.values(e.aliases||{}))for(const a of (A||[]))add(a?.value);
-     for(const sl of Object.values(e.sitelinks||{}))add(sl?.title);
-     rows.push({h,e,good,work,hasImg,labels});
-     if(!good||work<6||!hasImg)continue;
-     const preferred=[e.labels?.ja?.value,e.labels?.en?.value,e.labels?.ko?.value,...labels].filter(Boolean);
-     for(const resolved of [...new Set(preferred)].slice(0,10)){
-       const box=document.createElement('div');
-       try{await Promise.race([Promise.resolve(frozen131('art',resolved,box,origin)),new Promise(r=>setTimeout(r,10000))])}catch(_){ }
-       if(successBox(box))return {box,rows,resolved};
-     }
-   }
-   return {box:null,rows};
+   box.innerHTML='<b>🔎 격리된 보조 검색 결과</b><p>검증 가능한 같은 대상을 찾지 못했습니다. 기존 공통 엔진·연구기억·카드는 변경하지 않았습니다.</p>';
  }
  ns9094ShowArtwork=async function(section,name,pv,originName){
-   const origin=cardInputName(originName||name);
-   const first=document.createElement('div');
-   try{await Promise.race([Promise.resolve(frozen131(section,name,first,origin)),new Promise(r=>setTimeout(r,40000))])}catch(_){ }
-   if(successBox(first)){pv.innerHTML='';while(first.firstChild)pv.appendChild(first.firstChild);return}
-   // Strict regression barrier: no discovery runs until the frozen NS90.131 path has failed.
-   pv.innerHTML='<div class="preview-card">🌐 <b>기존 공통 엔진이 찾지 못한 이름의 원어 작품명을 확인하고 있어요…</b><p>NS90.131의 성공·삭제·재검색 경로는 변경하지 않습니다.</p></div>';
-   const r=await Promise.race([discover(origin),new Promise(res=>setTimeout(()=>res({box:null,rows:[]}),30000))]);
-   if(r.box){pv.innerHTML='';while(r.box.firstChild)pv.appendChild(r.box.firstChild);return}
-   // Preserve the exact frozen failure/diagnostic view rather than replacing it with a new engine.
-   pv.innerHTML='';while(first.firstChild)pv.appendChild(first.firstChild);
+   // 1) Run the exact NS90.131 locked core first and await it fully.
+   await LOCKED_CORE(section,name,pv,originName);
+   // 2) Successful/remembered core result: stop. Fallback is never called.
+   if(!failed(pv)) return;
+   // 3) Failure only: expose a separately isolated opt-in action; no automatic mutation.
+   if(pv.querySelector('.ns90133-fallback')) return;
+   const wrap=document.createElement('div'); wrap.className='ns90133-fallback';
+   const b=document.createElement('button'); b.type='button'; b.textContent='🔎 실패한 경우만 원어명 보조검색';
+   b.onclick=()=>{b.disabled=true; isolated(section,cardInputName(originName||name),pv)};
+   wrap.appendChild(b); pv.appendChild(wrap);
  };
  try{document.getElementById('ns9015Banner').textContent='✅ '+V}catch(_){ }
  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
