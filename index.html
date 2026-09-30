@@ -6222,4 +6222,82 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90124_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90124_VERSION;
 </script>
 
+
+<script id="ns90125-phonetic-token-entity-bridge">
+// ===== NS90.125 PHONETIC TOKEN + ENTITY BRIDGE =====
+// Failure-only. Earlier successful artwork paths stay frozen.
+// Generic strategy: preserve word boundaries, generate common Japanese title-suffix boundaries,
+// search Wikidata aliases directly, then require artwork/entity/image evidence before card creation.
+const NS90125_VERSION='MASTER V28 · NS90.125 PHONETIC TOKEN + ENTITY BRIDGE · ONE MASTER';
+const ns90125_frozen_show=ns9094ShowArtwork;
+function ns90125RomanVariants(origin){
+ const base=ns90124Roman(origin).replace(/\s+/g,' ').trim();
+ const out=[]; const add=x=>{x=String(x||'').replace(/\s+/g,' ').trim();if(x&&!out.includes(x))out.push(x)};
+ add(base);
+ // Generic Japanese title suffixes often transliterated attached to the preceding word.
+ // Split only suffix boundaries; no artwork-name table is used.
+ const toks=base.split(' ');
+ const suffixes=['zu','e','ga','zō','zo','byōbu','byobu'];
+ for(let i=0;i<toks.length;i++)for(const sf of suffixes){
+   if(toks[i].length>sf.length+2&&toks[i].endsWith(sf)){
+     const a=toks.slice(); a.splice(i,1,toks[i].slice(0,-sf.length),sf); add(a.join(' '));
+   }
+ }
+ add(base.replace(/\s+/g,''));
+ return out;
+}
+async function ns90125WdSearch(term,lang){
+ const u='https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encodeURIComponent(term)+'&language='+lang+'&uselang='+lang+'&type=item&limit=12&format=json&origin=*';
+ const j=await ns90120FetchJson(u,3500), out=[];
+ for(const x of (j?.search||[]))if(x?.id)out.push({id:x.id,title:x.label||'',desc:x.description||'',lang,rank:out.length,seed:term,via:'Wikidata 원제·별칭 검색'});
+ return out;
+}
+async function ns90125Recover(origin){
+ const vars=ns90125RomanVariants(origin), seen=new Set(), hits=[];
+ const addHit=h=>{if(h?.id&&!seen.has(h.id)){seen.add(h.id);hits.push(h)}};
+ for(const v of vars.slice(0,8)){
+   const queries=[v, v+' painting', v+' Japanese painting', v+' ukiyo-e'];
+   for(const q of queries){
+     for(const lang of ['en','ja']){
+       let hs=[];try{hs=await ns90125WdSearch(q,lang)}catch(_){}
+       for(const h of hs) addHit(h);
+       if(hits.length>=36)break;
+     }
+     if(hits.length>=36)break;
+   }
+   if(hits.length>=36)break;
+ }
+ const rows=[];
+ for(const h of hits.slice(0,32)){
+   let e=null;try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){}
+   const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed], blob=vals.filter(Boolean).join(' ');
+   let bad=ns90122RejectText(blob);try{bad=bad||ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+   const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad), hasImg=!!e?.claims?.P18, work=e?ns90118WorkEvidence(e,blob):0;
+   const norm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+   let phon=0; const nb=norm(blob);
+   for(const v of vars){const nv=norm(v);if(nv.length>=5&&nb.includes(nv)){phon=Math.max(phon,4)}else{for(const t of v.split(' ')){const nt=norm(t);if(nt.length>=3&&nb.includes(nt))phon++}}}
+   const row={h,e,vals,blob,identity:phon*14,ev:{hits:phon,ratio:0},work,good,hasImg}; rows.push(row);
+   if(!good||!hasImg||work<6||phon<2)continue;
+   let card=null;try{card=await ns90120Card(origin,row)}catch(_){}
+   if(card?.photo){card.phoneticEntityRecovered=true;return {card,rows}}
+ }
+ return {card:null,rows};
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90125_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,34000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|확인하지 못했습니다|건너뛰었습니다|no-entity|작품 엔티티 조건 부족|최종 작품 증거 부족/.test(proxy.textContent||'')){
+   pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🧩 <b>발음 단어를 작품 엔티티의 원제·별칭과 직접 대조하고 있어요…</b><p>발음 경계를 보존해 후보를 만들고, 작품·작가·대표사진 증거가 있는 결과만 카드 단계로 넘깁니다.</p></div>';
+ const result=await Promise.race([ns90125Recover(originName),new Promise(r=>setTimeout(()=>r({card:null,rows:[]}),24000))]);
+ if(result.card)return openRepresentativePreview(section,name,result.card,pv);
+ if(result.rows?.length)return ns90117Render(originName,result.rows.map(r=>({label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ja?.value||r.e?.descriptions?.en?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:r.identity||0,hits:r.ev?.hits||0,hasImg:r.hasImg,reasons:[r.good?(r.hasImg?'작품 후보이나 발음 동일성 증거 부족':'작품 후보이나 대표 사진 없음'):'작품 엔티티 조건 부족']})),pv);
+ pv.innerHTML='<div class="preview-card"><b>발음·원제·별칭 검색에서도 같은 작품을 확인하지 못했습니다.</b><p>기존 성공 카드와 저장 데이터는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90125_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90125_VERSION;
+</script>
+
 </body></html>
