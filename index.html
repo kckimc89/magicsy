@@ -6021,7 +6021,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </style>
 <script id="ns90137-full-representative-research-test">
 (()=>{
- const V='MASTER V28 · NS90.137 CLEAN START FULL RESEARCH TEST · SEARCH LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.138 MANUAL REPRESENTATIVE TEST · RESULTS PRESERVED · SEARCH LOCKED · ONE MASTER';
  const COUNTRIES=['ES','JP','US'];
  const SECTIONS=['food','fruit','animals','places','culture','singers','athletes','people','art'];
  const FLAG='magic_ns90137_run_after_refresh';
@@ -6079,10 +6079,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
    try{openCountry(old)}catch(_){}
  }
  sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1200);
- setTimeout(()=>{box();try{if(localStorage.getItem(FLAG)==='1')run()}catch(_){}},700);
+ setTimeout(()=>{try{localStorage.removeItem(FLAG)}catch(_){}},50);
 })();
 </script>
-</body></html>
+\n<!-- NS90.138: preserve current results, stop automatic queue, manual representative test only. Search engine untouched. -->\n<style id="ns90138-style">\n#ns90138Box{position:fixed;left:14px;bottom:14px;z-index:99999;max-width:min(720px,calc(100vw - 28px));background:#fff;border:2px solid #6d4bd1;border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.45}\n#ns90138Box button{font:inherit;font-weight:800;border:1px solid #b8a7ef;background:#f4efff;border-radius:12px;padding:8px 12px;margin:4px 4px 0 0}\n#ns90138Box .small{font-size:12px;color:#555}\n</style>\n<script id="ns90138-manual-representative-test">\n(()=>{\n const V='MASTER V28 · NS90.138 MANUAL REPRESENTATIVE TEST · RESULTS PRESERVED · SEARCH LOCKED · ONE MASTER';\n // Stop only the NS90.137 test queue flag. Do not clear cards, ready candidates, research memory, or caches.\n try{localStorage.removeItem('magic_ns90137_run_after_refresh')}catch(_){}\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n function mount(){\n   try{document.getElementById('ns90137TestBox')?.remove()}catch(_){}\n   let b=document.getElementById('ns90138Box'); if(b)return;\n   b=document.createElement('div'); b.id='ns90138Box';\n   b.innerHTML='<b>🧪 NS90.138 수동 대표이름 확인</b><div class="small">NS90.137에서 지금까지 검색된 결과는 그대로 유지합니다. 자동 전체검색은 중단했습니다. 아직 ○인 대표이름만 직접 눌러 기존 공통 검색엔진으로 확인하세요. 검색엔진·대표이름·저장된 보라색 결과는 변경하지 않습니다.</div><button type="button" class="ns90138hide">창 닫기</button>' ;\n   document.body.appendChild(b); b.querySelector('.ns90138hide').onclick=()=>b.remove();\n }\n sync(); setTimeout(sync,0); setTimeout(sync,300); setTimeout(sync,1500); setTimeout(sync,3500); setTimeout(mount,500);\n})();\n</script>\n</body></html>
 
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
@@ -6250,10 +6250,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </script>
 
 <!-- NS90.137 final visible version sync; no search logic changes. -->
-<script id="ns90137-final-version-sync">
+<script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.137 CLEAN START FULL RESEARCH TEST · SEARCH LOCKED · ONE MASTER';
- function sync137(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
- sync137(); setTimeout(sync137,0); setTimeout(sync137,300); setTimeout(sync137,1500); setTimeout(sync137,3500);
+ const V='MASTER V28 · NS90.138 MANUAL REPRESENTATIVE TEST · RESULTS PRESERVED · SEARCH LOCKED · ONE MASTER';
+ function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
 </script>
