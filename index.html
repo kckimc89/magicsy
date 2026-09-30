@@ -5714,4 +5714,79 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90117_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90117_VERSION;
 </script>
 
+
+<script id="ns90118-universal-artwork-evidence-resolver">
+// ===== NS90.118 UNIVERSAL ARTWORK EVIDENCE RESOLVER =====
+// Preserve the existing successful resolver first. On failure, accept a differently-titled
+// candidate only when independent artwork evidence agrees: real work entity + image +
+// creator/series/work-type evidence + clean non-person/non-place semantics. No named-work table.
+const NS90118_VERSION='MASTER V28 · NS90.118 UNIVERSAL ARTWORK EVIDENCE RESOLVER · ONE MASTER';
+const ns90118_base_show=ns90117_prev_show;
+function ns90118Claim(e,p){return !!(e?.claims?.[p]?.length)}
+function ns90118WorkEvidence(e,blob){
+ let n=0;
+ if(ns90118Claim(e,'P18'))n+=3;          // representative work image
+ if(ns90118Claim(e,'P170'))n+=3;         // creator
+ if(ns90118Claim(e,'P31'))n+=1;          // typed entity
+ if(ns90118Claim(e,'P179'))n+=1;         // series
+ if(ns90118Claim(e,'P571'))n+=1;         // inception/date
+ if(ns9094ArtWords(blob)||ns9097GoodArtworkText(blob))n+=3;
+ return n;
+}
+async function ns90118Resolve(origin){
+ const deadline=Date.now()+12500, seeds=[]; const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
+ try{ns90112AliasSeeds(origin).forEach(add)}catch(_){add(origin)}
+ try{ns90108Seeds(origin).slice(0,8).forEach(add)}catch(_){ }
+ const hits=[],seen=new Set();
+ for(const seed of seeds.slice(0,8)){
+  for(const lang of ['ko','ja','en','zh']){
+   if(Date.now()>deadline)break;
+   let pair=[];try{pair=(await Promise.all([ns90111WdHits(seed,lang),ns90111WikiHits(seed,lang)])).flat()}catch(_){ }
+   for(let i=0;i<pair.length;i++){const h=pair[i];if(h?.id&&!seen.has(h.id)){seen.add(h.id);hits.push({...h,seed,via:lang,rank:i})}}
+  }
+  if(hits.length>=44||Date.now()>deadline)break;
+ }
+ let best=null;
+ for(const h of hits.slice(0,40)){
+  if(Date.now()>deadline)break;
+  let e=null;try{e=await ns90111Entity(h.id)}catch(_){ }
+  if(!e)continue;
+  const vals=ns90111Vals(e,h),blob=vals.join(' ');
+  if(ns9097BadArtworkText(blob)||ns9094RejectWords(blob))continue;
+  if(!ns90111GoodEntity(e,blob))continue;
+  const work=ns90118WorkEvidence(e,blob);
+  const lexical=ns9094IdentityScore(origin,vals);
+  let ev={hits:0,ratio:0};try{ev=ns90115Evidence(origin,vals)}catch(_){ }
+  // Two independent gates: it must be a strongly evidenced artwork, and it must have
+  // arrived through the representative-name search/alias path. Lexical equality alone
+  // can never turn a person/place candidate into a work.
+  const route=(h.rank<=2?3:0)+(h.seed===origin?2:1)+(ev.hits?2:0)+(lexical>=24?2:0);
+  if(work<7||route<4||!ns90118Claim(e,'P18'))continue;
+  let card=null;try{card=await ns90111Hydrate(origin,h,e)}catch(_){ }
+  if(!card?.photo)continue;
+  const score=work*10+route*5+Math.min(lexical,45)+ev.hits*5;
+  if(!best||score>best.score)best={...card,score,finalEntityVerified:true,finalArtworkVerified:true,evidenceResolved:true};
+ }
+ return best;
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ // 1) Frozen successful path first: existing three cards and every other prior success stay untouched.
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90118_base_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,22000))])}catch(_){ }
+ if(proxy.querySelector('button')&&!/찾지 못했습니다|건너뛰었습니다|no-entity/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ // 2) Failure-only evidence resolver.
+ pv.innerHTML='<div class="preview-card">🧩 <b>작품의 제목뿐 아니라 작가·작품종류·사진·연작 정보를 함께 확인하고 있어요…</b><p>기존 성공 카드는 변경하지 않습니다.</p></div>';
+ const resolved=await Promise.race([ns90118Resolve(originName),new Promise(r=>setTimeout(()=>r(null),13500))]);
+ if(resolved)return openRepresentativePreview(section,name,resolved,pv);
+ // 3) Still unresolved: keep NS90.117 observer so the next failure remains explainable.
+ const rows=await Promise.race([ns90117Observe(originName),new Promise(r=>setTimeout(()=>r([]),13000))]);
+ ns90117Render(originName,rows,pv);
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90118_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90118_VERSION;
+</script>
+
 </body></html>
