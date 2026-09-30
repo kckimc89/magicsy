@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2168,7 +2168,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER',
+ version:'MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2473,6 +2473,46 @@ async function precheckRepresentative(section,name){
  const result=verified&&verified.desc?{ok:true,verified}:{ok:false,verified:null};
  repAvailabilityCache.set(req.key,result);return result;
 }
+// ===== NS90.106 STABLE CARD STORAGE =====
+// Add-card writes are append/merge operations. A stale preview snapshot may never replace
+// cards that were saved earlier. Delete continues to use the established durable delete path.
+function ns90106CardIdentity(country,section,x){
+ const n=String(x?.name||x?.entityTitle||'').trim();
+ try{return ns9097StableCardKey(country,section,n)}catch(_){return [country,section,normalizeItemName(n)].join('|')}
+}
+function ns90106MergeCards(country,section,...lists){
+ const out=[], pos=new Map();
+ for(const list of lists) for(const raw of (Array.isArray(list)?list:[])){
+  if(!raw)continue; const x={...raw};
+  const k=String(x.stableKey||ns90106CardIdentity(country,section,x)||x.id||'');
+  if(!k)continue;
+  x.stableKey=k;
+  if(pos.has(k)){
+   const i=pos.get(k), old=out[i];
+   // Newer object may enrich the same representative, but never erases populated fields.
+   out[i]={...old,...Object.fromEntries(Object.entries(x).filter(([_,v])=>v!==''&&v!=null))};
+  }else{pos.set(k,out.length);out.push(x)}
+ }
+ return out;
+}
+async function ns90106AppendCard(section,item){
+ const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
+ // Read all three stores immediately before commit; this prevents stale UI arrays from
+ // dropping siblings when cards are created one after another on Safari/iPad.
+ const db=await cardDBGet(country,section);
+ let mirror=[];try{mirror=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){ }
+ const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];
+ const merged=ns90106MergeCards(country,section,db,mirror,mem,[item]);
+ await cardDBPut(country,section,merged.map(x=>({...x})));
+ CARD_MEM.set(mk,merged.map(x=>({...x})));
+ try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(e){
+  if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(_){}}
+ }
+ const check=await cardDBGet(country,section);
+ const wanted=ns90106CardIdentity(country,section,item);
+ if(!check.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('NS90.106 append verify failed');
+ return true;
+}
 function openRepresentativePreview(section,name,verified,panel){
  ns9053SaveReady(v12Request(section,name),verified);
  let pv=panel.querySelector('.rep-preview-v5');
@@ -2491,12 +2531,12 @@ function openRepresentativePreview(section,name,verified,panel){
      sources:Array.isArray(verified.sources)?verified.sources.map(String):[]};
    const saveCountry=String(COUNTRY||'');
    try{
-     const ok=await ns9055SetCustomDurable(section,[...a,item]);
+     const ok=await ns90106AppendCard(section,item);
      const saved=getCustom(section).some(x=>x.id===item.id);
      if(ok!==true||!saved)throw new Error('primary card save verification failed');
    }catch(e){
      console.error('[NS90.56] primary card save failed',e);
-     if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=await ns9055SetCustomDurable(section,[...a,item]);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
+     if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=await ns90106AppendCard(section,item);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
      alert(isQuotaError(e)?'저장공간을 자동 정리했지만 카드 저장에 필요한 공간이 아직 부족합니다. 기존 카드는 지우지 않았습니다. 백업 후 다시 확인해 주세요.':'카드 저장 중 오류가 발생했습니다. 다시 한 번 눌러 주세요.');
      return;
    }
@@ -2709,7 +2749,7 @@ async function v22ShowAssistResults(section,name,pv,originName){
   if(!exact&&['singers','athletes','people'].includes(section)){pv.innerHTML='<div class="preview-card"><b>인물 자체로 확인되지 않아 제외했습니다.</b><p>책·작품·장소처럼 인물과 관련만 있는 결과는 카드로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   let found=exact?{desc:exact.desc}:null;if(!found&&h.summary?.text&&h.catScore>0)found={desc:h.summary.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')};
   if(!found){pv.innerHTML='<div class="preview-card"><b>이 카테고리의 항목으로 충분히 확인하지 못했습니다.</b><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
-  let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(originName||h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대상과 일치하는 대표 사진을 확인하지 못해 사진 없이 보여드려요.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);const displayName=originName||h.title;if(hasIdentity(displayName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:displayName,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||h.wikibaseId||''),entityTitle:String(exact?.title||h.title),searchAlias:String(h.title||''),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList()
+  let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(originName||h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대상과 일치하는 대표 사진을 확인하지 못해 사진 없이 보여드려요.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);const displayName=originName||h.title;if(hasIdentity(displayName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:displayName,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||h.wikibaseId||''),entityTitle:String(exact?.title||h.title),searchAlias:String(h.title||''),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList()
 }
 function manualRepresentative(section,name){
  // "자동 카드 불가" means the strict automatic gate failed, not that the name is unknown.
@@ -2939,7 +2979,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3037,9 +3077,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(!exact){pv.innerHTML='<div class="preview-card"><b>대상 자체로 확인되지 않아 제외했습니다.</b><p>책·작품·장소처럼 관련만 있는 결과는 카드로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   const photo=exact.photo||''; const person=NS9070_PERSON_SECTIONS.has(section);
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
-  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
+  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 <script id="ns9071-entity-first-same-identity-gate">
@@ -3097,11 +3137,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
   pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
-  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3156,11 +3196,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
   pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
-  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:!!exact.finalEntityVerified,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:!!exact.finalEntityVerified,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3240,7 +3280,7 @@ renderRepresentativeCardButtonsV5=async function(section){
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3307,9 +3347,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=exact.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||h.summary?.text||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 같은 대상으로 확인되었습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3364,9 +3404,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=exact.photo||h.entityPhoto||ns9070CommonsPhoto(h.entity)||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||h.summary?.text||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 같은 대상으로 확인되었습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3442,9 +3482,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const desc=exact.desc||h.summary?.text||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">같은 대상으로 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3501,7 +3541,7 @@ async function ns9080InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9080InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3559,7 +3599,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  rows.map((r,i)=>`<div style="padding:8px 0;border-top:1px solid #d9dee7"><b>${i+1}. ${esc(r.title)}</b> ${r.qid?`<span>(${esc(r.qid)})</span>`:''}<br><span>검색: ${esc(r.query)} · ${esc(r.lang)} · 점수 ${r.score==null?'—':Math.round(r.score)} · subject ${r.subject??'—'} · cat ${r.cat??'—'} · type ${r.type??'—'} · country ${r.country??'—'} · penalty ${r.penalty??'—'} · role +${r.roleBonus??0}/-${r.rolePenalty??0}</span><br><b>${esc(r.reason||'')}</b><br><span>${esc(String(r.desc||r.snippet||'').slice(0,180))}</span></div>`).join('');
  pv.appendChild(box);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3622,7 +3662,7 @@ async function ns9082InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9082InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3687,7 +3727,7 @@ async function ns9083InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9083InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 <script id="ns9084-verified-winner-to-card">
@@ -3724,9 +3764,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'',desc=snap.desc||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">같은 대상으로 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3791,9 +3831,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">같은 개념으로 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -3860,9 +3900,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">개념은 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 <script id="ns9087-concept-identity-card">
@@ -3920,9 +3960,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  // description or photo is allowed to leak into a broad concept card.
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">개념은 확인했습니다. 정확한 개념 자체의 대표 사진을 찾지 못해 사진 없이 저장합니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 <script id="ns9088-country-context-concept-card">
@@ -3974,11 +4014,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">나라와 문화 맥락은 확인했습니다. 알맞은 대표 사진을 찾지 못해 사진 없이 저장합니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
 // Candidate trace is development-only; keep it out of the child-facing UI.
 (function(){const st=document.createElement('style');st.textContent='details:has(summary[style*="font-weight:800"]){display:none!important}';document.head.appendChild(st)})();
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4006,11 +4046,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.v18-manual-save').onclick=async()=>{
   const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');
   const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true,countryVerified:true};
-  try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}
+  try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>\n
 
 <script id="ns9090-final-route-bypass">
@@ -4033,7 +4073,7 @@ async function ns9090RenderBroad(section,originName,pv){
  pv.querySelector('.v18-manual-save').onclick=async()=>{
   const a=getCustom(section); if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');
   const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias||'',pageId:'',conceptMode:true,countryContext:true,countryVerified:true,finalRouteVerified:true};
-  try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}
+  try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
 }
@@ -4042,7 +4082,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(ns9090IsBroad(section,originName)) return ns9090RenderBroad(section,originName,pv);
  return ns9090_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4100,7 +4140,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)) snap.photo=await ns9091ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4153,7 +4193,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9092ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4217,7 +4257,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9093CultureScenePhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4274,13 +4314,13 @@ async function ns9094ShowArtwork(section,name,pv,originName){
  if(!x.photo){pv.innerHTML='<div class="preview-card"><b>작품 자체는 확인했지만 작품 이미지를 찾지 못했습니다.</b><p>다른 관련 사진으로 대신하지 않습니다.</p><button class="rep-close-v5">닫기</button></div>';pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(x.desc)}</p><div class="v3-photo-choices"><img src="${esc(x.photo)}" alt="${esc(originName)}"></div><div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(x.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:x.desc||'',emoji:'⭐',source:'manual',photoVerified:true,photoRemote:x.photo,entityId:String(x.entityId||''),entityTitle:String(x.title||originName),searchAlias:String(x.title||''),pageId:String(x.pageId||'')};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,x.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(x.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:x.desc||'',emoji:'⭐',source:'manual',photoVerified:true,photoRemote:x.photo,entityId:String(x.entityId||''),entityTitle:String(x.title||originName),searchAlias:String(x.title||''),pageId:String(x.pageId||'')};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,x.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 }
 v22ShowAssistResults=async function(section,name,pv,originName){
  if(String(section)==='art') return ns9094ShowArtwork(section,name,pv,originName);
  return ns9094_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4377,7 +4417,7 @@ async function ns9095ExpandedArtworkDiscovery(originName){
 }
 // Replace only the discovery function used by the NS90.94 artwork adapter.
 ns9094ArtworkDiscovery=ns9095ExpandedArtworkDiscovery;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4444,7 +4484,7 @@ ns9094ArtworkDiscovery=async function(originName){
  const x=await ns9096Timeout(ns9097_prev_artwork_discovery(originName),18000,null);
  return await ns9097VerifyArtworkResult(originName,x);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4497,7 +4537,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }
  return kept;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 <script id="ns9099-durable-research-memory">
@@ -4540,7 +4580,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }catch(_){ }
  return await ns9099PrevDelete(section,itemId);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4620,7 +4660,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob) && !e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4702,7 +4742,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4794,7 +4834,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
@@ -4888,12 +4928,12 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns90103ArtworkEntityOK(e,blob))return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 
 <script id="ns90105-success-freeze-series-fallback">
-// ===== NS90.105 SUCCESS FREEZE + SERIES FALLBACK =====
+// ===== NS90.106 STABLE CARD STORAGE =====
 // Base is NS90.103. Existing resolver always runs first and wins unchanged.
 // Only a true failure reaches these generic fallbacks. No country/title exception table.
 const ns90105_prev_artwork_discovery=ns9094ArtworkDiscovery;
@@ -4969,7 +5009,7 @@ ns9094ArtworkDiscovery=async function(originName){
  // 3) Only then: generic numbered-series fallback.
  return await ns90105SeriesFallback(originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.105 SUCCESS FREEZE + SERIES FALLBACK · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.106 STABLE CARD STORAGE · ONE MASTER';
 </script>
 
 </body></html>
