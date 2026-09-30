@@ -6010,6 +6010,78 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  setTimeout(sync134,100); setTimeout(sync134,1000);
 })();
 </script>
+
+
+<!-- NS90.137: full representative research test harness. Search/resolver functions are NOT replaced. -->
+<style id="ns90137-style">
+#ns90137TestBox{position:fixed;left:14px;bottom:14px;z-index:99998;max-width:min(720px,calc(100vw - 28px));background:#fff;border:2px solid #6d4bd1;border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.45}
+#ns90137TestBox button{font:inherit;font-weight:800;border:1px solid #b8a7ef;background:#f4efff;border-radius:12px;padding:8px 12px;margin:4px 4px 0 0}
+#ns90137TestBox .bar{height:8px;background:#eee;border-radius:8px;overflow:hidden;margin:8px 0}.ns90137fill{height:100%;width:0;background:#7b61d1}
+#ns90137TestBox .small{font-size:12px;color:#555}.ns90137ok{color:#5b35b5;font-weight:800}.ns90137fail{color:#a33;font-weight:800}
+</style>
+<script id="ns90137-full-representative-research-test">
+(()=>{
+ const V='MASTER V28 · NS90.137 CLEAN START FULL RESEARCH TEST · SEARCH LOCKED · ONE MASTER';
+ const COUNTRIES=['ES','JP','US'];
+ const SECTIONS=['food','fruit','animals','places','culture','singers','athletes','people','art'];
+ const FLAG='magic_ns90137_run_after_refresh';
+ const RESULT='magic_ns90137_last_result';
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ function norm(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').trim().toLowerCase()}}
+ function namesFor(c,s){const old=COUNTRY;let out=[];try{COUNTRY=c;out=parseRepNames(repTextFor(s),s).map(n=>v28RepresentativeName(s,n)).filter(Boolean)}catch(_){}finally{COUNTRY=old}return [...new Map(out.map(n=>[norm(n),n])).values()]}
+ function isRepresentative(c,s,n){const z=norm(n);return namesFor(c,s).some(x=>norm(x)===z)}
+ async function clearAllCards(){
+   const old=COUNTRY;
+   try{
+    for(const c of COUNTRIES){COUNTRY=c;
+     for(const s of SECTIONS){
+      try{await cardDBPut(c,s,[])}catch(_){}
+      try{CARD_MEM.set(cardStoreKey(c,s),[])}catch(_){}
+      try{localStorage.removeItem(`${DATA_NS}custom_${c}_${s}`)}catch(_){}
+     }
+    }
+   }finally{COUNTRY=old}
+ }
+ function clearResearchState(){
+   const rm=[];
+   try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(
+     k.startsWith('magic_ready_9053_')||k.startsWith('magic_v28_entity_')||k.startsWith('magic_v16_entity_')||k.startsWith('magic_v15_entity_')||k.startsWith('magic_v14_entity_')||k.startsWith('magic_v13_entity_')||
+     k.startsWith('magic_ns9099_research_ES|')||k.startsWith('magic_ns9099_research_JP|')||k.startsWith('magic_ns9099_research_US|')
+   )rm.push(k)}}catch(_){}
+   rm.forEach(k=>{try{localStorage.removeItem(k)}catch(_){}});
+   try{repAvailabilityCache.clear()}catch(_){};try{V16_SEARCH_STATE.clear()}catch(_){};
+ }
+ function box(){let b=document.getElementById('ns90137TestBox');if(b)return b;b=document.createElement('div');b.id='ns90137TestBox';b.innerHTML=`<b>🧪 NS90.137 전체 대표이름 재검색 시험</b><div class="small">스페인·일본·미국의 저장된 모든 카드(대표·비대표·직접추가)와 검색기억을 초기화한 뒤, 대표이름 목록만 남겨 새로고침 후 기존 공통 검색엔진으로 전수검색합니다. 검색 로직은 변경하지 않습니다.</div><div class="bar"><div class="ns90137fill"></div></div><div class="ns90137msg">시험 준비됨</div><button class="ns90137start">모든 카드 삭제 → 새로고침 → 전체검색</button><button class="ns90137hide">창 닫기</button>`;document.body.appendChild(b);b.querySelector('.ns90137hide').onclick=()=>b.remove();b.querySelector('.ns90137start').onclick=prepare;return b}
+ function msg(t,p){const b=box();b.querySelector('.ns90137msg').innerHTML=t;if(p!=null)b.querySelector('.ns90137fill').style.width=Math.max(0,Math.min(100,p))+'%'}
+ async function prepare(){if(!confirm('스페인·일본·미국의 저장된 모든 카드(대표·비대표·직접추가)와 재검색용 기억을 지우고 완전히 새로 시작할까요?\n\n대표이름 목록은 그대로 유지하며 검색 로직은 변경하지 않습니다.'))return;msg('모든 카드를 정리하고 있습니다…',2);await clearAllCards();clearResearchState();try{localStorage.setItem(FLAG,'1')}catch(_){};location.reload()}
+ async function run(){
+   let jobs=[];for(const c of COUNTRIES)for(const s of SECTIONS)for(const n of namesFor(c,s))jobs.push({c,s,n});
+   const old=COUNTRY, results=[];msg(`전체 ${jobs.length}개 대표이름을 새로 검색합니다…`,3);
+   try{
+    for(let i=0;i<jobs.length;i++){
+      const j=jobs[i];COUNTRY=j.c;let verified=null,shown=j.n;
+      try{
+        let choice={display:j.n};try{choice=await v24ResolveRepresentative(j.s,j.n)}catch(_){}
+        shown=choice?.display||j.n;
+        try{repAvailabilityCache.delete(v12Request(j.s,shown).key)}catch(_){}
+        const r=await precheckRepresentative(j.s,shown);verified=r?.ok?r.verified:null;
+        if(verified?.desc){try{ns9053SaveReady(v12Request(j.s,shown),verified)}catch(_){}}
+      }catch(e){console.warn('[NS90.137 test]',j,e)}
+      results.push({...j,shown,ok:!!verified?.desc});
+      msg(`${j.c} · ${j.s} · ${j.n}<br><span class="small">${i+1} / ${jobs.length}</span>`,Math.round((i+1)*100/jobs.length));
+      await new Promise(r=>setTimeout(r,90));
+    }
+   }finally{COUNTRY=old}
+   try{localStorage.removeItem(FLAG);localStorage.setItem(RESULT,JSON.stringify({at:Date.now(),results}))}catch(_){}
+   const bad=results.filter(x=>!x.ok), expectedOnly=bad.length===1&&bad[0].c==='JP'&&norm(bad[0].n)===norm('미카에리 비진즈');
+   const good=results.length-bad.length;
+   msg(`<span class="ns90137ok">검색 가능 ${good}/${results.length}</span> · <span class="ns90137fail">미완료 ${bad.length}</span><br>${bad.length?'미완료: '+bad.map(x=>`${x.c}/${x.s}/${x.n}`).join(' · '):'모든 대표이름 검색 완료'}${expectedOnly?'<br><b>예상대로 일본 「미카에리 비진즈」만 남았습니다.</b>':''}`,100);
+   try{openCountry(old)}catch(_){}
+ }
+ sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1200);
+ setTimeout(()=>{box();try{if(localStorage.getItem(FLAG)==='1')run()}catch(_){}},700);
+})();
+</script>
 </body></html>
 
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
@@ -6174,5 +6246,14 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  // Data maintenance only: no resolver/search/candidate function is replaced or patched.
  sync(); setTimeout(sync,0); setTimeout(sync,250); setTimeout(sync,1200);
  setTimeout(()=>cleanup().then(sync),350);
+})();
+</script>
+
+<!-- NS90.137 final visible version sync; no search logic changes. -->
+<script id="ns90137-final-version-sync">
+(()=>{
+ const V='MASTER V28 · NS90.137 CLEAN START FULL RESEARCH TEST · SEARCH LOCKED · ONE MASTER';
+ function sync137(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ sync137(); setTimeout(sync137,0); setTimeout(sync137,300); setTimeout(sync137,1500); setTimeout(sync137,3500);
 })();
 </script>
