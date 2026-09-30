@@ -5789,4 +5789,79 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90118_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90118_VERSION;
 </script>
 
+
+<script id="ns90119-candidate-pipeline-bridge">
+// ===== NS90.119 CANDIDATE PIPELINE BRIDGE =====
+// Collect once, retain every candidate, then evaluate the same retained set.
+// This prevents a good observer candidate from disappearing before the evidence resolver.
+const NS90119_VERSION='MASTER V28 · NS90.119 CANDIDATE PIPELINE BRIDGE · ONE MASTER';
+const ns90119_frozen_show=ns90118_base_show;
+async function ns90119Collect(origin){
+ const deadline=Date.now()+15000,seeds=[];const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
+ add(origin);try{ns90112AliasSeeds(origin).forEach(add)}catch(_){}try{ns90108Seeds(origin).slice(0,10).forEach(add)}catch(_){}
+ const hits=[],seen=new Set();
+ const keep=(x,seed,via)=>{if(!x?.id)return;const k=x.id+'|'+(x.title||'');if(seen.has(k))return;seen.add(k);hits.push({...x,seed,via})};
+ for(const seed of seeds.slice(0,10)){
+  for(const lang of ['ko','ja','en','zh']){
+   if(Date.now()>deadline||hits.length>=48)break;
+   // Independent short requests: one failed endpoint must never erase the other result.
+   try{for(const x of (await ns90111WdHits(seed,lang)).slice(0,6))keep(x,seed,'Wikidata '+lang)}catch(_){}
+   try{for(const x of (await ns90111WikiHits(seed,lang)).slice(0,6))keep(x,seed,'Wikipedia '+lang)}catch(_){}
+  }
+ }
+ const rows=[];
+ for(const h of hits.slice(0,42)){
+  if(Date.now()>deadline)break;
+  let e=null;try{e=await ns90111Entity(h.id)}catch(_){}
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed],blob=vals.filter(Boolean).join(' ');
+  let identity=0;for(const seed of seeds)try{identity=Math.max(identity,ns9094IdentityScore(seed,vals))}catch(_){}
+  let ev={hits:0,ratio:0};try{ev=ns90115Evidence(origin,vals)}catch(_){}
+  const work=e?ns90118WorkEvidence(e,blob):0;
+  const bad=(()=>{try{return ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){return false}})();
+  const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad),hasImg=!!e?.claims?.P18;
+  rows.push({h,e,vals,blob,identity,ev,work,good,hasImg});
+ }
+ return rows;
+}
+async function ns90119Resolve(origin,rows){
+ let best=null;
+ for(const r of rows){
+  if(!r.e||!r.good||!r.hasImg)continue;
+  const route=(r.h.rank<=2?3:0)+(r.h.seed===origin?2:1)+(r.ev.hits?2:0)+(r.identity>=24?2:0);
+  if(r.work<7||route<4)continue;
+  let card=null;try{card=await ns90111Hydrate(origin,r.h,r.e)}catch(_){}
+  if(!card?.photo)continue;
+  const score=r.work*10+route*5+Math.min(r.identity,45)+(r.ev.hits||0)*5;
+  if(!best||score>best.score)best={...card,score,finalEntityVerified:true,finalArtworkVerified:true,evidenceResolved:true,pipelineBridge:true};
+ }
+ return best;
+}
+function ns90119ObserveRows(origin,rows){
+ return rows.map(r=>{
+  const reasons=[];
+  if(!r.e)reasons.push('엔티티 상세 없음');
+  if(r.e&&!r.good)reasons.push('작품 엔티티 조건 부족 또는 비작품 결과');
+  if(r.identity<17&&!(r.ev.hits>=1&&r.ev.ratio>=0.25))reasons.push('동일 작품 근거 부족');
+  if(!r.hasImg)reasons.push('대표 사진 없음');
+  return {label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ko?.value||r.e?.descriptions?.ja?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:r.identity,hits:r.ev.hits||0,hasImg:r.hasImg,reasons:reasons.length?reasons:['검증 가능 후보']};
+ }).sort((a,b)=>(b.identity+b.hits*12+(b.hasImg?5:0))-(a.identity+a.hits*12+(a.hasImg?5:0))).slice(0,6);
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ // Frozen path first: do not change already-successful behavior.
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90119_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,22000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/찾지 못했습니다|건너뛰었습니다|no-entity/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🔗 <b>찾은 후보를 그대로 보존한 채 작품 증거를 확인하고 있어요…</b><p>후보 수집과 작품 판정을 하나의 흐름으로 연결합니다.</p></div>';
+ const rows=await ns90119Collect(originName);
+ const resolved=await ns90119Resolve(originName,rows);
+ if(resolved)return openRepresentativePreview(section,name,resolved,pv);
+ ns90117Render(originName,ns90119ObserveRows(originName,rows),pv);
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90119_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90119_VERSION;
+</script>
+
 </body></html>
