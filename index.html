@@ -6157,4 +6157,69 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90123_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90123_VERSION;
 </script>
 
+
+<script id="ns90124-reverse-original-title-discovery">
+// ===== NS90.124 REVERSE ORIGINAL-TITLE DISCOVERY =====
+// Failure-only bridge. Freeze every earlier successful path.
+// When direct title recovery fails, use phonetic/romanized fragments + artwork context,
+// then reverse-resolve only verified artwork entities back to their original-language title.
+const NS90124_VERSION='MASTER V28 · NS90.124 REVERSE ORIGINAL-TITLE DISCOVERY · ONE MASTER';
+const ns90124_frozen_show=ns9094ShowArtwork;
+function ns90124Roman(text){
+ const map={'미':'mi','카':'ka','에':'e','리':'ri','비':'bi','진':'jin','즈':'zu','가':'ga','나':'na','와':'wa','해':'hae','변':'byeon','의':'ui','높':'nop','은':'eun','파':'pa','도':'do','아':'a','래':'rae'};
+ return String(text||'').split(/\s+/).map(w=>[...w].map(c=>map[c]||'').join('')).filter(Boolean).join(' ').trim();
+}
+async function ns90124Search(term,lang){
+ const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(term)+'&gsrnamespace=0&gsrlimit=12&prop=pageprops|description&format=json&origin=*';
+ const j=await ns90120FetchJson(u,3500), out=[];
+ for(const pg of Object.values(j?.query?.pages||{})){
+  const id=pg?.pageprops?.wikibase_item||''; if(id)out.push({id,title:pg.title||'',desc:pg.description||'',lang,rank:out.length,seed:term,via:'역추적 작품명 검색'});
+ }
+ return out;
+}
+async function ns90124Reverse(origin){
+ const kata=ns90122HangulReading(origin), hira=ns90122Hiragana(kata), roman=ns90124Roman(origin);
+ const terms=[]; const add=x=>{x=String(x||'').trim();if(x&&!terms.includes(x))terms.push(x)};
+ add(roman+' painting'); add(roman+' artwork'); add(roman+' ukiyo-e'); add(hira+' 美人画'); add(hira+' 絵画'); add(kata+' 美術作品');
+ // Also search significant phonetic chunks independently; this is generic and avoids one bad full transliteration blocking recovery.
+ const parts=String(origin||'').split(/\s+/).filter(x=>x.length>=3); for(const x of parts){const r=ns90124Roman(x);if(r){add(r+' Japanese painting');add(r+' ukiyo-e')}}
+ const seen=new Set(), hits=[];
+ for(const q of terms.slice(0,10)){
+  for(const lang of ['en','ja']){
+   let hs=[];try{hs=await ns90124Search(q,lang)}catch(_){}
+   for(const h of hs){if(h.id&&!seen.has(h.id)){seen.add(h.id);hits.push(h)}}
+  }
+  if(hits.length>=30)break;
+ }
+ const rows=[];
+ for(const h of hits.slice(0,28)){
+  let e=null;try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){}
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed], blob=vals.filter(Boolean).join(' ');
+  let bad=ns90122RejectText(blob);try{bad=bad||ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+  const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad), hasImg=!!e?.claims?.P18, work=e?ns90118WorkEvidence(e,blob):0;
+  let phon=0; const low=blob.toLowerCase(), rr=roman.toLowerCase().split(/\s+/).filter(Boolean); for(const t of rr)if(t.length>=3&&low.includes(t))phon++;
+  const row={h,e,vals,blob,identity:phon*12,ev:{hits:phon,ratio:rr.length?phon/rr.length:0},work,good,hasImg}; rows.push(row);
+  if(!good||work<6||phon<1)continue;
+  let card=null;try{card=await ns90120Card(origin,row)}catch(_){}
+  if(card?.photo){card.reverseOriginalTitleRecovered=true;return {card,rows}}
+ }
+ return {card:null,rows};
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90124_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,32000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|확인하지 못했습니다|건너뛰었습니다|no-entity|작품 엔티티 조건 부족|최종 작품 증거 부족/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🔁 <b>작품 주변정보에서 원제목을 역추적하고 있어요…</b><p>발음·회화·우키요에 문맥을 함께 확인하고, 작품으로 검증된 결과만 카드 단계로 넘깁니다.</p></div>';
+ const result=await Promise.race([ns90124Reverse(originName),new Promise(r=>setTimeout(()=>r({card:null,rows:[]}),22000))]);
+ if(result.card)return openRepresentativePreview(section,name,result.card,pv);
+ if(result.rows?.length)return ns90117Render(originName,result.rows.map(r=>({label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ja?.value||r.e?.descriptions?.en?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:r.identity||0,hits:r.ev?.hits||0,hasImg:r.hasImg,reasons:[r.good?(r.ev?.hits?'작품 후보이나 최종 동일성 증거 부족':'작품이지만 발음 연결 근거 부족'):'작품 엔티티 조건 부족']})),pv);
+ pv.innerHTML='<div class="preview-card"><b>역추적 검색에서도 같은 작품을 확인하지 못했습니다.</b><p>기존 성공 카드와 저장 데이터는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90124_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90124_VERSION;
+</script>
+
 </body></html>
