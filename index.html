@@ -5994,6 +5994,22 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
+
+<!-- NS90.134: version sync + Spain person-card cleanup layer. Locked core unchanged. -->
+<script>
+(()=>{
+ const NS134_LABEL='MASTER V28 · NS90.134 VERSION SYNC + SPAIN PERSON CARD CLEANUP · ONE MASTER';
+ function sync134(){
+   for(const el of document.querySelectorAll('body *')){
+     if(el.children.length===0 && /MASTER V28\s*[·•]\s*NS90\.131 DURABLE COMMON RESEARCH MEMORY\s*[·•]\s*ONE MASTER/i.test(el.textContent||'')) el.textContent=NS134_LABEL;
+   }
+ }
+ const mo=new MutationObserver(sync134);
+ document.addEventListener('DOMContentLoaded',()=>{sync134();mo.observe(document.body,{subtree:true,childList:true,characterData:true});});
+ window.addEventListener('load',sync134);
+ setTimeout(sync134,100); setTimeout(sync134,1000);
+})();
+</script>
 </body></html>
 
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
@@ -6067,5 +6083,40 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  };
  try{document.getElementById('ns9015Banner').textContent='✅ '+V}catch(_){ }
  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
+})();
+</script>
+
+<!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
+<script id="ns90134-version-sync-spain-card-tidy">
+(()=>{
+ const V='MASTER V28 · NS90.134 VERSION SYNC + SPAIN CARD TIDY · LOCKED CORE · ONE MASTER';
+ const ES_ORDER={
+  singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
+  athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
+  people:['이사벨 1세','페르난도 2세','카를로스 1세','펠리페 2세','미겔 데 세르반테스','후안 세바스티안 엘카노','산티아고 라몬 이 카할']
+ };
+ function norm(s){try{return normalizeItemName(String(s||''))}catch(_){return String(s||'').trim().toLowerCase()}}
+ function tidy(section){
+   if(String(COUNTRY||'')!=='ES'||!ES_ORDER[section])return;
+   const el=document.getElementById(section+'List'); if(!el)return;
+   const order=new Map(ES_ORDER[section].map((n,i)=>[norm(n),i]));
+   const cards=[...el.querySelectorAll(':scope > article.item')];
+   cards.sort((a,b)=>{
+     const an=norm(a.querySelector('h3')?.textContent), bn=norm(b.querySelector('h3')?.textContent);
+     const ai=order.has(an)?order.get(an):999, bi=order.has(bn)?order.get(bn):999;
+     return ai-bi;
+   });
+   cards.forEach(c=>el.appendChild(c));
+ }
+ // Presentation-only tidy: no card deletion, rewrite, cache mutation, or search-engine change.
+ const prevRender=renderSection;
+ renderSection=async function(section){const r=await prevRender.apply(this,arguments);try{tidy(section)}catch(_){}return r};
+ ['singers','athletes','people'].forEach(s=>{try{tidy(s)}catch(_){}});
+ // Final banner/version assignment must run after the older frozen layers.
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ sync(); setTimeout(sync,0); setTimeout(sync,250);
 })();
 </script>
