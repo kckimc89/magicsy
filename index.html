@@ -5870,7 +5870,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90119_VERSION
 // Failure-only bridge: keep the NS90.119 candidate set, rehydrate promising artwork
 // candidates with a slower detail retry, recover an image from the verified entity/page,
 // and snapshot fetchable images as data URLs for more durable saved cards.
-const NS90120_VERSION='MASTER V28 · NS90.120 ENTITY DETAIL + IMAGE BRIDGE · ONE MASTER';
+const NS90120_VERSION='MASTER V28 · NS90.121 PHONETIC TITLE DISCOVERY · ONE MASTER';
 const ns90120_frozen_show=ns9094ShowArtwork;
 async function ns90120FetchJson(url,ms=4200){
  const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
@@ -5949,4 +5949,77 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90120_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION;
 </script>
 
+
+<script id="ns90121-phonetic-title-discovery">
+// ===== NS90.121 PHONETIC TITLE DISCOVERY =====
+// Failure-only universal bridge for foreign titles written phonetically in Hangul.
+// It converts Hangul pronunciation to a rough Katakana search seed, then feeds any
+// verified artwork entity into the already-successful NS90.120 detail+image bridge.
+const NS90121_VERSION='MASTER V28 · NS90.121 PHONETIC TITLE DISCOVERY · ONE MASTER';
+const ns90121_frozen_show=ns9094ShowArtwork;
+function ns90121HangulToKana(text){
+ const L=['','k','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+ const V=['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+ const T=['','k','k','k','n','n','n','t','l','k','m','l','l','p','l','m','p','p','t','t','ng','t','t','k','t','p','h'];
+ let rom='';
+ for(const ch of String(text||'')){
+  const c=ch.charCodeAt(0);
+  if(c>=0xAC00&&c<=0xD7A3){const n=c-0xAC00,li=Math.floor(n/588),vi=Math.floor((n%588)/28),ti=n%28;rom+=L[li]+V[vi]+T[ti]+' ';}
+  else rom+=ch+' ';
+ }
+ rom=rom.toLowerCase().replace(/\s+/g,' ').trim();
+ const pairs=[['kya','キャ'],['kyu','キュ'],['kyo','キョ'],['gya','ギャ'],['gyu','ギュ'],['gyo','ギョ'],['sha','シャ'],['shu','シュ'],['sho','ショ'],['cha','チャ'],['chu','チュ'],['cho','チョ'],['ja','ジャ'],['ju','ジュ'],['jo','ジョ'],['rya','リャ'],['ryu','リュ'],['ryo','リョ'],['nya','ニャ'],['nyu','ニュ'],['nyo','ニョ'],['hya','ヒャ'],['hyu','ヒュ'],['hyo','ヒョ'],['mya','ミャ'],['myu','ミュ'],['myo','ミョ'],['bya','ビャ'],['byu','ビュ'],['byo','ビョ'],['pya','ピャ'],['pyu','ピュ'],['pyo','ピョ'],['shi','シ'],['chi','チ'],['tsu','ツ'],['fu','フ'],['ji','ジ'],['zu','ズ'],['ka','カ'],['ki','キ'],['ku','ク'],['ke','ケ'],['ko','コ'],['ga','ガ'],['gi','ギ'],['gu','グ'],['ge','ゲ'],['go','ゴ'],['sa','サ'],['su','ス'],['se','セ'],['so','ソ'],['za','ザ'],['ze','ゼ'],['zo','ゾ'],['ta','タ'],['te','テ'],['to','ト'],['da','ダ'],['de','デ'],['do','ド'],['na','ナ'],['ni','ニ'],['nu','ヌ'],['ne','ネ'],['no','ノ'],['ha','ハ'],['hi','ヒ'],['he','ヘ'],['ho','ホ'],['ba','バ'],['bi','ビ'],['bu','ブ'],['be','ベ'],['bo','ボ'],['pa','パ'],['pi','ピ'],['pu','プ'],['pe','ペ'],['po','ポ'],['ma','マ'],['mi','ミ'],['mu','ム'],['me','メ'],['mo','モ'],['ra','ラ'],['ri','リ'],['ru','ル'],['re','レ'],['ro','ロ'],['ya','ヤ'],['yu','ユ'],['yo','ヨ'],['wa','ワ'],['wo','ヲ'],['a','ア'],['i','イ'],['u','ウ'],['e','エ'],['o','オ'],['n','ン']];
+ let out=[];
+ for(let syl of rom.split(' ')){
+  if(!syl){continue} let z=syl;
+  // Korean final n/ng is commonly represented by ン in Japanese title readings.
+  z=z.replace(/ng$/,'n');
+  let k='';
+  while(z){let hit=false;for(const [r,j] of pairs){if(z.startsWith(r)){k+=j;z=z.slice(r.length);hit=true;break}}if(!hit){z=z.slice(1)}}
+  if(k)out.push(k);
+ }
+ return out.join('');
+}
+async function ns90121Hits(origin){
+ const kana=ns90121HangulToKana(origin); if(!kana)return[];
+ const seeds=[kana,kana+' 図',kana+' 絵',kana+' 美人',kana+' 作品'];
+ const seen=new Set(),out=[];
+ for(const seed of seeds){
+  let pair=[];try{pair=(await Promise.all([ns90111WdHits(seed,'ja'),ns90111WikiHits(seed,'ja')])).flat()}catch(_){}
+  for(const h of pair){if(h?.id&&!seen.has(h.id)){seen.add(h.id);out.push({...h,seed,via:'일본어 발음 검색'})}}
+  if(out.length>=24)break;
+ }
+ return out;
+}
+async function ns90121Resolve(origin){
+ const hits=await ns90121Hits(origin), rows=[];
+ for(const h of hits.slice(0,24)){
+  let e=null;try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){}
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed],blob=vals.filter(Boolean).join(' ');
+  let bad=false;try{bad=ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+  const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad),hasImg=!!e?.claims?.P18;
+  let work=e?ns90118WorkEvidence(e,blob):0;
+  rows.push({h,e,vals,blob,identity:0,ev:{hits:0,ratio:0},work,good,hasImg});
+  if(!good||work<6)continue;
+  let card=null;try{card=await ns90120Card(origin,rows[rows.length-1])}catch(_){}
+  if(card?.photo)return {card,rows,kana:ns90121HangulToKana(origin)};
+ }
+ return {card:null,rows,kana:ns90121HangulToKana(origin)};
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90121_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,27000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|건너뛰었습니다|no-entity/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🔤 <b>한글로 적힌 외국 작품명의 발음을 원어 검색으로 연결하고 있어요…</b><p>기존 성공 카드와 검색 경로는 변경하지 않습니다.</p></div>';
+ const result=await Promise.race([ns90121Resolve(originName),new Promise(r=>setTimeout(()=>r({card:null,rows:[],kana:''}),15000))]);
+ if(result.card)return openRepresentativePreview(section,name,result.card,pv);
+ if(result.rows?.length)return ns90117Render(originName,result.rows.map(r=>({label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ja?.value||r.e?.descriptions?.en?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:r.identity||0,hits:0,hasImg:r.hasImg,reasons:[r.good?'작품 후보이나 최종 증거 부족':'작품 엔티티 조건 부족']})),pv);
+ pv.innerHTML='<div class="preview-card"><b>원어 발음 검색에서도 같은 작품 후보를 찾지 못했습니다.</b><p>기존 성공 카드는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90121_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90121_VERSION;
+</script>
 </body></html>
