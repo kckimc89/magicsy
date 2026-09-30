@@ -5864,4 +5864,89 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90119_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90119_VERSION;
 </script>
 
+
+<script id="ns90120-entity-detail-image-bridge">
+// ===== NS90.120 ENTITY DETAIL + IMAGE BRIDGE =====
+// Failure-only bridge: keep the NS90.119 candidate set, rehydrate promising artwork
+// candidates with a slower detail retry, recover an image from the verified entity/page,
+// and snapshot fetchable images as data URLs for more durable saved cards.
+const NS90120_VERSION='MASTER V28 · NS90.120 ENTITY DETAIL + IMAGE BRIDGE · ONE MASTER';
+const ns90120_frozen_show=ns9094ShowArtwork;
+async function ns90120FetchJson(url,ms=4200){
+ const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
+ try{const r=await fetch(url,{signal:c.signal,cache:'no-store'});return r.ok?await r.json():null}catch(_){return null}finally{clearTimeout(t)}
+}
+async function ns90120Entity(id){
+ if(!id)return null;
+ const u='https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+encodeURIComponent(id)+'&props=labels|descriptions|claims|sitelinks&languages=ko|ja|en|zh&sitefilter=kowiki|jawiki|enwiki|zhwiki&format=json&origin=*';
+ const j=await ns90120FetchJson(u,4300);return j?.entities?.[id]||null;
+}
+async function ns90120PageImage(e){
+ for(const site of ['kowiki','jawiki','enwiki','zhwiki']){
+  const sl=e?.sitelinks?.[site];if(!sl?.title)continue;const lang=site.slice(0,2);
+  const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&prop=pageimages&piprop=original|thumbnail&pithumbsize=900&titles='+encodeURIComponent(sl.title)+'&format=json&origin=*';
+  const j=await ns90120FetchJson(u,3000),pg=Object.values(j?.query?.pages||{})[0];
+  const x=pg?.original?.source||pg?.thumbnail?.source||'';if(x)return x;
+ }
+ return '';
+}
+async function ns90120Snapshot(url){
+ if(!url||/^data:/.test(url))return url||'';
+ try{
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),4500),r=await fetch(url,{signal:c.signal,mode:'cors'});clearTimeout(t);
+  if(!r.ok)return url;const b=await r.blob();if(!/^image\//.test(b.type)||b.size>3500000)return url;
+  return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result||url);fr.onerror=()=>res(url);fr.readAsDataURL(b)});
+ }catch(_){return url}
+}
+async function ns90120Card(origin,r){
+ let e=r.e;
+ if(!e)try{e=await ns90120Entity(r.h.id)}catch(_){}
+ if(!e)return null;
+ const vals=ns90111Vals(e,r.h),blob=vals.join(' ');
+ let bad=false;try{bad=ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+ if(bad||!ns90111GoodEntity(e,blob))return null;
+ let ev={hits:0,ratio:0};try{ev=ns90115Evidence(origin,vals)}catch(_){}
+ let identity=0;try{identity=ns9094IdentityScore(origin,vals)}catch(_){}
+ const work=ns90118WorkEvidence(e,blob);
+ // Require artwork evidence plus either title evidence or a strong artwork description route.
+ if(work<6 || (identity<10 && !(ev.hits>=1&&ev.ratio>=0.20)))return null;
+ let photo=ns9094P18(e)||'';
+ if(!photo)photo=await ns90120PageImage(e);
+ if(!photo){
+  const title=e?.labels?.ko?.value||e?.labels?.ja?.value||e?.labels?.en?.value||r.h.title||origin;
+  try{const im=await Promise.race([ns9094FindPhoto(title,'artworks'),new Promise(res=>setTimeout(()=>res(null),2600))]);photo=typeof im==='string'?im:(im?.photo||im?.url||'')}catch(_){}
+ }
+ if(!photo)return null;
+ const title=e?.labels?.ko?.value||e?.labels?.ja?.value||e?.labels?.en?.value||r.h.title||origin;
+ const base=e?.descriptions?.ko?.value||e?.descriptions?.ja?.value||e?.descriptions?.en?.value||r.h.desc||'';
+ let extract='';try{extract=await ns90113WikiExtract(e)}catch(_){}
+ photo=await ns90120Snapshot(photo);
+ return {title,desc:ns90113Desc(origin,e,base,extract),photo,photos:[photo],photoSource:'verified-entity-bridge',entityId:r.h.id,finalEntityVerified:true,finalArtworkVerified:true,qualityGateVerified:true,entityDetailBridge:true};
+}
+async function ns90120Resolve(origin,rows){
+ // Prioritize candidates whose label/description already carries artwork evidence.
+ const ranked=[...rows].sort((a,b)=>((b.identity||0)+(b.ev?.hits||0)*18+(b.work||0)*7)-((a.identity||0)+(a.ev?.hits||0)*18+(a.work||0)*7));
+ for(const r of ranked.slice(0,10)){
+  try{const card=await ns90120Card(origin,r);if(card)return card}catch(_){}
+ }
+ return null;
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ // First run NS90.119 unchanged. If it succeeds, do not interfere.
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90120_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,26000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|건너뛰었습니다|no-entity/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🖼️ <b>확인된 작품 후보의 상세정보와 대표 사진을 다시 연결하고 있어요…</b><p>기존 성공 카드는 변경하지 않습니다.</p></div>';
+ const rows=await ns90119Collect(originName);
+ const card=await ns90120Resolve(originName,rows);
+ if(card)return openRepresentativePreview(section,name,card,pv);
+ ns90117Render(originName,ns90119ObserveRows(originName,rows),pv);
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90120_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION;
+</script>
+
 </body></html>
