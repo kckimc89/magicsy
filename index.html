@@ -119,7 +119,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1702,7 +1702,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2168,7 +2168,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER',
+ version:'MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2939,7 +2939,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3039,7 +3039,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 <script id="ns9071-entity-first-same-identity-gate">
@@ -3101,7 +3101,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3160,7 +3160,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3240,7 +3240,7 @@ renderRepresentativeCardButtonsV5=async function(section){
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3309,7 +3309,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3366,7 +3366,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3444,7 +3444,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3501,7 +3501,7 @@ async function ns9080InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9080InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3559,7 +3559,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  rows.map((r,i)=>`<div style="padding:8px 0;border-top:1px solid #d9dee7"><b>${i+1}. ${esc(r.title)}</b> ${r.qid?`<span>(${esc(r.qid)})</span>`:''}<br><span>검색: ${esc(r.query)} · ${esc(r.lang)} · 점수 ${r.score==null?'—':Math.round(r.score)} · subject ${r.subject??'—'} · cat ${r.cat??'—'} · type ${r.type??'—'} · country ${r.country??'—'} · penalty ${r.penalty??'—'} · role +${r.roleBonus??0}/-${r.rolePenalty??0}</span><br><b>${esc(r.reason||'')}</b><br><span>${esc(String(r.desc||r.snippet||'').slice(0,180))}</span></div>`).join('');
  pv.appendChild(box);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3622,7 +3622,7 @@ async function ns9082InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9082InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3687,7 +3687,7 @@ async function ns9083InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9083InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 <script id="ns9084-verified-winner-to-card">
@@ -3726,7 +3726,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3793,7 +3793,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -3862,7 +3862,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 <script id="ns9087-concept-identity-card">
@@ -3922,7 +3922,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns9055SetCustomDurable(section,[...a,item])}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 <script id="ns9088-country-context-concept-card">
@@ -3978,7 +3978,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
 };
 // Candidate trace is development-only; keep it out of the child-facing UI.
 (function(){const st=document.createElement('style');st.textContent='details:has(summary[style*="font-weight:800"]){display:none!important}';document.head.appendChild(st)})();
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4010,7 +4010,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>\n
 
 <script id="ns9090-final-route-bypass">
@@ -4042,7 +4042,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(ns9090IsBroad(section,originName)) return ns9090RenderBroad(section,originName,pv);
  return ns9090_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4100,7 +4100,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)) snap.photo=await ns9091ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4153,7 +4153,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9092ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4217,7 +4217,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9093CultureScenePhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4280,7 +4280,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(String(section)==='art') return ns9094ShowArtwork(section,name,pv,originName);
  return ns9094_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4377,7 +4377,7 @@ async function ns9095ExpandedArtworkDiscovery(originName){
 }
 // Replace only the discovery function used by the NS90.94 artwork adapter.
 ns9094ArtworkDiscovery=ns9095ExpandedArtworkDiscovery;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4444,7 +4444,7 @@ ns9094ArtworkDiscovery=async function(originName){
  const x=await ns9096Timeout(ns9097_prev_artwork_discovery(originName),18000,null);
  return await ns9097VerifyArtworkResult(originName,x);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4497,7 +4497,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }
  return kept;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 <script id="ns9099-durable-research-memory">
@@ -4540,7 +4540,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }catch(_){ }
  return await ns9099PrevDelete(section,itemId);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4620,7 +4620,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob) && !e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4702,7 +4702,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 
@@ -4794,7 +4794,101 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
+</script>
+
+
+<script id="ns90103-universal-artwork-title-discovery">
+// ===== NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY =====
+// ONE MASTER. Runs only after every NS90.102-and-earlier artwork path fails.
+// Generic purpose: discover the real multilingual title of an artwork/series from the
+// representative label, then return that identity to the SAME common artwork pipeline.
+// No country/title exception table.
+const ns90103_prev_artwork_discovery=ns9094ArtworkDiscovery;
+function ns90103TitleSeeds(originName){
+ const raw=String(originName||'').trim(), out=[raw];
+ const p=ns90102ParseSeries(raw);
+ if(!p)return out;
+ const n=String(p.num), cjk=ns90101CjkNum(p.num), ko=ns90100NumKo(p.num);
+ const cores=[p.core];
+ // Both spaced and fused forms matter in CJK artwork titles.
+ for(const c of cores){
+   out.push(c+n+p.unit,c+' '+n+p.unit,c+cjk+p.unit,c+' '+cjk+p.unit,c+ko+p.unit,c+' '+ko+p.unit);
+   out.push(c+n+' series',c+' '+n+' series',c+n+' views',c+' '+n+' views',c+n+' stations',c+' '+n+' stations');
+ }
+ return [...new Set(out.filter(Boolean))];
+}
+async function ns90103ExpandSeeds(originName){
+ const base=ns90103TitleSeeds(originName), p=ns90102ParseSeries(originName), out=[...base];
+ if(!p)return out;
+ const core=await ns9096Timeout(ns90102ResolveCore(p.core),7000,null);
+ if(!core)return out;
+ const n=String(p.num), cjk=ns90101CjkNum(p.num), ko=ns90100NumKo(p.num);
+ for(const c of core.vals.filter(Boolean).slice(0,12)){
+   out.push(c+n+p.unit,c+' '+n+p.unit,c+cjk+p.unit,c+' '+cjk+p.unit,c+ko+p.unit,c+' '+ko+p.unit);
+   out.push(c+n+' series',c+' '+n+' series',c+n+' views',c+' '+n+' views',c+n+' stations',c+' '+n+' stations');
+   out.push(c+cjk+'次',c+' '+cjk+'次',c+cjk+'景',c+' '+cjk+'景',c+cjk+'図',c+' '+cjk+'図');
+ }
+ return [...new Set(out.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,90);
+}
+function ns90103ArtworkEntityOK(e,blob){
+ if(!e)return false;
+ if(ns9097BadArtworkText(blob)||ns9094RejectWords(blob))return false;
+ return !!(ns9097GoodArtworkText(blob)||e.claims?.P170||e.claims?.P31||e.claims?.P179);
+}
+async function ns90103Discover(originName){
+ const p=ns90102ParseSeries(originName); if(!p)return null;
+ const seeds=await ns90103ExpandSeeds(originName), hits=[], seen=new Set();
+ for(const seed of seeds){
+   for(const lang of ['ja','en','ko','zh']){
+     try{for(const h of await ns90101Search(seed,lang)){if(!seen.has(h.id)){seen.add(h.id);hits.push({...h,seed,lang})}}}catch(_){ }
+     try{for(const h of await ns9094WdSearch(seed,lang)){if(!seen.has(h.id)){seen.add(h.id);hits.push({id:h.id,title:h.label||'',rank:8,seed,lang})}}}catch(_){ }
+   }
+   if(hits.length>=90)break;
+ }
+ const core=await ns9096Timeout(ns90102ResolveCore(p.core),6500,null), coreVals=core?.vals||[p.core];
+ let best=null, deadline=Date.now()+19000;
+ for(const h of hits.slice(0,90)){
+   if(Date.now()>deadline)break;
+   const e=await ns9096Timeout(ns9094FullEntity(h.id),3200,null); if(!e)continue;
+   const labels=[h.title,h.seed,ns9094Val(e,'labels','ko'),ns9094Val(e,'labels','ja'),ns9094Val(e,'labels','en'),ns9094Val(e,'labels','zh'),ns9094Link(e,'ko'),ns9094Link(e,'ja'),ns9094Link(e,'en'),ns9094Link(e,'zh')].filter(Boolean);
+   const meta=[ns9094Val(e,'descriptions','ko'),ns9094Val(e,'descriptions','ja'),ns9094Val(e,'descriptions','en'),ns9094Val(e,'descriptions','zh')].filter(Boolean).join(' ');
+   const blob=labels.join(' ')+' '+meta;
+   if(!ns90103ArtworkEntityOK(e,blob))continue;
+   const coreScore=Math.max(...coreVals.map(v=>ns9094IdentityScore(v,labels)));
+   const nums=[String(p.num),ns90101CjkNum(p.num),ns90100NumKo(p.num)].filter(Boolean);
+   const numberScore=nums.some(t=>blob.includes(t))?42:0;
+   if(coreScore<20||!numberScore)continue;
+   let title=ns9094Link(e,'ko')||ns9094Val(e,'labels','ko')||ns9094Link(e,'ja')||ns9094Val(e,'labels','ja')||ns9094Link(e,'en')||ns9094Val(e,'labels','en')||h.title;
+   let desc='',photo=ns9094P18(e),pageId='';
+   for(const lang of ['ko','ja','en','zh']){
+     const wt=ns9094Link(e,lang); if(!wt)continue;
+     try{const sm=await ns9096Timeout(wikiSummaryByTitle(wt,lang),2800,null);if(sm){if(!desc&&sm.text)desc=sm.text;if(!photo&&sm.photo)photo=sm.photo;if(!pageId&&sm.pageid!=null)pageId=String(sm.pageid)}}catch(_){ }
+   }
+   // A series identity may legitimately have no lead image. Try image discovery using the
+   // verified multilingual title instead of rejecting the identity immediately.
+   if(!photo){
+     for(const q of [title,h.seed,...labels].filter(Boolean).slice(0,8)){
+       try{const im=await ns9096Timeout(ns9094FindPhoto(q,'artworks'),2600,null);if(im){photo=typeof im==='string'?im:(im.photo||im.url||'');if(photo)break}}catch(_){ }
+     }
+   }
+   if(!photo)continue;
+   if(!desc)desc=meta||originName+'에 관한 예술작품 연작입니다.';
+   const score=coreScore+numberScore+Math.max(0,24-(Number(h.rank)||0)*2)+(e.claims?.P170?20:0)+(ns9097GoodArtworkText(blob)?24:0)+18;
+   if(!best||score>best.score)best={score,title,desc,photo,entityId:h.id,pageId,recallVerified:true,multiscriptVerified:true,seriesVerified:true,titleDiscovered:true};
+ }
+ return best;
+}
+ns9094ArtworkDiscovery=async function(originName){
+ const old=await ns9096Timeout(ns90103_prev_artwork_discovery(originName),26000,null);
+ if(old)return old; // Freeze every established success.
+ const x=await ns90103Discover(originName); if(!x)return null;
+ const e=await ns9096Timeout(ns9094FullEntity(String(x.entityId||'')),4000,null); if(!e)return null;
+ const blob=[x.title,x.desc,ns9094Val(e,'descriptions','ko'),ns9094Val(e,'descriptions','ja'),ns9094Val(e,'descriptions','en')].join(' ');
+ if(!ns90103ArtworkEntityOK(e,blob))return null;
+ return x;
+};
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY · ONE MASTER';
 </script>
 
 </body></html>
