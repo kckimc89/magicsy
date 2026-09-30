@@ -5572,4 +5572,86 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90115_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90115_VERSION;
 </script>
 
+
+<script id="ns90116-universal-reverse-artwork-discovery">
+// ===== NS90.116 UNIVERSAL REVERSE ARTWORK DISCOVERY =====
+// Freeze NS90.115. Failure-only reverse discovery: representative title -> surrounding
+// artwork evidence (creator/collection/series/page) -> linked candidate entity -> SAME quality gate.
+// No country/title-specific exception table.
+const NS90116_VERSION='MASTER V28 · NS90.116 UNIVERSAL REVERSE ARTWORK DISCOVERY · ONE MASTER';
+const ns90116_prev_show=ns9094ShowArtwork;
+async function ns90116Timed(url,ms=1800){try{return await ns90111FetchJson(url,ms)}catch(_){return null}}
+async function ns90116WikiSearch(term,lang){
+ const q=encodeURIComponent('"'+String(term||'').trim()+'"');
+ const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&list=search&srnamespace=0&srlimit=8&srsearch='+q+'&format=json&origin=*';
+ const j=await ns90116Timed(u,1700); return (j?.query?.search||[]).map(x=>({title:x.title,snippet:String(x.snippet||'').replace(/<[^>]+>/g,' '),lang}));
+}
+async function ns90116PageLinks(title,lang){
+ const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&prop=links|pageprops&plnamespace=0&pllimit=40&redirects=1&titles='+encodeURIComponent(title)+'&format=json&origin=*';
+ const j=await ns90116Timed(u,1800), pg=Object.values(j?.query?.pages||{})[0]||{};
+ return {qid:pg?.pageprops?.wikibase_item||'',links:(pg.links||[]).map(x=>x.title)};
+}
+async function ns90116Reverse(origin){
+ const deadline=Date.now()+12500, seeds=[]; const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
+ ns90112AliasSeeds(origin).forEach(add); try{ns90108Seeds(origin).slice(0,6).forEach(add)}catch(_){ }
+ const pageHits=[];
+ for(const seed of seeds.slice(0,7))for(const lang of ['ja','ko','en']){
+  if(Date.now()>deadline)break;
+  for(const h of await ns90116WikiSearch(seed,lang))pageHits.push({...h,seed});
+  if(pageHits.length>=30)break;
+ }
+ const ids=new Map();
+ for(const h of pageHits.slice(0,30)){
+  if(Date.now()>deadline)break;
+  const ev=ns90115Evidence(origin,[h.title,h.snippet,h.seed]);
+  // The surrounding page must still carry title evidence; this prevents broad topic drift.
+  if(ev.hits<1&&ns9094IdentityScore(origin,[h.title,h.snippet])<14)continue;
+  const pl=await ns90116PageLinks(h.title,h.lang);
+  if(pl.qid)ids.set(pl.qid,{id:pl.qid,title:h.title,desc:h.snippet,seed:h.seed,source:'page'});
+  // Linked titles are searched as entities only when their label still resembles the work.
+  for(const t of pl.links.slice(0,28)){
+   const ident=ns9094IdentityScore(origin,[t,h.title,h.snippet]); if(ident<16)continue;
+   const pair=await Promise.all([ns90111WdHits(t,h.lang),ns90111WikiHits(t,h.lang)]);
+   for(const x of pair.flat().slice(0,4))if(x.id&&!ids.has(x.id))ids.set(x.id,{...x,seed:h.seed,source:'linked-page'});
+   if(ids.size>=36||Date.now()>deadline)break;
+  }
+  if(ids.size>=36)break;
+ }
+ let best=null;
+ for(const h of [...ids.values()].slice(0,40)){
+  if(Date.now()>deadline)break;
+  const e=await ns90111Entity(h.id); if(!e)continue;
+  const vals=ns90111Vals(e,h), blob=vals.join(' ');
+  if(!ns90111GoodEntity(e,blob)||ns9097BadArtworkText(blob)||ns9094RejectWords(blob))continue;
+  const ev=ns90115Evidence(origin,vals); let identity=0;
+  for(const seed of seeds)identity=Math.max(identity,ns9094IdentityScore(seed,vals));
+  // Reverse discovery is allowed to bridge a translated title, but final entity must have
+  // strong artwork evidence plus either title overlap or a solid identity score.
+  if(identity<17 && !(ev.hits>=1&&ev.ratio>=0.25))continue;
+  const x=await ns90111Hydrate(origin,h,e); if(!x)continue;
+  const score=identity+ev.hits*14+(e.claims?.P170?26:0)+(e.claims?.P18?24:0)+(e.claims?.P179?14:0)+(ns9097GoodArtworkText(blob)?22:0)+(h.source==='linked-page'?8:0);
+  if(!best||score>best.score)best={...x,score,reverseArtworkDiscovery:true};
+ }
+ return best;
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div'); let ok=false;
+ try{
+  await Promise.race([ns90116_prev_show(section,name,proxy,originName),new Promise(r=>setTimeout(r,22000))]);
+  if(proxy.querySelector('button')&&!/찾지 못했습니다|건너뛰었습니다/.test(proxy.textContent||'')){
+   pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);ok=true;
+  }
+ }catch(_){ }
+ if(ok)return;
+ pv.innerHTML='<div class="preview-card">🎨 <b>작품 주변의 작가·작품군·소장 정보에서 원래 작품을 다시 찾고 있어요…</b><p>같은 작품으로 검증되는 경우에만 보여줍니다.</p></div>';
+ const x=await Promise.race([ns90116Reverse(originName),new Promise(r=>setTimeout(()=>r(null),13500))]);
+ if(x)return openRepresentativePreview(section,name,x,pv);
+ pv.innerHTML='<div class="preview-card"><b>예술작품에서 같은 작품으로 확인되는 대상을 찾지 못했습니다.</b><p>작품명 검색과 역방향 작품 탐색까지 확인했지만 동일 작품으로 검증되지 않은 결과는 제외했습니다. 기존 카드는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';
+ const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90116_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90116_VERSION;
+</script>
+
 </body></html>
