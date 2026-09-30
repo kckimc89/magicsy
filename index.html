@@ -6090,4 +6090,71 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90122_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90122_VERSION;
 </script>
 
+
+<script id="ns90123-original-title-recovery-bridge">
+// ===== NS90.123 ORIGINAL TITLE RECOVERY BRIDGE =====
+// Failure-only bridge. Keep all successful routes frozen.
+// Search the exact reconstructed reading first, then hydrate only artwork entities.
+const NS90123_VERSION='MASTER V28 · NS90.123 ORIGINAL TITLE RECOVERY BRIDGE · ONE MASTER';
+const ns90123_frozen_show=ns9094ShowArtwork;
+async function ns90123WikiSearch(term,lang='ja'){
+ const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent('"'+term+'"')+'&srnamespace=0&srlimit=12&format=json&origin=*';
+ const j=await ns90120FetchJson(u,4200), out=[];
+ for(const x of (j?.query?.search||[])){
+  const u2='https://'+lang+'.wikipedia.org/w/api.php?action=query&prop=pageprops|description&titles='+encodeURIComponent(x.title||'')+'&format=json&origin=*';
+  const d=await ns90120FetchJson(u2,2600),pg=Object.values(d?.query?.pages||{})[0];
+  const id=pg?.pageprops?.wikibase_item||''; if(id)out.push({id,title:pg?.title||x.title||'',desc:pg?.description||'',lang,rank:out.length,seed:term,via:'원제 읽기 복원 검색'});
+  if(out.length>=8)break;
+ }
+ return out;
+}
+async function ns90123Recover(origin){
+ const kata=ns90122HangulReading(origin),hira=ns90122Hiragana(kata); if(!kata)return {card:null,rows:[]};
+ const forms=[hira,kata]; const seen=new Set(),hits=[];
+ for(const q of forms){
+  let hs=[];try{hs=(await Promise.all([ns90123WikiSearch(q,'ja'),ns90111WdHits(q,'ja')])).flat()}catch(_){}
+  for(const h of hs){if(h?.id&&!seen.has(h.id)){seen.add(h.id);hits.push({...h,seed:q,via:h.via||'원제 읽기 복원 검색'})}}
+ }
+ const rows=[];
+ for(const h of hits.slice(0,16)){
+  let e=null;try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){}
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed],blob=vals.filter(Boolean).join(' ');
+  let bad=ns90122RejectText(blob);try{bad=bad||ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+  const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad),hasImg=!!e?.claims?.P18,work=e?ns90118WorkEvidence(e,blob):0;
+  const row={h,e,vals,blob,identity:0,ev:{hits:0,ratio:0},work,good,hasImg};rows.push(row);
+  if(!good||work<6)continue;
+  // The exact reconstructed reading found this entity; let the proven NS90.120
+  // detail/image bridge finish the card, without weakening the artwork gate.
+  let card=null;try{card=await ns90120Card(origin,row)}catch(_){}
+  if(!card?.photo){
+   try{
+    const title=e?.labels?.ko?.value||e?.labels?.ja?.value||e?.labels?.en?.value||h.title||origin;
+    let photo=ns9094P18(e)||await ns90120PageImage(e); if(!photo)continue;
+    const base=e?.descriptions?.ko?.value||e?.descriptions?.ja?.value||e?.descriptions?.en?.value||h.desc||'';
+    let extract='';try{extract=await ns90113WikiExtract(e)}catch(_){}
+    photo=await ns90120Snapshot(photo);
+    card={title,desc:ns90113Desc(origin,e,base,extract),photo,photos:[photo],photoSource:'original-title-recovery',entityId:h.id,finalEntityVerified:true,finalArtworkVerified:true,qualityGateVerified:true,originalTitleRecovered:true};
+   }catch(_){}
+  }
+  if(card?.photo)return {card,rows,kata,hira};
+ }
+ return {card:null,rows,kata,hira};
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90123_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,30000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|확인하지 못했습니다|건너뛰었습니다|no-entity|작품 엔티티 조건 부족/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🈶 <b>발음에서 원어 작품명을 복원하고 있어요…</b><p>정확한 읽기와 일치하는 결과만 가져온 뒤 작품 엔티티인지 다시 확인합니다.</p></div>';
+ const result=await Promise.race([ns90123Recover(originName),new Promise(r=>setTimeout(()=>r({card:null,rows:[]}),20000))]);
+ if(result.card)return openRepresentativePreview(section,name,result.card,pv);
+ if(result.rows?.length)return ns90117Render(originName,result.rows.map(r=>({label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ja?.value||r.e?.descriptions?.en?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:0,hits:0,hasImg:r.hasImg,reasons:[r.good?'원제 후보이나 최종 작품 증거 부족':'작품 엔티티 조건 부족']})),pv);
+ pv.innerHTML='<div class="preview-card"><b>원제 읽기 검색에서도 같은 작품을 확인하지 못했습니다.</b><p>기존 성공 카드와 저장 데이터는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90123_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90123_VERSION;
+</script>
+
 </body></html>
