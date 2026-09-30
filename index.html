@@ -6120,3 +6120,59 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  sync(); setTimeout(sync,0); setTimeout(sync,250);
 })();
 </script>
+
+
+<!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
+<script id="ns90135-country-data-cleanup-only">
+(()=>{
+ const V='MASTER V28 · NS90.135 COUNTRY DATA CLEANUP ONLY · SEARCH LOCKED · ONE MASTER';
+ const DATA={
+  ES:{
+   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
+   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
+   people:['이사벨 1세','페르난도 2세','카를로스 1세','펠리페 2세','미겔 데 세르반테스','후안 세바스티안 엘카노','산티아고 라몬 이 카할']
+  },
+  JP:{
+   singers:['미소라 히바리','사카모토 큐','우타다 히카루','하마사키 아유미','아무로 나미에','요네즈 켄시','호시노 겐'],
+   athletes:['오타니 쇼헤이','스즈키 이치로','하뉴 유즈루','오사카 나오미','혼다 게이스케','우치무라 고헤이'],
+   people:['쇼토쿠 태자','무라사키 시키부','미나모토노 요리토모','오다 노부나가','도요토미 히데요시','도쿠가와 이에야스','사카모토 료마']
+  },
+  US:{
+   singers:['루이 암스트롱','엘비스 프레슬리','마이클 잭슨','마돈나','휘트니 휴스턴','비욘세','테일러 스위프트'],
+   athletes:['마이클 조던','르브론 제임스','베이브 루스','세리나 윌리엄스','마이클 펠프스','시몬 바일스'],
+   people:['조지 워싱턴','벤저민 프랭클린','에이브러햄 링컨','해리엇 터브먼','토머스 에디슨','마틴 루터 킹 주니어','로자 파크스']
+  }
+ };
+ function norm(v){
+   let s=String(v||'').replace(/[《》〈〉「」『』]/g,'').replace(/\s*[—–-]\s*(테니스|축구|농구|야구|수영|체조|자동차\s*경주|피겨스케이팅).*$/,'').trim();
+   try{return normalizeItemName(s)}catch(_){return s.toLowerCase().replace(/\s+/g,'')}
+ }
+ function allowed(country,section,name){return (DATA[country]?.[section]||[]).some(n=>norm(n)===norm(name));}
+ async function cleanOne(country,section){
+   let arr=[]; try{arr=await cardDBGet(country,section)}catch(_){}
+   if(!arr.length){try{arr=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){arr=[]}}
+   if(!arr.length)return 0;
+   // Keep parent-created/manual cards. For engine-created cards in these three person categories,
+   // retain only the verified representative data belonging to that country.
+   const kept=arr.filter(x=>x?.source==='manual'||allowed(country,section,x?.name||x?.title));
+   if(kept.length===arr.length)return 0;
+   try{await cardDBPut(country,section,kept)}catch(_){}
+   try{CARD_MEM.set(cardStoreKey(country,section),kept.map(x=>({...x})))}catch(_){}
+   try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(kept.map(x=>typeof ns9055CompactCardForLocal==='function'?ns9055CompactCardForLocal(x):x)))}catch(_){}
+   return arr.length-kept.length;
+ }
+ async function cleanup(){
+   let changed=0;
+   for(const c of Object.keys(DATA))for(const s of ['singers','athletes','people'])changed+=await cleanOne(c,s);
+   try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of ['singers','athletes','people'])await renderSection(s)}catch(_){}
+   return changed;
+ }
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ // Data maintenance only: no resolver/search/candidate function is replaced or patched.
+ sync(); setTimeout(sync,0); setTimeout(sync,250); setTimeout(sync,1200);
+ setTimeout(()=>cleanup().then(sync),350);
+})();
+</script>
