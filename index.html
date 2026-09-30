@@ -5398,4 +5398,55 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90112_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90112_VERSION;
 </script>
 
+
+<script id="ns90113-artwork-quality-gate">
+// ===== NS90.113 ARTWORK QUALITY GATE =====
+// Freeze NS90.112 discovery/storage. Improve only the verified artwork snapshot:
+// prefer entity-owned artwork images and enrich short descriptions from the entity's own Wikipedia page.
+const NS90113_VERSION='MASTER V28 · NS90.113 ARTWORK QUALITY GATE · ONE MASTER';
+const ns90113_prev_hydrate=ns90111Hydrate;
+async function ns90113WikiExtract(e){
+ for(const site of ['kowiki','jawiki','enwiki']){
+  const sl=e?.sitelinks?.[site]; if(!sl?.title)continue;
+  const lang=site.slice(0,2);
+  try{
+   const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&titles='+encodeURIComponent(sl.title)+'&format=json&origin=*';
+   const j=await ns90111FetchJson(u,1800), pages=Object.values(j?.query?.pages||{}), t=String(pages[0]?.extract||'').replace(/\s+/g,' ').trim();
+   if(t.length>=70)return t.slice(0,420);
+  }catch(_){ }
+ }
+ return '';
+}
+function ns90113Desc(origin,e,base,extract){
+ let d=String(extract||base||'').replace(/\s+/g,' ').trim();
+ // Very short database descriptions are labels, not child-friendly explanations.
+ if(d.length<70){
+  const creator=!!e?.claims?.P170, series=!!e?.claims?.P179;
+  d=origin+'은(는) 일본 미술의 예술작품'+(series?' 또는 연작':'')+'입니다. '+
+    (creator?'작가와 제작 배경, 작품에 담긴 풍경과 표현을 함께 살펴보면 작품의 특징을 이해하기 쉽습니다.':'작품의 제작 배경과 화면에 표현된 모습을 함께 살펴보면 특징을 이해하기 쉽습니다.');
+ }
+ return d;
+}
+ns90111Hydrate=async function(origin,h,e){
+ const vals=ns90111Vals(e,h), blob=vals.join(' ');
+ if(!ns90111GoodEntity(e,blob))return null;
+ const title=e?.labels?.ko?.value||e?.labels?.ja?.value||e?.labels?.en?.value||h.title||origin;
+ const base=e?.descriptions?.ko?.value||e?.descriptions?.ja?.value||e?.descriptions?.en?.value||h.desc||'';
+ const extract=await ns90113WikiExtract(e);
+ let photo=ns9094P18(e)||'';
+ let photoSource=photo?'entity-P18':'';
+ // Only use a searched image after the entity itself has passed the artwork identity gate.
+ if(!photo){
+  for(const q of [title,h.title,origin].filter(Boolean)){
+   const im=await Promise.race([ns9094FindPhoto(q,'artworks').catch(()=>null),new Promise(r=>setTimeout(()=>r(null),1500))]);
+   if(im){photo=typeof im==='string'?im:(im.photo||im.url||'');if(photo){photoSource='verified-entity-search';break}}
+  }
+ }
+ if(!photo)return null;
+ return {title,desc:ns90113Desc(origin,e,base,extract),photo,photos:[photo],photoSource,entityId:h.id,finalEntityVerified:true,finalArtworkVerified:true,nonBlockingVerified:true,qualityGateVerified:true};
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90113_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90113_VERSION;
+</script>
+
 </body></html>
