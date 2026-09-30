@@ -5654,4 +5654,64 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90116_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90116_VERSION;
 </script>
 
+
+<script id="ns90117-artwork-candidate-observer">
+// ===== NS90.117 ARTWORK CANDIDATE OBSERVER =====
+// Failure-only observer. Existing successful card/search paths are untouched.
+const NS90117_VERSION='MASTER V28 · NS90.117 ARTWORK CANDIDATE OBSERVER · ONE MASTER';
+const ns90117_prev_show=ns9094ShowArtwork;
+async function ns90117Observe(origin){
+ const deadline=Date.now()+12000, seeds=[]; const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
+ try{ns90112AliasSeeds(origin).forEach(add)}catch(_){add(origin)}
+ try{ns90108Seeds(origin).slice(0,8).forEach(add)}catch(_){ }
+ const rows=[], seen=new Set();
+ const push=(x,seed,via)=>{if(!x)return;const k=(x.id||'')+'|'+(x.title||'');if(seen.has(k))return;seen.add(k);rows.push({...x,seed,via})};
+ for(const seed of seeds.slice(0,8)){
+  for(const lang of ['ja','ko','en']){
+   if(Date.now()>deadline||rows.length>=18)break;
+   try{for(const x of (await ns90111WdHits(seed,lang)).slice(0,4))push(x,seed,'Wikidata '+lang)}catch(_){ }
+   try{for(const x of (await ns90111WikiHits(seed,lang)).slice(0,4))push(x,seed,'Wikipedia '+lang)}catch(_){ }
+  }
+ }
+ const out=[];
+ for(const h of rows.slice(0,14)){
+  if(Date.now()>deadline)break;
+  let e=null;try{if(h.id)e=await ns90111Entity(h.id)}catch(_){ }
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.description,h.seed], blob=vals.filter(Boolean).join(' ');
+  let identity=0;for(const seed of seeds)try{identity=Math.max(identity,ns9094IdentityScore(seed,vals))}catch(_){ }
+  let ev={hits:0,ratio:0};try{ev=ns90115Evidence(origin,vals)}catch(_){ }
+  const reasons=[];
+  if(!e)reasons.push('엔티티 상세 없음');
+  if(e&&!ns90111GoodEntity(e,blob))reasons.push('작품 엔티티 조건 부족');
+  try{if(ns9097BadArtworkText(blob)||ns9094RejectWords(blob))reasons.push('관련 항목/비작품 결과') }catch(_){ }
+  if(identity<17&&!(ev.hits>=1&&ev.ratio>=0.25))reasons.push('동일 작품 근거 부족');
+  const hasImg=!!(e?.claims?.P18); if(!hasImg)reasons.push('대표 사진 없음');
+  const label=(h.title||h.label||'(이름 없음)').replace(/</g,'&lt;');
+  const desc=(h.desc||h.description||'설명 없음').replace(/<[^>]+>/g,' ').replace(/</g,'&lt;').slice(0,180);
+  out.push({label,desc,via:h.via,seed:h.seed,identity,hits:ev.hits||0,hasImg,reasons:reasons.length?reasons:['검증 가능 후보']});
+ }
+ return out.sort((a,b)=>(b.identity+b.hits*12+(b.hasImg?5:0))-(a.identity+a.hits*12+(a.hasImg?5:0))).slice(0,6);
+}
+function ns90117Render(origin,rows,pv){
+ const esc=v=>String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ let html='<div class="preview-card"><b>🔎 후보 관찰 모드 · '+esc(origin)+'</b><p>카드로 통과하지 못한 검색 후보를 보여줍니다. 기존 카드는 변경하지 않습니다.</p>';
+ if(!rows.length)html+='<p><b>검색 후보 자체를 확보하지 못했습니다.</b></p>';
+ else rows.forEach((r,i)=>{html+='<div style="margin:10px 0;padding:10px;border:1px solid #d8dee8;border-radius:12px;background:#fff"><b>'+(i+1)+'. '+esc(r.label)+'</b><div style="margin-top:5px;font-size:.92em">'+esc(r.desc)+'</div><div style="margin-top:6px;font-size:.82em;color:#64748b">검색: '+esc(r.via)+' · 사용 이름: '+esc(r.seed)+' · 동일성 '+r.identity+' · 제목근거 '+r.hits+' · 사진 '+(r.hasImg?'있음':'없음')+'</div><div style="margin-top:5px;font-size:.88em"><b>판정:</b> '+esc(r.reasons.join(' / '))+'</div></div>'});
+ html+='<p style="font-size:.88em;color:#64748b">※ 이 화면은 진단용입니다. 후보를 자동 저장하거나 기존 성공 카드를 바꾸지 않습니다.</p><button class="rep-close-v5">닫기</button></div>';
+ pv.innerHTML=html;const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name); const proxy=document.createElement('div'), limit=22000; let finished=false;
+ try{await Promise.race([Promise.resolve(ns90117_prev_show(section,name,proxy,originName)).then(()=>{finished=true}),new Promise(r=>setTimeout(r,limit))]);}catch(_){finished=true}
+ if(proxy.querySelector('button')&&!/찾지 못했습니다|건너뛰었습니다|no-entity/.test(proxy.textContent||'')){
+  pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return;
+ }
+ pv.innerHTML='<div class="preview-card">🔎 <b>검색 후보와 탈락 이유를 확인하고 있어요…</b><p>성공한 기존 카드와 검색 경로는 그대로 보존합니다.</p></div>';
+ const rows=await Promise.race([ns90117Observe(originName),new Promise(r=>setTimeout(()=>r([]),13000))]);
+ ns90117Render(originName,rows,pv);
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90117_VERSION}catch(_){ }
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90117_VERSION;
+</script>
+
 </body></html>
