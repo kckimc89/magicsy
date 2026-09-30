@@ -6300,4 +6300,69 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90125_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90125_VERSION;
 </script>
 
+
+
+<script id="ns90126-open-discovery-strict-verify">
+// ===== NS90.126 OPEN DISCOVERY -> STRICT VERIFY =====
+// Failure-only bridge. All earlier successful routes remain frozen.
+// Discovery is broadened to Wikimedia Commons/Wikipedia metadata, but creation still
+// requires the same strict artwork entity + image evidence used by the proven engine.
+const NS90126_VERSION='MASTER V28 · NS90.126 OPEN DISCOVERY → STRICT VERIFY · ONE MASTER';
+const ns90126_frozen_show=ns9094ShowArtwork;
+async function ns90126CommonsHits(term){
+ const out=[],seen=new Set();
+ for(const ns of [14,6,0]){
+  const u='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(term)+'&gsrnamespace='+ns+'&gsrlimit=12&prop=pageprops|description|imageinfo&iiprop=url&format=json&origin=*';
+  let j=null;try{j=await ns90120FetchJson(u,3600)}catch(_){continue}
+  for(const pg of Object.values(j?.query?.pages||{})){
+   const id=pg?.pageprops?.wikibase_item||'';
+   const key=id||('commons:'+pg.pageid); if(seen.has(key))continue;seen.add(key);
+   out.push({id,title:pg.title||'',desc:pg.description||'',rank:out.length,seed:term,via:'Wikimedia Commons 공개 발견',directPhoto:pg?.imageinfo?.[0]?.thumburl||pg?.imageinfo?.[0]?.url||''});
+  }
+ }
+ return out;
+}
+async function ns90126OpenDiscover(origin){
+ const vars=ns90125RomanVariants(origin), terms=[]; const add=x=>{x=String(x||'').trim();if(x&&!terms.includes(x))terms.push(x)};
+ for(const v of vars){add(v);add(v+' painting');add(v+' Japanese painting');add(v+' ukiyo-e');add(v+' art')}
+ const seen=new Set(),hits=[];
+ for(const q of terms.slice(0,14)){
+  let hs=[];try{hs=await ns90126CommonsHits(q)}catch(_){}
+  for(const h of hs){const k=h.id||h.title;if(k&&!seen.has(k)){seen.add(k);hits.push(h)}}
+  if(hits.length>=42)break;
+ }
+ const rows=[];
+ for(const h of hits.slice(0,36)){
+  let e=null;if(h.id)try{e=await ns90120Entity(h.id)||await ns90111Entity(h.id)}catch(_){}
+  const vals=e?ns90111Vals(e,h):[h.title,h.desc,h.seed],blob=vals.filter(Boolean).join(' ');
+  let bad=ns90122RejectText(blob);try{bad=bad||ns9097BadArtworkText(blob)||ns9094RejectWords(blob)}catch(_){}
+  const good=!!(e&&ns90111GoodEntity(e,blob)&&!bad),hasImg=!!(e?.claims?.P18||h.directPhoto),work=e?ns90118WorkEvidence(e,blob):0;
+  const norm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,''); const nb=norm(blob); let phon=0;
+  for(const v of vars){const nv=norm(v);if(nv.length>=5&&nb.includes(nv))phon=Math.max(phon,5);else for(const t of v.split(' ')){const nt=norm(t);if(nt.length>=3&&nb.includes(nt))phon++}}
+  const row={h,e,vals,blob,identity:phon*16,ev:{hits:phon,ratio:0},work,good,hasImg};rows.push(row);
+  // OPEN discovery is never enough by itself: require a real Wikidata artwork entity,
+  // strong artwork evidence, phonetic/title evidence, and an image before hydration.
+  if(!e||!good||!hasImg||work<6||phon<2)continue;
+  let card=null;try{card=await ns90120Card(origin,row)}catch(_){}
+  if(!card?.photo&&h.directPhoto){
+   try{const photo=await ns90120Snapshot(h.directPhoto);const title=e?.labels?.ko?.value||e?.labels?.ja?.value||e?.labels?.en?.value||h.title||origin;const base=e?.descriptions?.ko?.value||e?.descriptions?.ja?.value||e?.descriptions?.en?.value||h.desc||'';let extract='';try{extract=await ns90113WikiExtract(e)}catch(_){};card={title,desc:ns90113Desc(origin,e,base,extract),photo,photos:[photo],photoSource:'commons-open-discovery',entityId:h.id,finalEntityVerified:true,finalArtworkVerified:true,qualityGateVerified:true,openDiscoveryVerified:true}}catch(_){}
+  }
+  if(card?.photo)return {card,rows};
+ }
+ return {card:null,rows};
+}
+ns9094ShowArtwork=async function(section,name,pv,originName){
+ originName=cardInputName(originName||name);
+ const proxy=document.createElement('div');
+ try{await Promise.race([Promise.resolve(ns90126_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,36000))])}catch(_){}
+ if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|확인하지 못했습니다|건너뛰었습니다|no-entity|작품 엔티티 조건 부족|최종 작품 증거 부족/.test(proxy.textContent||'')){pv.innerHTML='';while(proxy.firstChild)pv.appendChild(proxy.firstChild);return}
+ pv.innerHTML='<div class="preview-card">🌐 <b>공개 미술자료에서 작품 후보를 넓게 찾고, 엄격하게 검증하고 있어요…</b><p>발견은 넓게 하되 실제 작품 엔티티·제목 근거·대표사진이 모두 확인된 경우만 카드로 넘깁니다.</p></div>';
+ const result=await Promise.race([ns90126OpenDiscover(originName),new Promise(r=>setTimeout(()=>r({card:null,rows:[]}),26000))]);
+ if(result.card)return openRepresentativePreview(section,name,result.card,pv);
+ if(result.rows?.length)return ns90117Render(originName,result.rows.map(r=>({label:r.h.title||'(이름 없음)',desc:r.h.desc||r.e?.descriptions?.ja?.value||r.e?.descriptions?.en?.value||'설명 없음',via:r.h.via,seed:r.h.seed,identity:r.identity||0,hits:r.ev?.hits||0,hasImg:r.hasImg,reasons:[r.good?(r.hasImg?'작품 후보이나 동일 작품 최종 증거 부족':'작품 후보이나 대표 사진 없음'):'작품 엔티티 조건 부족']})),pv);
+ pv.innerHTML='<div class="preview-card"><b>공개 발견 검색에서도 검증 가능한 같은 작품을 확인하지 못했습니다.</b><p>기존 성공 카드와 저장 데이터는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';const b=pv.querySelector('.rep-close-v5');if(b)b.onclick=()=>pv.innerHTML='';
+};
+try{document.getElementById('ns9015Banner').textContent='✅ '+NS90126_VERSION}catch(_){}
+if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90126_VERSION;
+</script>
 </body></html>
