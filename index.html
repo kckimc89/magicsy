@@ -5962,3 +5962,65 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
   try{ if(window.__NS9021_ONE_ENGINE) window.__NS9021_ONE_ENGINE.version=V; }catch(_){ }
 })();
 </script>
+
+<!-- NS90.131: durable common research memory; failure-safe recall before network discovery. -->
+<script id="ns90131-durable-common-research-memory">
+(()=>{
+ const V='MASTER V28 · NS90.131 DURABLE COMMON RESEARCH MEMORY · ONE MASTER';
+ const prevShow=ns9094ShowArtwork;
+ function validSnap(s){
+   if(!s||!String(s.desc||'').trim()) return false;
+   const p=String(s.photo||s.photoRemote||(Array.isArray(s.photos)&&s.photos[0])||'').trim();
+   if(!p) return false;
+   const t=(String(s.title||'')+' '+String(s.desc||'')).toLowerCase();
+   try{ if(typeof ns9097BadArtworkText==='function'&&ns9097BadArtworkText(t)) return false; }catch(_){ }
+   try{ if(typeof ns9094RejectWords==='function'&&ns9094RejectWords(t)) return false; }catch(_){ }
+   return true;
+ }
+ function memory(section,name){
+   let s=null;
+   try{s=ns9099LoadResearch(section,name)}catch(_){ }
+   if(validSnap(s)) return s;
+   try{
+     const c=v15CachedRepresentative(section,name);
+     if(c&&validSnap(c.verified)) return c.verified;
+   }catch(_){ }
+   return null;
+ }
+ function cardFromSnap(name,s){
+   const photo=String(s.photo||s.photoRemote||(Array.isArray(s.photos)&&s.photos[0])||'');
+   return {
+     title:String(s.title||name), desc:String(s.desc||''), photo,
+     photos:Array.isArray(s.photos)&&s.photos.length?s.photos:[photo],
+     entityId:String(s.entityId||''), pageId:s.pageId==null?'':String(s.pageId),
+     sources:Array.isArray(s.sources)?s.sources:[],
+     finalEntityVerified:true, finalArtworkVerified:true, qualityGateVerified:true,
+     durableCommonResearchRecall:true
+   };
+ }
+ // Existing ONE MASTER path is unchanged. We only reuse a previously verified snapshot;
+ // if none exists, NS90.120 runs exactly as before.
+ ns9094ShowArtwork=async function(section,name,pv,originName){
+   const canonical=cardInputName(originName||name);
+   const s=memory(section,canonical)||memory(section,name);
+   if(s){
+     try{return openRepresentativePreview(section,name,cardFromSnap(canonical,s),pv)}catch(_){ }
+   }
+   return prevShow(section,name,pv,originName);
+ };
+ // Keep successful snapshots independent from card lifetime. This does not change card data.
+ const prevOpen=openRepresentativePreview;
+ openRepresentativePreview=function(section,name,verified,pv){
+   try{
+     if(validSnap(verified)){
+       const snap={...verified,representativeName:String(name||''),savedAt:Date.now()};
+       try{localStorage.setItem(ns9099MemoryKey(section,name),JSON.stringify(snap))}catch(_){ }
+       try{ns9053SaveReady(v12Request(section,name),snap)}catch(_){ }
+     }
+   }catch(_){ }
+   return prevOpen.apply(this,arguments);
+ };
+ try{document.getElementById('ns9015Banner').textContent='✅ '+V}catch(_){ }
+ try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
+})();
+</script>
