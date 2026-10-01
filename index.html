@@ -6083,54 +6083,54 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 \n<!-- NS90.138: preserve current results, stop automatic queue, manual representative test only. Search engine untouched. -->\n<style id="ns90138-style">\n#ns90138Box{position:fixed;left:14px;bottom:14px;z-index:99999;max-width:min(720px,calc(100vw - 28px));background:#fff;border:2px solid #6d4bd1;border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.45}\n#ns90138Box button{font:inherit;font-weight:800;border:1px solid #b8a7ef;background:#f4efff;border-radius:12px;padding:8px 12px;margin:4px 4px 0 0}\n#ns90138Box .small{font-size:12px;color:#555}\n</style>\n<script id="ns90138-manual-representative-test">\n(()=>{\n const V='MASTER V28 · NS90.138 MANUAL REPRESENTATIVE TEST · RESULTS PRESERVED · SEARCH LOCKED · ONE MASTER';\n // Stop only the NS90.137 test queue flag. Do not clear cards, ready candidates, research memory, or caches.\n try{localStorage.removeItem('magic_ns90137_run_after_refresh')}catch(_){}\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n function mount(){\n   try{document.getElementById('ns90137TestBox')?.remove()}catch(_){}\n   let b=document.getElementById('ns90138Box'); if(b)return;\n   b=document.createElement('div'); b.id='ns90138Box';\n   b.innerHTML='<b>🧪 NS90.138 수동 대표이름 확인</b><div class="small">NS90.137에서 지금까지 검색된 결과는 그대로 유지합니다. 자동 전체검색은 중단했습니다. 아직 ○인 대표이름만 직접 눌러 기존 공통 검색엔진으로 확인하세요. 검색엔진·대표이름·저장된 보라색 결과는 변경하지 않습니다.</div><button type="button" class="ns90138hide">창 닫기</button>' ;\n   document.body.appendChild(b); b.querySelector('.ns90138hide').onclick=()=>b.remove();\n }\n sync(); setTimeout(sync,0); setTimeout(sync,300); setTimeout(sync,1500); setTimeout(sync,3500); setTimeout(mount,500);\n})();\n</script>\n
-<!-- NS90.143: READ-ONLY DATA DIAGNOSTIC. No search/storage mutation. -->
-<style id="ns90143-style">
-#ns90143Btn{position:fixed;right:18px;bottom:86px;z-index:9998;border:1px solid #48658d;border-radius:18px;background:#fff;padding:10px 14px;font-weight:800;font-size:14px;color:#233a5a}
-#ns90143Panel{position:fixed;inset:7% 5%;z-index:10020;background:#fff;border:2px solid #405b80;border-radius:18px;padding:18px;overflow:auto;box-shadow:0 8px 30px #0003;color:#222}
-#ns90143Panel.hidden{display:none}#ns90143Panel h2{margin:0 0 8px}#ns90143Panel pre{white-space:pre-wrap;word-break:break-word;background:#f6f7f9;border:1px solid #ddd;border-radius:12px;padding:12px;font-size:13px;line-height:1.5}
-#ns90143Panel .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}#ns90143Panel button{padding:9px 12px;border:1px solid #aaa;border-radius:10px;background:#fff;font-weight:700}
+
+
+
+<!-- NS90.144 SAFE STATE RECOVERY. NS90.140 search core remains locked. -->
+<style id="ns90144-style">
+#ns90144Btn{position:fixed;right:18px;bottom:86px;z-index:9998;border:1px solid #48658d;border-radius:18px;background:#fff;padding:10px 14px;font-weight:800;font-size:14px;color:#233a5a}
+#ns90144Panel{position:fixed;inset:7% 5%;z-index:10020;background:#fff;border:2px solid #405b80;border-radius:18px;padding:18px;overflow:auto;box-shadow:0 8px 30px #0003;color:#222}#ns90144Panel.hidden{display:none}
+#ns90144Panel .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}#ns90144Panel button{padding:9px 12px;border:1px solid #aaa;border-radius:10px;background:#fff;font-weight:700}#ns90144Out{white-space:pre-wrap;background:#f6f7f9;border:1px solid #ddd;border-radius:12px;padding:12px;font-size:13px;line-height:1.5}
 </style>
-<button id="ns90143Btn" type="button">🔎 데이터 진단</button>
-<div id="ns90143Panel" class="hidden"><h2>🔎 NS90.143 읽기 전용 데이터 진단</h2><p>저장된 값을 읽기만 합니다. 카드·검색기억·보라색 상태를 삭제하거나 변환하지 않습니다.</p><div class="row"><button id="ns90143Run" type="button">현재 저장상태 확인</button><button id="ns90143Close" type="button">닫기</button></div><pre id="ns90143Out">아직 진단하지 않았습니다.</pre></div>
-<script id="ns90143-readonly-diagnostic">
+<button id="ns90144Btn" type="button">🛟 상태 복구</button>
+<div id="ns90144Panel" class="hidden"><h2>🛟 NS90.144 안전 상태 복구</h2><p>기존 카드·READY 검색결과는 삭제하지 않습니다. 현재 대표이름과 정확히 일치하는 기존 성공자료만 검색완료 상태로 연결합니다.</p><div class="row"><button id="ns90144Scan" type="button">복구 가능 상태 확인</button><button id="ns90144Recover" type="button">안전 복구 실행</button><button id="ns90144Close" type="button">닫기</button></div><pre id="ns90144Out">먼저 ‘복구 가능 상태 확인’을 눌러주세요.</pre></div>
+<script id="ns90144-safe-state-recovery">
 (()=>{
- const V='MASTER V28 · NS90.143 READ-ONLY DATA RECOVERY DIAGNOSTIC · NS90.140 SEARCH BASELINE · ONE MASTER';
+ const V='MASTER V28 · NS90.144 SAFE STATE RECOVERY · NS90.140 SEARCH CORE LOCKED · ONE MASTER';
+ const P='magic_ns90144_searched|';
  const $=id=>document.getElementById(id);
+ const norm=x=>String(x||'').trim().replace(/\s+/g,' ');
+ function markKey(country,section,name){return P+[country,section,norm(name)].join('|')}
+ function hasMark(country,section,name){try{return localStorage.getItem(markKey(country,section,name))==='1'}catch(_){return false}}
+ function saveMark(country,section,name){try{localStorage.setItem(markKey(country,section,name),'1');return true}catch(_){return false}}
+ function readyFor(section,name){try{const req=v12Request(section,name);const j=JSON.parse(localStorage.getItem('magic_ready_9053_'+req.key)||'null');return j&&j.desc?j:null}catch(_){return null}}
+ function currentNames(section){try{return parseRepNames(repTextFor(section),section).map(n=>({shown:cardInputName(n),resolved:v28RepresentativeName(section,n)}))}catch(_){return []}}
+ function scanCountry(country){const old=COUNTRY, rows=[];try{COUNTRY=country;for(const section of REP_SECTIONS){for(const x of currentNames(section)){const ready=readyFor(section,x.resolved)||readyFor(section,x.shown);const saved=ns9067SavedForRepresentative(section,x.shown);if(saved||ready||hasMark(country,section,x.shown))rows.push({country,section,name:x.shown,saved:!!saved,ready:!!ready,marked:hasMark(country,section,x.shown)})}}}finally{COUNTRY=old}return rows}
+ function scanAll(){return ['ES','JP','US'].flatMap(scanCountry)}
+ function report(rows){const by={ES:[],JP:[],US:[]};rows.forEach(r=>by[r.country].push(r));let a=['NS90.144 SAFE RECOVERY SCAN','기존 자료를 삭제하지 않습니다.',''];for(const c of ['ES','JP','US']){a.push(c+' 복구 근거: '+by[c].length+'개');for(const r of by[c])a.push('  '+r.section+' | '+r.name+' | '+(r.saved?'CARD ':'')+(r.ready?'READY ':'')+(r.marked?'MARK':''));a.push('')}return a.join('\n')}
  function sync(){try{const b=$('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
- sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);
- function localRows(){const a=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';const v=localStorage.getItem(k)||'';a.push([k,v])}}catch(_){}return a}
- function countPrefix(rows,p){return rows.filter(([k])=>k.startsWith(p)).length}
- function researchNames(rows,c){const p='magic_ns9099_research_'+c+'|';return rows.filter(([k])=>k.startsWith(p)).map(([k])=>k.slice(p.length)).sort()}
- function readyNames(rows){return rows.filter(([k])=>k.startsWith('magic_ready_9053_')).map(([k])=>k.slice('magic_ready_9053_'.length)).sort()}
- async function cardCounts(){const out={};try{const db=await openCardDB();await new Promise((resolve,reject)=>{const tx=db.transaction(CARD_STORE,'readonly'),st=tx.objectStore(CARD_STORE),q=st.openCursor();q.onsuccess=()=>{const cur=q.result;if(!cur)return resolve();const val=Array.isArray(cur.value)?cur.value:[];out[String(cur.key)]=val.length;cur.continue()};q.onerror=()=>reject(q.error)})}catch(e){out['(IndexedDB 읽기 오류)']=String(e?.message||e)}return out}
- async function run(){
-   const rows=localRows(), cards=await cardCounts();
-   const es=researchNames(rows,'ES'),jp=researchNames(rows,'JP'),us=researchNames(rows,'US'),ready=readyNames(rows);
-   const mirror=rows.filter(([k])=>k.startsWith('magic_engine5_custom_')).map(([k,v])=>{let n='?';try{n=JSON.parse(v||'[]').length}catch(_){}return k+' = '+n+'장'}).sort();
-   const flags=rows.filter(([k])=>/ns9013[678]|run_after_refresh|last_result/.test(k)).map(([k,v])=>k+' = '+String(v).slice(0,120));
-   const lines=[];
-   lines.push('NS90.143 READ-ONLY DIAGNOSTIC');
-   lines.push('localStorage 전체 키: '+rows.length);
-   lines.push('');
-   lines.push('[검색 성공/연구 기억]');
-   lines.push('ES 연구기억: '+es.length); lines.push(...es.map(x=>'  ES '+x));
-   lines.push('JP 연구기억: '+jp.length); lines.push(...jp.map(x=>'  JP '+x));
-   lines.push('US 연구기억: '+us.length); lines.push(...us.map(x=>'  US '+x));
-   lines.push('공통 ready snapshot: '+ready.length); lines.push(...ready.map(x=>'  READY '+x));
-   lines.push('');
-   lines.push('[카드 IndexedDB]'); Object.keys(cards).sort().forEach(k=>lines.push('  '+k+' = '+cards[k]+'장'));
-   lines.push('');lines.push('[카드 localStorage mirror]'); lines.push(...(mirror.length?mirror:['  없음']));
-   lines.push('');lines.push('[시험/초기화 관련 플래그]');lines.push(...(flags.length?flags:['  없음']));
-   lines.push('');lines.push('[주요 키 개수]');
-   ['magic_ready_9053_','magic_v28_entity_','magic_ns9099_research_','trial_candidates_used_','magic_engine5_custom_'].forEach(p=>lines.push('  '+p+' : '+countPrefix(rows,p)));
-   lines.push('');lines.push('※ 이 진단은 저장값을 변경하지 않습니다. 이 화면을 캡처해서 보내주세요.');
-   $('ns90143Out').textContent=lines.join('\n');
- }
- $('ns90143Btn').onclick=()=>{$('ns90143Panel').classList.remove('hidden');run()};
- $('ns90143Run').onclick=run;$('ns90143Close').onclick=()=>$('ns90143Panel').classList.add('hidden');
+ sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);
+ // Paint recovered searched state purple without changing the search resolver.
+ const basePaint=v16PaintRow;
+ v16PaintRow=function(section,row,panel){
+   const country=String(COUNTRY||''), shown=cardInputName(row.name);
+   if(!row.ok && hasMark(country,section,shown)){
+     const snap=readyFor(section,row.resolvedName||shown)||readyFor(section,shown);
+     if(snap){row.ok=true;row.verified=snap}
+   }
+   return basePaint(section,row,panel);
+ };
+ // Any verified READY result seen by the normal renderer gets a durable country-specific searched mark.
+ const baseRender=renderRepresentativeCardButtonsV5;
+ renderRepresentativeCardButtonsV5=async function(section){
+   const r=await baseRender(section);try{const st=v16State(section);for(const row of st.rows.values()){const shown=cardInputName(row.name);if(row.ok&&row.verified&&row.verified.desc)saveMark(String(COUNTRY||''),section,shown)}}catch(_){}return r;
+ };
+ async function recover(){const rows=scanAll();let n=0;for(const r of rows){if((r.saved||r.ready)&&saveMark(r.country,r.section,r.name))n++}try{V16_SEARCH_STATE.clear();repAvailabilityCache.clear()}catch(_){};try{renderAllRepresentativeCardButtonsV5()}catch(_){};$('ns90144Out').textContent='안전 복구 완료: '+n+'개 대표이름에 검색성공 연결을 보강했습니다.\n\n'+report(scanAll())+'\n\n※ 카드와 READY 원본은 삭제하지 않았습니다.'}
+ $('ns90144Btn').onclick=()=>{$('ns90144Panel').classList.remove('hidden');$('ns90144Out').textContent=report(scanAll())};
+ $('ns90144Scan').onclick=()=>{$('ns90144Out').textContent=report(scanAll())};
+ $('ns90144Recover').onclick=recover;$('ns90144Close').onclick=()=>$('ns90144Panel').classList.add('hidden');
 })();
 </script>
-
 </body></html>
 
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
