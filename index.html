@@ -6331,3 +6331,22 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  wire();sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);
 })();
 </script>
+
+<!-- NS90.144 FINAL VERSION LOCK: display/version metadata only; search/recovery logic untouched. -->
+<script id="ns90144-final-version-lock">
+(()=>{
+ const V='MASTER V28 · NS90.144 SAFE STATE RECOVERY · NS90.140 SEARCH CORE LOCKED · ONE MASTER';
+ let locking=false;
+ function sync(){
+   if(locking)return; locking=true;
+   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+   locking=false;
+ }
+ sync(); [0,100,300,800,1500,3500,6000].forEach(ms=>setTimeout(sync,ms));
+ try{
+   const b=document.getElementById('ns9015Banner');
+   if(b)new MutationObserver(sync).observe(b,{childList:true,characterData:true,subtree:true});
+ }catch(_){}
+})();
+</script>
