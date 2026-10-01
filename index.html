@@ -6326,3 +6326,39 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  wire();sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);
 })();
 </script>
+
+<!-- NS90.142: representative state stability. Search/resolver engine untouched. -->
+<script id="ns90142-representative-state-stability">
+(()=>{
+ const V='MASTER V28 · NS90.142 REPRESENTATIVE STATE STABILITY · SEARCH CORE LOCKED · ONE MASTER';
+ function norm(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}}
+ function repNames(section){try{return parseRepNames(repTextFor(section),section).map(x=>cardInputName(v28RepresentativeName(section,x)))}catch(_){return []}}
+ function isRep(section,name){const n=norm(name);return repNames(section).some(x=>norm(x)===n)}
+ function preserveReady(section,item){
+   if(!item||!item.name||!item.desc||!isRep(section,item.name))return;
+   const person=(typeof NS9070_PERSON_SECTIONS!=='undefined'&&NS9070_PERSON_SECTIONS.has(section));
+   const snap={title:String(item.entityTitle||item.name||''),desc:String(item.desc||'').trim(),photo:String(item.photoRemote||''),photos:item.photoRemote?[String(item.photoRemote)]:[],entityId:String(item.entityId||''),pageId:item.pageId==null?'':String(item.pageId),sources:Array.isArray(item.sources)?item.sources:[],representativeName:String(item.name||''),savedAt:Date.now(),representativeManaged:true,finalEntityVerified:person?true:(item.finalEntityVerified===true)};
+   try{ns9053SaveReady(v12Request(section,item.name),snap)}catch(_){}
+   try{localStorage.setItem(ns9099MemoryKey(section,item.name),JSON.stringify(snap))}catch(_){}
+ }
+ // Save the representative success independently BEFORE card deletion. Card deletion must never erase it.
+ const prevDelete=ns9096DeleteDurable;
+ ns9096DeleteDurable=async function(section,itemId){
+   let target=null;
+   try{target=getCustom(section).find(x=>String(x.id)===String(itemId))||null;if(target)preserveReady(section,target)}catch(_){}
+   const out=await prevDelete.call(this,section,itemId);
+   try{if(target)preserveReady(section,target)}catch(_){}
+   try{await renderRepresentativeCardButtonsV5(section)}catch(_){}
+   return out;
+ };
+ // Any representative card successfully saved becomes durable purple-ready evidence for its later deletion.
+ const prevAppend=ns90106AppendCard;
+ ns90106AppendCard=async function(section,item){
+   const ok=await prevAppend.call(this,section,item);
+   if(ok===true)try{preserveReady(section,item)}catch(_){}
+   return ok;
+ };
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);setTimeout(sync,7000);
+})();
+</script>
