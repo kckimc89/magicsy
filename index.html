@@ -6018,6 +6018,57 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  document.getElementById('ns90158Close').addEventListener('click',()=>document.getElementById('ns90158Diag').style.display='none');
 })();
 </script>
+
+
+<!-- NS90.160: purple READY opens stored verified result immediately; network search only for white state. -->
+<script id="ns90160-ready-instant-open">
+(()=>{
+ const V='MASTER V28 · NS90.160 READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_\-–—]/g,'');
+ function sameName(name,obj,key){
+   const n=norm(name); if(!n)return false; const vals=[];
+   try{if(obj&&typeof obj==='object'){if(obj.name)vals.push(obj.name);if(obj.title)vals.push(obj.title);if(obj.verified){if(obj.verified.name)vals.push(obj.verified.name);if(obj.verified.title)vals.push(obj.verified.title)}}}catch(_){}
+   const tail=String(key||'').split('|').pop();if(tail)vals.push(tail);
+   return vals.some(v=>{const x=norm(v);return x===n||x.startsWith(n)||n.startsWith(x)});
+ }
+ function extract(o){
+   if(!o||typeof o!=='object')return null; const v=o.verified||o;
+   if(!String(v?.desc||'').trim())return null;
+   return {name:String(v.name||o.name||''),title:String(v.title||o.title||v.name||o.name||''),desc:String(v.desc||''),photo:String(v.photo||v.photoRemote||''),photos:Array.isArray(v.photos)?v.photos:(v.photo?[v.photo]:[]),entityId:String(v.entityId||''),pageId:v.pageId==null?'':String(v.pageId),sources:Array.isArray(v.sources)?v.sources:[],finalEntityVerified:v.finalEntityVerified!==false,photoVerified:!!(v.photo||v.photoRemote)};
+ }
+ function loadStored(section,name,country){
+   // First use the app's normal READY/cache path. No network is used here.
+   try{const c=__NS9073_CACHED(section,name);if(c?.verified?.desc)return c.verified}catch(_){}
+   const ctry=String(country||COUNTRY||''), sec=String(section||'').toLowerCase();
+   for(let i=0;i<localStorage.length;i++){
+     const k=localStorage.key(i)||'';
+     if(!(/^magic_v3_result_(?:V11-QUALITY|V9-SHARED)\|/i.test(k)||/^magic_ready_/i.test(k)))continue;
+     if(/^magic_ready_/i.test(k)&&k.includes('|')&&ctry&&!k.includes(ctry))continue;
+     if(!/^magic_ready_/i.test(k)&&sec&&k.includes('|')&&!k.toLowerCase().includes('|'+sec+'|'))continue;
+     let o=null;try{o=JSON.parse(localStorage.getItem(k)||'null')}catch(_){continue}
+     if(!sameName(name,o,k))continue;
+     const v=extract(o);if(v)return v;
+   }
+   return null;
+ }
+ // Extend cache lookup only. The resolver/search engine itself is untouched.
+ const prev=v15CachedRepresentative;
+ v15CachedRepresentative=function(section,name){
+   const c=prev(section,name);if(c?.verified?.desc)return c;
+   const v=loadStored(section,name,COUNTRY);return v?{ok:true,verified:v,cached:true,ns90160:true}:null;
+ };
+ window.ns90160LoadStoredVerified=loadStored;
+ // Ensure a successful representative search is durably marked immediately.
+ try{
+   const oldMark=ns9053SaveReady;
+   ns9053SaveReady=function(req,verified){const r=oldMark(req,verified);try{if(verified?.desc&&req?.section&&req?.name)ns90154MarkSearched(req.section,req.name,COUNTRY)}catch(_){}return r};
+ }catch(_){}
+ // Rebuild only the representative UI state so existing purple items acquire their stored snapshot.
+ function repaint(){try{REP_SECTIONS.forEach(sec=>{const st=v16State(sec);for(const row of st.rows.values()){if(!ns9067SavedForRepresentative(sec,cardInputName(row.name))){const c=v15CachedRepresentative(sec,row.resolvedName||cardInputName(row.name))||v15CachedRepresentative(sec,cardInputName(row.name));if(c?.verified?.desc){row.ok=true;row.verified=c.verified;row.pending=false}}}const el=document.getElementById(sec);if(el)renderRepresentativeCardButtonsV5(sec)})}catch(e){console.warn('[NS90.160 repaint]',e)}}
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){} }
+ document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(repaint,80)});window.addEventListener('load',()=>{sync();setTimeout(repaint,150)});sync();setTimeout(sync,300);setTimeout(sync,1500);
+})();
+</script>
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
