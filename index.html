@@ -6082,7 +6082,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  setTimeout(()=>{try{localStorage.removeItem(FLAG)}catch(_){}},50);
 })();
 </script>
-\n<!-- NS90.138: preserve current results, stop automatic queue, manual representative test only. Search engine untouched. -->\n<style id="ns90138-style">\n#ns90138Box{position:fixed;left:14px;bottom:14px;z-index:99999;max-width:min(720px,calc(100vw - 28px));background:#fff;border:2px solid #6d4bd1;border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.45}\n#ns90138Box button{font:inherit;font-weight:800;border:1px solid #b8a7ef;background:#f4efff;border-radius:12px;padding:8px 12px;margin:4px 4px 0 0}\n#ns90138Box .small{font-size:12px;color:#555}\n</style>\n<script id="ns90138-manual-representative-test">\n(()=>{\n const V='MASTER V28 · NS90.138 MANUAL REPRESENTATIVE TEST · RESULTS PRESERVED · SEARCH LOCKED · ONE MASTER';\n // Stop only the NS90.137 test queue flag. Do not clear cards, ready candidates, research memory, or caches.\n try{localStorage.removeItem('magic_ns90137_run_after_refresh')}catch(_){}\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n function mount(){\n   try{document.getElementById('ns90137TestBox')?.remove()}catch(_){}\n   let b=document.getElementById('ns90138Box'); if(b)return;\n   b=document.createElement('div'); b.id='ns90138Box';\n   b.innerHTML='<b>🧪 NS90.138 수동 대표이름 확인</b><div class="small">NS90.137에서 지금까지 검색된 결과는 그대로 유지합니다. 자동 전체검색은 중단했습니다. 아직 ○인 대표이름만 직접 눌러 기존 공통 검색엔진으로 확인하세요. 검색엔진·대표이름·저장된 보라색 결과는 변경하지 않습니다.</div><button type="button" class="ns90138hide">창 닫기</button>' ;\n   document.body.appendChild(b); b.querySelector('.ns90138hide').onclick=()=>b.remove();\n }\n sync(); setTimeout(sync,0); setTimeout(sync,300); setTimeout(sync,1500); setTimeout(sync,3500); setTimeout(mount,500);\n})();\n</script>\n
+<!-- NS90.138: preserve current results, stop automatic queue, manual representative test only. Search engine untouched. --><style id="ns90138-style">\n#ns90138Box{position:fixed;left:14px;bottom:14px;z-index:99999;max-width:min(720px,calc(100vw - 28px));background:#fff;border:2px solid #6d4bd1;border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.45}\n#ns90138Box button{font:inherit;font-weight:800;border:1px solid #b8a7ef;background:#f4efff;border-radius:12px;padding:8px 12px;margin:4px 4px 0 0}\n#ns90138Box .small{font-size:12px;color:#555}\n</style><script id="ns90138-manual-representative-test">(()=>{\n const V='MASTER V28 · NS90.138 MANUAL REPRESENTATIVE TEST · RESULTS PRESERVED · SEARCH LOCKED · ONE MASTER';\n // Stop only the NS90.137 test queue flag. Do not clear cards, ready candidates, research memory, or caches.\n try{localStorage.removeItem('magic_ns90137_run_after_refresh')}catch(_){}\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n function mount(){\n   try{document.getElementById('ns90137TestBox')?.remove()}catch(_){}\n   let b=document.getElementById('ns90138Box'); if(b)return;\n   b=document.createElement('div'); b.id='ns90138Box';\n   b.innerHTML='<b>🧪 NS90.138 수동 대표이름 확인</b><div class="small">NS90.137에서 지금까지 검색된 결과는 그대로 유지합니다. 자동 전체검색은 중단했습니다. 아직 ○인 대표이름만 직접 눌러 기존 공통 검색엔진으로 확인하세요. 검색엔진·대표이름·저장된 보라색 결과는 변경하지 않습니다.</div><button type="button" class="ns90138hide">창 닫기</button>' ;\n   document.body.appendChild(b); b.querySelector('.ns90138hide').onclick=()=>b.remove();\n }\n sync(); setTimeout(sync,0); setTimeout(sync,300); setTimeout(sync,1500); setTimeout(sync,3500); setTimeout(mount,500);\n})();\n</script>\n
 
 
 
@@ -6129,6 +6129,39 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  $('ns90144Btn').onclick=()=>{$('ns90144Panel').classList.remove('hidden');$('ns90144Out').textContent=report(scanAll())};
  $('ns90144Scan').onclick=()=>{$('ns90144Out').textContent=report(scanAll())};
  $('ns90144Recover').onclick=recover;$('ns90144Close').onclick=()=>$('ns90144Panel').classList.add('hidden');
+})();
+</script>
+
+
+<!-- NS90.145 DEEP STORED-EVIDENCE RECOVERY. Search core untouched; no network search. -->
+<style id="ns90145-style">
+#ns90145Btn{position:fixed;right:18px;bottom:136px;z-index:9999;border:1px solid #67508f;border-radius:18px;background:#fff;padding:10px 14px;font-weight:800;font-size:14px;color:#3e2b63}
+#ns90145Panel{position:fixed;inset:7% 5%;z-index:10030;background:#fff;border:2px solid #67508f;border-radius:18px;padding:18px;overflow:auto;box-shadow:0 8px 30px #0003;color:#222}.hidden{display:none}
+#ns90145Panel .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}#ns90145Panel button{padding:9px 12px;border:1px solid #aaa;border-radius:10px;background:#fff;font-weight:700}#ns90145Out{white-space:pre-wrap;background:#f7f5fb;border:1px solid #ddd;border-radius:12px;padding:12px;font-size:13px;line-height:1.5}
+</style>
+<button id="ns90145Btn" type="button">🧭 심층 복구</button>
+<div id="ns90145Panel" class="hidden"><h2>🧭 NS90.145 저장증거 심층 복구</h2><p>새 검색을 하지 않습니다. 기존 카드·READY·과거 성공 캐시에서 현재 대표이름과 연결 가능한 자료만 찾습니다.</p><div class="row"><button id="ns90145Scan" type="button">심층 복구 가능 확인</button><button id="ns90145Recover" type="button">심층 안전 복구 실행</button><button id="ns90145Close" type="button">닫기</button></div><pre id="ns90145Out">먼저 ‘심층 복구 가능 확인’을 눌러주세요.</pre></div>
+<script id="ns90145-deep-evidence-recovery">
+(()=>{
+ const V='MASTER V28 · NS90.145 DEEP STORED-EVIDENCE RECOVERY · NS90.140 SEARCH CORE LOCKED · ONE MASTER';
+ const $=id=>document.getElementById(id), P='magic_ns90144_searched|';
+ const norm=x=>String(x||'').trim().toLowerCase().replace(/[\s·ㆍ・,._()\-–—:;]+/g,'');
+ const shownNorm=x=>norm(cardInputName(x));
+ function markKey(c,s,n){return P+[c,s,String(n||'').trim().replace(/\s+/g,' ')].join('|')}
+ function mark(c,s,n){try{localStorage.setItem(markKey(c,s,n),'1');return true}catch(_){return false}}
+ function existingMark(c,s,n){try{return localStorage.getItem(markKey(c,s,n))==='1'}catch(_){return false}}
+ function readyExact(section,name){try{const req=v12Request(section,name);const j=JSON.parse(localStorage.getItem('magic_ready_9053_'+req.key)||'null');return j&&j.desc?j:null}catch(_){return null}}
+ function names(section){try{return parseRepNames(repTextFor(section),section).map(n=>({shown:cardInputName(n),resolved:v28RepresentativeName(section,n)}))}catch(_){return []}}
+ function evidenceIndex(){const a=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(!/^(magic_ready_9053_|magic_v28_entity_|magic_v16_entity_|magic_v15_entity_|magic_v14_entity_|magic_v13_entity_)/.test(k))continue;let j=null;try{j=JSON.parse(localStorage.getItem(k)||'null')}catch(_){};if(!j||!j.desc)continue;const keyText=k.replace(/^(magic_ready_9053_|magic_v28_entity_|magic_v16_entity_|magic_v15_entity_|magic_v14_entity_|magic_v13_entity_)/,'');a.push({k,j,keyText,keyNorm:norm(keyText),titleNorm:norm(j.title||'')})}}catch(_){}return a}
+ function deepEvidence(section,shown,resolved,index){const exact=readyExact(section,resolved)||readyExact(section,shown);if(exact)return {type:'READY',j:exact};const targets=[shown,resolved].map(shownNorm).filter(Boolean);for(const e of index){for(const t of targets){if(!t)continue;/* require full normalized representative name in saved request key; title-only evidence is not enough */if(e.keyNorm.includes(t))return {type:'LEGACY',j:e.j,key:e.k}}}return null}
+ function scanCountry(c,index){const old=COUNTRY,out=[];try{COUNTRY=c;for(const section of REP_SECTIONS){for(const x of names(section)){const saved=!!ns9067SavedForRepresentative(section,x.shown);const ev=deepEvidence(section,x.shown,x.resolved,index);if(saved||ev||existingMark(c,section,x.shown))out.push({c,section,name:x.shown,saved,ev,marked:existingMark(c,section,x.shown)})}}}finally{COUNTRY=old}return out}
+ function scan(){const idx=evidenceIndex();return {idx,rows:['ES','JP','US'].flatMap(c=>scanCountry(c,idx))}}
+ function report(o){const by={ES:[],JP:[],US:[]};o.rows.forEach(r=>by[r.c].push(r));let a=['NS90.145 DEEP STORED-EVIDENCE SCAN','새 검색 없음 · 기존 자료 삭제 없음','저장 성공증거 인덱스: '+o.idx.length+'개',''];for(const c of ['ES','JP','US']){a.push(c+' 연결 가능: '+by[c].length+'개');for(const r of by[c])a.push('  '+r.section+' | '+r.name+' | '+(r.saved?'CARD ':'')+(r.ev?r.ev.type+' ':'')+(r.marked?'MARK':''));a.push('')}return a.join('\n')}
+ function sync(){try{const b=$('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);
+ async function recover(){const o=scan();let n=0;for(const r of o.rows){if((r.saved||r.ev)&&mark(r.c,r.section,r.name))n++}try{V16_SEARCH_STATE.clear();repAvailabilityCache.clear()}catch(_){};try{await renderAllRepresentativeCardButtonsV5()}catch(_){};$('ns90145Out').textContent='심층 안전 복구 완료: '+n+'개 대표이름 상태를 연결했습니다.\n\n'+report(scan())+'\n\n※ 새 검색을 하지 않았고 기존 카드·READY·캐시는 삭제하지 않았습니다.'}
+ $('ns90145Btn').onclick=()=>{$('ns90145Panel').classList.remove('hidden');$('ns90145Out').textContent=report(scan())};
+ $('ns90145Scan').onclick=()=>{$('ns90145Out').textContent=report(scan())};$('ns90145Recover').onclick=recover;$('ns90145Close').onclick=()=>$('ns90145Panel').classList.add('hidden');
 })();
 </script>
 </body></html>
@@ -6350,3 +6383,5 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  }catch(_){}
 })();
 </script>
+
+<script id="ns90145-final-version-lock">(()=>{const V='MASTER V28 · NS90.145 DEEP STORED-EVIDENCE RECOVERY · NS90.140 SEARCH CORE LOCKED · ONE MASTER';function f(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}}f();setTimeout(f,0);setTimeout(f,500);setTimeout(f,2000);})();</script>
