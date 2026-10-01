@@ -2835,6 +2835,13 @@ function v16PaintRow(section,row,panel){
  const registered=!!savedLinked;
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
+ // NS90.151 SINGLE SOURCE: card existence decides green; otherwise the established
+ // durable verified cache decides purple. Never infer white merely because a card was deleted.
+ let durable=null;
+ if(!registered){
+   try{durable=v15CachedRepresentative(section,row.resolvedName||shown)||v15CachedRepresentative(section,shown)}catch(_){durable=null}
+   if(durable?.verified?.desc){row.ok=true;row.verified=durable.verified;row.pending=false}
+ }
  const ready=!registered&&!!(row.ok&&row.verified&&row.verified.desc);
  b.textContent=(registered?'◆ ':ready?'◆ ':'○ ')+shown;
  b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'verified-ready':'can-make');
@@ -6018,7 +6025,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </style>
 <script id="ns90148-clean-structural-master">
 (()=>{
- const V='MASTER V28 · NS90.148 CLEAN STRUCTURAL MASTER · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.151 REPRESENTATIVE STATE CORE INTEGRATION · SEARCH CORE LOCKED · ONE MASTER';
  const P='magic_ns90148_searched|';
  const clean=x=>String(x||'').trim().replace(/\\s+/g,' ');
  function key(c,s,n){return P+[c,s,clean(n)].join('|')}
@@ -6045,7 +6052,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
    try{localStorage.removeItem('magic_ns90137_run_after_refresh')}catch(_){}
    document.querySelectorAll('#ns90137TestBox,#ns90138Box,#ns90144Btn,#ns90144Panel,#ns90145Btn,#ns90145Panel').forEach(x=>x.remove());
-   try{let b=document.getElementById('ns90148StableBadge');if(!b){b=document.createElement('div');b.id='ns90148StableBadge';b.textContent='🧱 구조 안정판 1차 · 검색엔진 잠금 · 하나씩 검색하며 안정적으로 저장';const banner=document.getElementById('ns9015Banner');if(banner&&banner.parentNode)banner.insertAdjacentElement('afterend',b);else document.body.prepend(b)}}catch(_){}
+   try{let b=document.getElementById('ns90148StableBadge');if(!b){b=document.createElement('div');b.id='ns90148StableBadge';b.textContent='🧱 구조 안정판 4차 · 대표이름 상태를 기존 엔진 판정에 직접 통합 · 검색엔진 잠금';const banner=document.getElementById('ns9015Banner');if(banner&&banner.parentNode)banner.insertAdjacentElement('afterend',b);else document.body.prepend(b)}}catch(_){}
  }
  sync();[0,300,1000,2500,5000].forEach(ms=>setTimeout(sync,ms));setTimeout(()=>seed(),700);
 })();
@@ -6252,126 +6259,8 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </script>
 
 
-<!-- NS90.149 DELETE STATE SEPARATION: card deletion never deletes representative search success. -->
-<script id="ns90149-delete-state-separation">
-(()=>{
- const V='MASTER V28 · NS90.149 DELETE STATE SEPARATION · SEARCH CORE LOCKED · ONE MASTER';
- const P='magic_ns90148_searched|';
- const clean=x=>String(x||'').trim().replace(/\s+/g,' ');
- const stateKey=(c,s,n)=>P+[c,s,clean(n)].join('|');
- function isRepresentative(section,name){
-   try{return parseRepNames(repTextFor(section),section).map(cardInputName).some(n=>clean(n)===clean(cardInputName(name)))}catch(_){return false}
- }
- function compact(x){
-   if(!x||!String(x.desc||'').trim())return null;
-   const photo=String(x.photoRemote||x.photo||((Array.isArray(x.photos)&&x.photos[0])||''));
-   return {title:String(x.entityTitle||x.title||x.name||''),desc:String(x.desc||''),photo,photos:photo?[photo]:[],entityId:String(x.entityId||''),pageId:x.pageId==null?'':String(x.pageId),sources:Array.isArray(x.sources)?x.sources:[]};
- }
- // Wrap the final durable delete implementation. Capture representative success BEFORE deletion,
- // then restore READY + searched marker AFTER deletion. Search/resolver functions are untouched.
- try{
-   const previousDelete=ns9096DeleteDurable;
-   ns9096DeleteDurable=async function(section,itemId){
-     const country=String(COUNTRY||''); let name='',snap=null,rep=false;
-     try{
-       const target=(getCustom(section)||[]).find(x=>String(x.id)===String(itemId));
-       if(target){name=cardInputName(target.name);rep=isRepresentative(section,name);if(rep){snap=compact(target)||ns9053LoadReady(v12Request(section,name))||null;}}
-     }catch(_){}
-     const result=await previousDelete(section,itemId);
-     if(rep&&name){
-       try{localStorage.setItem(stateKey(country,section,name),'1')}catch(_){}
-       try{if(snap&&snap.desc)ns9053SaveReady(v12Request(section,name),snap)}catch(_){}
-       try{const mem=typeof ns9099LoadResearch==='function'?ns9099LoadResearch(section,name):null;if(mem&&mem.desc)ns9053SaveReady(v12Request(section,name),mem)}catch(_){}
-     }
-     return result;
-   };
- }catch(_){}
- // Make the searched marker sufficient when durable research memory survived but READY was compacted.
- try{
-   const previousPaint=v16PaintRow;
-   v16PaintRow=function(section,row,panel){
-     try{
-       const country=String(COUNTRY||''),name=cardInputName(row.name);
-       if(!row.ok&&localStorage.getItem(stateKey(country,section,name))==='1'){
-         let snap=ns9053LoadReady(v12Request(section,row.resolvedName||name))||ns9053LoadReady(v12Request(section,name));
-         if(!snap&&typeof ns9099LoadResearch==='function')snap=ns9099LoadResearch(section,name);
-         if(snap&&snap.desc){row.ok=true;row.verified=snap;row.pending=false;}
-       }
-     }catch(_){}
-     return previousPaint(section,row,panel);
-   };
- }catch(_){}
- function sync(){
-   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
-   try{let badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 2차 · 카드 삭제와 검색 성공상태 분리 · 검색엔진 잠금'}catch(_){}
- }
- sync();[0,300,1000,2500,5000].forEach(ms=>setTimeout(sync,ms));
-})();
-</script>
 
-
-<!-- NS90.150 REPRESENTATIVE STATE SINGLE SOURCE: independent verified snapshot survives card deletion. -->
-<script id="ns90150-representative-state-single-source">
-(()=>{
- const V='MASTER V28 · NS90.150 REPRESENTATIVE STATE SINGLE SOURCE · SEARCH CORE LOCKED · ONE MASTER';
- const P='magic_ns90150_repstate|';
- const clean=x=>String(x||'').trim().replace(/\s+/g,' ');
- const k=(c,s,n)=>P+[String(c||''),String(s||''),clean(cardInputName(n))].join('|');
- function isRep(section,name){try{return parseRepNames(repTextFor(section),section).map(cardInputName).some(n=>clean(n)===clean(cardInputName(name)))}catch(_){return false}}
- function compact(x,name){
-   if(!x||!String(x.desc||'').trim())return null;
-   const photo=String(x.photoRemote||x.photo||((Array.isArray(x.photos)&&x.photos[0])||''));
-   return {title:String(x.entityTitle||x.title||x.name||name||''),desc:String(x.desc||''),photo,photos:Array.isArray(x.photos)&&x.photos.length?x.photos:(photo?[photo]:[]),entityId:String(x.entityId||''),pageId:x.pageId==null?'':String(x.pageId),sources:Array.isArray(x.sources)?x.sources:[],finalEntityVerified:x.finalEntityVerified!==false,photoVerified:!!photo,savedAt:Date.now()};
- }
- function put(c,s,n,snap){if(!c||!isRep(s,n))return false;const v=compact(snap,n);if(!v)return false;try{localStorage.setItem(k(c,s,n),JSON.stringify(v));return true}catch(_){return false}}
- function get(c,s,n){try{const v=JSON.parse(localStorage.getItem(k(c,s,n))||'null');return v&&v.desc?v:null}catch(_){return null}}
- // SINGLE SOURCE precedence: saved CARD -> independent verified snapshot -> legacy READY -> white.
- // Search engine itself is not replaced.
- const oldCached=v15CachedRepresentative;
- v15CachedRepresentative=function(section,name){
-   const c=String(COUNTRY||'');
-   const own=get(c,section,name);
-   if(own)return {ok:true,verified:own,cached:true,ns90150:true};
-   const old=oldCached(section,name);
-   if(old?.verified?.desc){put(c,section,name,old.verified);return old}
-   return old;
- };
- // Every successful representative preview writes the independent snapshot BEFORE any card exists.
- const oldOpen=openRepresentativePreview;
- openRepresentativePreview=function(section,name,verified,panel){try{if(verified?.desc)put(String(COUNTRY||''),section,name,verified)}catch(_){}return oldOpen.apply(this,arguments)};
- // Every representative card save also refreshes the independent snapshot.
- try{const oldAppend=ns90106AppendCard;ns90106AppendCard=async function(section,item){try{if(item?.desc)put(String(COUNTRY||''),section,item?.name,item)}catch(_){}return await oldAppend.apply(this,arguments)}}catch(_){}
- // Seed current green representative cards. This is storage-only; no search/network call.
- async function seed(){const c=String(COUNTRY||'');if(!c)return;for(const section of REP_SECTIONS){let names=[];try{names=parseRepNames(repTextFor(section),section).map(cardInputName)}catch(_){}for(const name of names){try{const card=ns9067SavedForRepresentative(section,name);if(card)put(c,section,name,card)}catch(_){}}}}
- // Delete CARD only. Capture a verified snapshot first; after deletion force row reconstruction from the independent snapshot.
- try{
-   const oldDelete=ns9096DeleteDurable;
-   ns9096DeleteDurable=async function(section,itemId){
-     const c=String(COUNTRY||'');let n='',snap=null;
-     try{const target=(getCustom(section)||[]).find(x=>String(x.id)===String(itemId));if(target&&isRep(section,target.name)){n=cardInputName(target.name);snap=compact(target,n);if(snap)put(c,section,n,snap)}}catch(_){}
-     const r=await oldDelete.apply(this,arguments);
-     if(n){
-       if(snap)put(c,section,n,snap);
-       try{V16_SEARCH_STATE.delete(v16Key(section));}catch(_){try{V16_SEARCH_STATE.clear()}catch(__){}}
-       try{repAvailabilityCache.clear()}catch(_){}
-       setTimeout(()=>{try{renderRepresentativeCardButtonsV5(section)}catch(_){}},30);
-     }
-     return r;
-   };
- }catch(_){}
- // Paint from the same source even when an older row object was reconstructed as white.
- const oldPaint=v16PaintRow;
- v16PaintRow=function(section,row,panel){
-   try{const c=String(COUNTRY||''),n=cardInputName(row.name),snap=get(c,section,n);if(snap){row.ok=true;row.verified=snap;row.pending=false}}
-   catch(_){}
-   return oldPaint(section,row,panel);
- };
- function sync(){
-   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
-   try{let badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 3차 · 대표이름 상태 단일판정 · 카드 삭제 후 보라색 유지 · 검색엔진 잠금'}catch(_){}
- }
- seed();sync();[0,300,1000,2500,5000].forEach(ms=>setTimeout(sync,ms));
-})();
+<!-- NS90.151: representative state integrated into the original v16PaintRow core. -->
+<script id="ns90151-version-sync">
+(()=>{const V='MASTER V28 · NS90.151 REPRESENTATIVE STATE CORE INTEGRATION · SEARCH CORE LOCKED · ONE MASTER';function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}try{const badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 4차 · 대표이름 상태를 기존 엔진 판정에 직접 통합 · 검색엔진 잠금'}catch(_){}}sync();[0,300,1000,2500].forEach(ms=>setTimeout(sync,ms));})();
 </script>
