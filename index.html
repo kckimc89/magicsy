@@ -6347,3 +6347,43 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  window.__NS90161_VERSION=V;
 })();
 </script>
+
+<!-- NS90.162 NON-DESTRUCTIVE CARD STABILITY: preserve sibling cards during add/delete/rerender. Search core unchanged. -->
+<script id="ns90162-nondestructive-card-stability">
+(()=>{
+ const V='MASTER V28 · NS90.162 CARD STABILITY + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ // Person audit used to remove an existing card when legacy verification could not be
+ // reproduced during a later render. That made an unrelated add/delete appear to erase
+ // siblings (e.g. a previously saved representative card). Audit is now migration-only:
+ // it may upgrade a card to finalEntityVerified=true, but it never deletes a saved card.
+ if(typeof ns9073AuditPersonCards==='function'){
+   ns9073AuditPersonCards=async function(section){
+     if(!NS9070_PERSON_SECTIONS.has(section))return;
+     const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
+     const db=await cardDBGet(country,section);
+     let mirror=[];try{mirror=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){}
+     const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];
+     const items=(typeof ns90106MergeCards==='function')?ns90106MergeCards(country,section,db,mirror,mem):getCustom(section);
+     if(!items.length)return;
+     let changed=false;
+     const kept=[];
+     for(const x of items){
+       if(x?.finalEntityVerified===true){kept.push(x);continue;}
+       let ok=false;try{ok=await ns9073VerifyPersonRecord(section,x?.name,x)}catch(_){ok=false}
+       if(ok){kept.push({...x,finalEntityVerified:true});changed=true}
+       else kept.push(x); // critical NS90.162 rule: verification uncertainty never deletes a user's saved card
+     }
+     if(changed){try{await ns9055SetCustomDurable(section,kept)}catch(_){setCustom(section,kept)}}
+     else {CARD_MEM.set(mk,kept.map(x=>({...x})));}
+   };
+ }
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);
+ const mo=new MutationObserver(sync);try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+ [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
+ window.__NS90162_VERSION=V;
+})();
+</script>
