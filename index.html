@@ -6197,7 +6197,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
-<!-- NS90.173: UNIFIED VERIFIED RECORD CORE
+<!-- NS90.174: UNIFIED VERIFIED RECORD CORE
      One rule for every country/category/item:
      card exists = green; verified record exists = purple; neither = white.
      Card deletion never deletes the verified record.
@@ -6209,7 +6209,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <script id="ns90173-unified-verified-record-core">
 (()=>{
 'use strict';
-const V='MASTER V28 · NS90.173 UNIFIED VERIFIED RECORD · NO EXCEPTIONS · ONE MASTER';
+const V='MASTER V28 · NS90.174 FULL RESET + FULL REBUILD · UNIFIED VERIFIED RECORD · NO EXCEPTIONS · ONE MASTER';
 const PREFIX='magic_ns90173_verified|';
 
 function canon(v){
@@ -6322,7 +6322,7 @@ function paint173(section,row,panel){
     b.dataset.busy='1';b.disabled=true;b.textContent='… '+shown;
     const pv=panel.querySelector('.rep-preview-v5');
     if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
-    let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(e){console.warn('[NS90.173 resolve]',e)}
+    let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(e){console.warn('[NS90.174 resolve]',e)}
     b.dataset.busy='0';b.disabled=false;
     if(v&&valid(v)){
       saveRec(section,shown,v);row.ok=true;row.verified=v;
@@ -6358,7 +6358,7 @@ function migrateVisible(){
 }
 function sync(){
   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-  try{document.title='요술방망이 백과사전 · NS90.173'}catch(_){}
+  try{document.title='요술방망이 백과사전 · NS90.174'}catch(_){}
   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
 }
 window.__NS90173={version:V,key:recKey,load:loadRec,save:saveRec,migrate:migrateSection};
@@ -6366,6 +6366,146 @@ sync();
 document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(migrateVisible,120)});
 window.addEventListener('load',()=>{sync();setTimeout(migrateVisible,250)});
 setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
+})();
+</script>
+
+
+<script id="ns90174-full-rebuild">
+(function(){
+  "use strict";
+  const VER="NS90.174";
+  const KEY="MW_NS90174_REBUILD_STATE";
+
+  function txt(el){ return (el && (el.innerText||el.textContent)||"").trim(); }
+  function visible(el){ if(!el) return false; const s=getComputedStyle(el), r=el.getBoundingClientRect(); return s.display!=="none"&&s.visibility!=="hidden"&&r.width>0&&r.height>0; }
+  function all(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function buttons(){ return all("button,[role=button],a").filter(visible); }
+  function findBtn(words){
+    const ws=Array.isArray(words)?words:[words];
+    return buttons().find(b=>ws.some(w=>txt(b).includes(w)));
+  }
+  function state(v){ if(v===undefined){ try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null} } localStorage.setItem(KEY,JSON.stringify(v)); }
+  function clearState(){ localStorage.removeItem(KEY); }
+  function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+  function ensurePanel(){
+    if(document.getElementById("ns174panel")) return;
+    const d=document.createElement("div"); d.id="ns174panel";
+    d.style.cssText="position:fixed;right:14px;bottom:76px;z-index:999999;background:#fff;border:2px solid #5b67c8;border-radius:16px;padding:10px 12px;box-shadow:0 5px 20px #0003;font-family:system-ui;max-width:330px";
+    d.innerHTML='<div style="font-weight:800;margin-bottom:6px">🧪 174 전체 구조 평가</div>'+
+      '<button id="ns174go" style="font-size:16px;font-weight:800;padding:9px 12px;border-radius:12px;border:0;background:#5b67c8;color:white">전체 카드 삭제 → 전체 재검색</button>'+
+      '<button id="ns174stop" style="font-size:14px;margin-left:5px;padding:8px;border-radius:10px">중지</button>'+
+      '<div id="ns174msg" style="font-size:13px;margin-top:6px;line-height:1.35">나라·카테고리 예외 없이 같은 절차로 실행합니다.</div>';
+    document.body.appendChild(d);
+    document.getElementById("ns174go").onclick=()=>start();
+    document.getElementById("ns174stop").onclick=()=>{clearState(); msg("중지했습니다.");};
+  }
+  function msg(s){ const e=document.getElementById("ns174msg"); if(e)e.textContent=s; }
+
+  // We do not directly mutate card/verified stores. Deletion and rebuild go through the app's own UI paths.
+  // This keeps the evaluation honest and exercises the same common engine a child/user would use.
+  async function clickAndWait(b, ms=450){ b.scrollIntoView({block:"center"}); b.click(); await sleep(ms); }
+
+  function countryCards(){
+    return all("body *").filter(e=>{
+      const t=txt(e);
+      return visible(e) && /^(스페인|일본|미국)$/.test(t) && e.children.length<8;
+    });
+  }
+  function categoryBtns(){
+    const names=["국기","수도","자연·기후","언어","음식","과일","동식물","명소","문화","가수","운동선수","역사인물","예술작품"];
+    return buttons().filter(b=>names.includes(txt(b)));
+  }
+  function candidateBtns(){
+    // candidate chips are identified structurally: visible compact controls under "대표 이름으로 카드 만들기"
+    const heads=all("body *").filter(e=>visible(e)&&txt(e).includes("대표 이름으로 카드 만들기"));
+    if(!heads.length) return [];
+    const h=heads[heads.length-1], hr=h.getBoundingClientRect();
+    return buttons().filter(b=>{
+      const r=b.getBoundingClientRect(), t=txt(b);
+      return r.top>hr.top && r.top<hr.top+430 && t && !/항목 추가|대표상태|새 백과구조|나라 목록|닫기|선택한 사진/.test(t);
+    });
+  }
+  function cardDeleteBtns(){
+    return buttons().filter(b=>/삭제/.test(txt(b)) && !/전체/.test(txt(b)));
+  }
+  async function deleteVisibleCards(){
+    let guard=0;
+    while(guard++<200){
+      const ds=cardDeleteBtns();
+      if(!ds.length) break;
+      await clickAndWait(ds[0],250);
+      const ok=findBtn(["확인","삭제"]);
+      if(ok && visible(ok)) await clickAndWait(ok,250);
+    }
+  }
+  async function buildCandidates(){
+    let guard=0;
+    while(guard++<100){
+      const cs=candidateBtns();
+      // Prefer not-yet-card / purple / empty candidates; existing cards won't need rebuild.
+      const c=cs.find(x=>visible(x));
+      if(!c) break;
+      const label=txt(c);
+      msg("재검색/검증: "+label);
+      await clickAndWait(c,650);
+      // If a preview opens, use normal save button.
+      let save=findBtn(["선택한 사진으로 카드 만들기","카드 만들기","저장"]);
+      if(save && visible(save)){
+        await clickAndWait(save,500);
+      } else {
+        // close failed/invalid result if app exposes close
+        const close=findBtn("닫기");
+        if(close && visible(close)) await clickAndWait(close,250);
+      }
+      // prevent endlessly re-clicking same control in pages where state cannot advance
+      c.dataset.ns174seen="1";
+      const remaining=candidateBtns().filter(x=>!x.dataset.ns174seen);
+      if(!remaining.length) break;
+    }
+  }
+
+  async function start(){
+    if(!confirm("174 전체 평가를 시작합니다.\n\n기존 카드를 모두 삭제한 뒤, 모든 나라·카테고리를 같은 공통 절차로 다시 검색/검증하여 카드를 만듭니다.\n\n백업이 필요하면 먼저 취소하고 백업해 주세요.")) return;
+    state({running:true,phase:"run"});
+    msg("전체 평가를 시작합니다…");
+    await run();
+  }
+  async function run(){
+    const st=state(); if(!st||!st.running) return;
+    // Discover country entry controls from current list. No country-specific code paths.
+    let cs=countryCards();
+    if(!cs.length){
+      const back=findBtn(["나라 목록으로","나라 목록","백과"]);
+      if(back){ await clickAndWait(back,500); cs=countryCards(); }
+    }
+    for(let ci=0;ci<cs.length;ci++){
+      if(!(state()||{}).running) return;
+      cs=countryCards(); const country=cs[ci]; if(!country) continue;
+      msg("나라 열기: "+txt(country));
+      await clickAndWait(country,550);
+      let cats=categoryBtns();
+      for(let ki=0;ki<cats.length;ki++){
+        if(!(state()||{}).running) return;
+        cats=categoryBtns(); const cat=cats[ki]; if(!cat) continue;
+        msg(txt(cat)+" — 카드 삭제");
+        await clickAndWait(cat,350);
+        await deleteVisibleCards();
+        msg(txt(cat)+" — 전체 재검색/검증");
+        // reset seen flags for this category
+        candidateBtns().forEach(x=>delete x.dataset.ns174seen);
+        await buildCandidates();
+      }
+      const back=findBtn(["나라 목록으로","나라 목록"]);
+      if(back) await clickAndWait(back,500);
+    }
+    clearState();
+    msg("완료: 전체 삭제 → 전체 재검색/검증을 마쳤습니다. 이제 보라색 상태와 재열기를 평가하세요.");
+    alert("NS90.174 전체 구조 평가 작업을 마쳤습니다.\n이제 각 나라·카테고리의 보라색 상태와 재열기를 확인해 주세요.");
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",ensurePanel);
+  else ensurePanel();
 })();
 </script>
 
