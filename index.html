@@ -6069,6 +6069,57 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(repaint,80)});window.addEventListener('load',()=>{sync();setTimeout(repaint,150)});sync();setTimeout(sync,300);setTimeout(sync,1500);
 })();
 </script>
+
+
+<!-- NS90.164 SNAPSHOT EXACT-ONE DELETE. Search/resolver core untouched. -->
+<script id="ns90164-snapshot-exact-one-delete">
+(()=>{
+ const V='MASTER V28 · NS90.164 SNAPSHOT EXACT-ONE DELETE · SIBLING PRESERVE · SEARCH CORE LOCKED · ONE MASTER';
+ // IMPORTANT: do not merge DB/localStorage/memory during deletion. The visible card list is
+ // already represented by CARD_MEM/getCustom. Merging older stores here could resurrect stale
+ // identity metadata and collapse an unrelated sibling. Remove one array entry only.
+ ns9096DeleteDurable=async function(section,itemId){
+   const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
+   const visible=(CARD_MEM.has(mk)?CARD_MEM.get(mk):getCustom(section)).map(x=>({...x}));
+   let idx=visible.findIndex(x=>String(x.id)===String(itemId));
+   if(idx<0)return visible;
+   const target=visible[idx];
+   // Keep the deleted representative's verified research memory for instant purple reopen.
+   try{if(typeof ns9099SaveResearch==='function')ns9099SaveResearch(section,target)}catch(_){}
+   try{if(typeof ns90154MarkSearched==='function')ns90154MarkSearched(section,target.name)}catch(_){}
+   try{if(typeof ns9098RememberForResearch==='function')await ns9098RememberForResearch(section,target)}catch(_){}
+   // splice removes EXACTLY ONE entry, even if legacy data accidentally reused an id/stableKey.
+   const kept=visible.slice(); kept.splice(idx,1);
+   // Write the complete surviving visible snapshot as one transaction. No identity normalization,
+   // no stableKey grouping, no cross-store merge, and no sibling repair/deletion pass.
+   await cardDBPut(country,section,kept.map(x=>({...x})));
+   CARD_MEM.set(mk,kept.map(x=>({...x})));
+   try{localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(e){
+     if(typeof isQuotaError==='function'&&isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}}
+   }
+   // Representative state only; never touch another card.
+   try{setDeletedBase(section,getDeletedBase(section).filter(n=>!sameCardIdentity(n,target.name)))}catch(_){}
+   try{unmarkCandidate(section,target.name)}catch(_){}
+   return kept;
+ };
+ window.__NS90164_VERSION=V;
+})();
+</script>
+
+<!-- NS90.164 FINAL VERSION LOCK -->
+<script id="ns90164-final-version-lock">
+(()=>{
+ const V='MASTER V28 · NS90.164 SNAPSHOT EXACT-ONE DELETE · SIBLING PRESERVE · READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync);
+ const mo=new MutationObserver(sync); try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+ [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
+ window.__NS90164_VERSION=V;
+})();
+</script>
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
@@ -6330,45 +6381,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
-<!-- NS90.163 TARGET-ONLY DELETE + SIBLING CARD PRESERVATION. Search/resolver core untouched. -->
-<script id="ns90163-target-only-delete">
+<!-- NS90.161 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
+<script id="ns90161-final-version-lock">
 (()=>{
- const V='MASTER V28 · NS90.163 TARGET-ONLY DELETE + SIBLING PRESERVE · SEARCH CORE LOCKED · ONE MASTER';
- // Delete exactly the card the user selected. Older delete layers could group cards by a
- // derived stable identity; on Safari that could make an unrelated sibling disappear when
- // one representative was deleted/re-added. NS90.163 never performs grouped deletion.
- ns9096DeleteDurable=async function(section,itemId){
-   const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
-   let db=[]; try{db=await ns9096Timeout(cardDBGet(country,section),2200,[])}catch(_){}
-   let mirror=[]; try{mirror=JSON.parse(localStorage.getItem(key(section))||'[]')}catch(_){}
-   const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];
-   let current=[];
-   try{current=ns90106MergeCards(country,section,db,mirror,mem,getCustom(section))}catch(_){current=getCustom(section).map(x=>({...x}))}
-   const target=current.find(x=>String(x.id)===String(itemId));
-   if(!target)return current;
-   // Preserve only this target's verified snapshot so its purple button can reopen instantly.
-   try{if(typeof ns9099SaveResearch==='function')ns9099SaveResearch(section,target)}catch(_){}
-   try{if(typeof ns90154MarkSearched==='function')ns90154MarkSearched(section,target.name)}catch(_){}
-   try{if(typeof ns9098RememberForResearch==='function')await ns9098RememberForResearch(section,target)}catch(_){}
-   const kept=current.filter(x=>String(x.id)!==String(itemId));
-   await cardDBPut(country,section,kept.map(x=>({...x})));
-   CARD_MEM.set(mk,kept.map(x=>({...x})));
-   try{localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(e){
-     if(typeof isQuotaError==='function'&&isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}}
-   }
-   // Verify only the selected id is gone; never remove or rewrite a sibling as a repair step.
-   const check=await ns9096Timeout(cardDBGet(country,section),2200,[]);
-   if((check||[]).some(x=>String(x.id)===String(itemId)))throw new Error('NS90.163 target-only delete verify failed');
-   return kept;
- };
- window.__NS90163_VERSION=V;
-})();
-</script>
-
-<!-- NS90.163 FINAL VERSION LOCK: appended after every legacy layer; search/resolver core remains locked. -->
-<script id="ns90163-final-version-lock">
-(()=>{
- const V='MASTER V28 · NS90.163 TARGET-ONLY DELETE + SIBLING PRESERVE · READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.161 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
@@ -6379,6 +6395,6 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  const mo=new MutationObserver(sync);
  try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
  [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
- window.__NS90163_VERSION=V;
+ window.__NS90161_VERSION=V;
 })();
 </script>
