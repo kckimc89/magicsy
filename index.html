@@ -6334,3 +6334,84 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <script id="ns90151-version-sync">
 (()=>{const V='MASTER V28 · NS90.152 REPRESENTATIVE STATE MACHINE · SEARCH CORE LOCKED · ONE MASTER';function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}try{const badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 4차 · 대표이름 상태를 기존 엔진 판정에 직접 통합 · 검색엔진 잠금'}catch(_){}}sync();[0,300,1000,2500].forEach(ms=>setTimeout(sync,ms));})();
 </script>
+
+<!-- NS90.153 FINAL representative-state integration. This block is intentionally LAST. -->
+<script id="ns90153-final-representative-state-integration">
+(()=>{
+ const V='MASTER V28 · NS90.153 FINAL REPRESENTATIVE STATE INTEGRATION · SEARCH CORE LOCKED · ONE MASTER';
+ const PREFIX='magic_ns90153_repstate_';
+ const norm=v=>{try{return cardInputName(v)}catch(_){return String(v||'').trim()}};
+ const key=(country,section,name)=>PREFIX+[String(country||''),String(section||''),norm(name)].join('|');
+ const mark=(country,section,name)=>{try{localStorage.setItem(key(country,section,name),'searched')}catch(_){}};
+ const has=(country,section,name)=>{try{return localStorage.getItem(key(country,section,name))==='searched'}catch(_){return false}};
+ const cardFor=(section,name)=>{try{return ns9067SavedForRepresentative(section,norm(name))||null}catch(_){return null}};
+ function sameRep(section,repName,cardName){
+   try{
+     if(sameCardIdentity(repName,cardName))return true;
+     return ns9067LinkedNames(section,repName).some(n=>sameCardIdentity(n,cardName));
+   }catch(_){return norm(repName)===norm(cardName)}
+ }
+ function state(section,row){
+   const country=String(COUNTRY||''), shown=norm(row.name), card=cardFor(section,shown);
+   if(card){mark(country,section,shown);return 'card'}
+   // Migrate any verified cache/research memory once, then rely on the durable state.
+   try{const c=v15CachedRepresentative(section,row.resolvedName||shown)||v15CachedRepresentative(section,shown);if(c?.verified?.desc)mark(country,section,shown)}catch(_){}
+   try{if(row.ok&&row.verified&&row.verified.desc)mark(country,section,shown)}catch(_){}
+   return has(country,section,shown)?'searched':'none';
+ }
+ function paint(section,row,panel){
+   if(!row||!panel)return;
+   const shown=norm(row.name), b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);if(!b)return;
+   const s=state(section,row);
+   if(s==='card'){
+     b.textContent='◆ '+shown;b.className='rep-card-btn-v5 registered ns9017-done';b.title='저장된 카드를 미리 봅니다.';
+   }else if(s==='searched'){
+     b.textContent='◆ '+shown;b.className='rep-card-btn-v5 verified-ready';b.title='검색 확인 완료 · 카드를 삭제해도 이 상태는 유지됩니다.';
+   }else{
+     b.textContent='○ '+shown;b.className='rep-card-btn-v5 can-make';b.title='누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
+   }
+ }
+ // FINAL renderer: this wrapper is defined after every legacy version block.
+ const prevPaint=v16PaintRow;
+ v16PaintRow=function(section,row,panel){const r=prevPaint.apply(this,arguments);try{paint(section,row,panel)}catch(e){console.warn('[NS90.153 paint]',e)}return r};
+ // A successful preview is the authoritative searched transition.
+ const prevPreview=openRepresentativePreview;
+ openRepresentativePreview=function(section,name,verified,panel){try{if(verified&&verified.desc)mark(String(COUNTRY||''),section,name)}catch(_){}const r=prevPreview.apply(this,arguments);return r};
+ // Capture delete BEFORE the legacy handler runs. This is independent of later delete wrappers.
+ document.addEventListener('click',e=>{
+   const btn=e.target?.closest?.('button.delete,button.v22-delete');if(!btn)return;
+   let card=btn.closest?.('.item');
+   if(!card && btn.classList.contains('v22-delete'))return; // modal forwards to .delete, which is captured next
+   if(!card)return;
+   const section=String(card.dataset.section||''), itemId=String(card.dataset.itemId||''), country=String(COUNTRY||'');
+   let cardName=String(card.querySelector('h3')?.textContent||'').trim();
+   try{const x=getCustom(section).find(v=>String(v.id)===itemId);if(x?.name)cardName=x.name}catch(_){}
+   if(!section||!cardName)return;
+   try{const st=v16State(section);for(const row of st.rows.values()){const shown=norm(row.name);if(sameRep(section,shown,cardName))mark(country,section,shown)}}catch(err){console.warn('[NS90.153 delete capture]',err)}
+ },true);
+ // After every durable delete, repaint from the single state source.
+ const prevDelete=ns9096DeleteDurable;
+ ns9096DeleteDurable=async function(section,itemId){
+   const country=String(COUNTRY||'');
+   try{const cur=getCustom(section),x=cur.find(v=>String(v.id)===String(itemId));if(x){const st=v16State(section);for(const row of st.rows.values()){const shown=norm(row.name);if(sameRep(section,shown,x.name))mark(country,section,shown)}}}catch(_){}
+   const r=await prevDelete.apply(this,arguments);
+   setTimeout(()=>{try{const st=v16State(section),p=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(p)for(const row of st.rows.values())paint(section,row,p)}catch(_){}},0);
+   return r;
+ };
+ function migrateAndPaint(){
+   try{for(const section of REP_SECTIONS){const st=v16State(section),p=document.getElementById(section)?.querySelector('.rep-card-panel-v5');for(const row of st.rows.values()){if(cardFor(section,norm(row.name)))mark(String(COUNTRY||''),section,norm(row.name));if(p)paint(section,row,p)}}}catch(_){}
+ }
+ const prevOpenCountry=openCountry;
+ openCountry=function(code){const r=prevOpenCountry.apply(this,arguments);setTimeout(migrateAndPaint,350);return r};
+ function cleanStrayText(){
+   try{const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const rm=[];while(w.nextNode()){const n=w.currentNode,t=String(n.nodeValue||'').trim();if(t==='\\n'||t==='\\n\\n'||t==='\\n\\n\\n')rm.push(n)}rm.forEach(n=>n.remove())}catch(_){}
+ }
+ function syncBanner(){
+   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+   try{const badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 6차 · 대표상태 최종 단일판정 · 삭제 전 검색완료 보존 · 검색엔진 잠금'}catch(_){}
+ }
+ window.__NS90153_REP_STATE={mark,has,key,state};
+ syncBanner();cleanStrayText();setTimeout(migrateAndPaint,400);[200,800,1800,3500].forEach(ms=>setTimeout(()=>{syncBanner();cleanStrayText()},ms));
+})();
+</script>
