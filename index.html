@@ -6387,3 +6387,56 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  window.__NS90162_VERSION=V;
 })();
 </script>
+
+
+<!-- NS90.163 ATOMIC CARD STORE: single-card add/delete must never rebuild or remove siblings. Search core unchanged. -->
+<script id="ns90163-atomic-card-store">
+(()=>{
+ const V='MASTER V28 · NS90.163 ATOMIC CARD STORE + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ const clone=x=>{try{return structuredClone(x)}catch(_){return JSON.parse(JSON.stringify(x))}};
+ const ident=x=>{try{return normalizeName(cardInputName(x?.name||x?.title||''))}catch(_){return String(x?.name||x?.title||'').trim().toLowerCase()}};
+ const uniq=arr=>{const out=[],seen=new Set();for(const x of (Array.isArray(arr)?arr:[])){const k=ident(x);if(!k||seen.has(k))continue;seen.add(k);out.push(clone(x))}return out};
+ async function snapshot(section){
+   const country=String(COUNTRY||''), mk=cardStoreKey(country,section);let db=[],ls=[],mem=[];
+   try{db=await cardDBGet(country,section)||[]}catch(_){}
+   try{ls=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){}
+   try{mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[]}catch(_){}
+   return uniq([...(Array.isArray(db)?db:[]),...(Array.isArray(ls)?ls:[]),...(Array.isArray(mem)?mem:[])]);
+ }
+ async function commit(section,arr){
+   const country=String(COUNTRY||''), clean=uniq(arr), mk=cardStoreKey(country,section);
+   try{await cardDBPut(country,section,clean)}catch(_){}
+   try{CARD_MEM.set(mk,clean.map(clone))}catch(_){}
+   try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(clean.map(x=>typeof ns9055CompactCardForLocal==='function'?ns9055CompactCardForLocal(x):x)))}catch(_){}
+   return clean;
+ }
+ // Atomic append: merge the new/updated card into a fresh snapshot; never replace the collection with a stale render-time array.
+ try{
+   ns90106AppendCard=async function(section,item){
+     const before=await snapshot(section), k=ident(item);let found=false;
+     const next=before.map(x=>{if(k&&ident(x)===k){found=true;return {...x,...clone(item)}}return x});
+     if(!found)next.push(clone(item));
+     await commit(section,next);
+     return item;
+   };
+ }catch(_){}
+ // Guard all durable whole-list writes: a stale subset may update matching records, but cannot silently drop siblings.
+ try{
+   const oldSet=ns9055SetCustomDurable;
+   ns9055SetCustomDurable=async function(section,arr){
+     const before=await snapshot(section), incoming=uniq(arr), map=new Map(incoming.map(x=>[ident(x),x]));
+     const merged=before.map(x=>map.has(ident(x))?{...x,...clone(map.get(ident(x)))}:x);
+     const have=new Set(merged.map(ident));for(const x of incoming){const k=ident(x);if(k&&!have.has(k)){merged.push(clone(x));have.add(k)}}
+     return commit(section,merged);
+   };
+ }catch(_){}
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);
+ const mo=new MutationObserver(sync);try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+ [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
+ window.__NS90163_VERSION=V;
+})();
+</script>
