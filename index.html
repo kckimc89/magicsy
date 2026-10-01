@@ -6385,3 +6385,42 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </script>
 
 <script id="ns90145-final-version-lock">(()=>{const V='MASTER V28 · NS90.145 DEEP STORED-EVIDENCE RECOVERY · NS90.140 SEARCH CORE LOCKED · ONE MASTER';function f(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}}f();setTimeout(f,0);setTimeout(f,500);setTimeout(f,2000);})();</script>
+
+
+<!-- NS90.146 STORED STATE RECONNECT. Search core untouched; reconnect deep stored evidence to purple state. -->
+<style id="ns90146-style">
+#ns90146Btn{position:fixed;right:18px;bottom:186px;z-index:10000;border:1px solid #6b4fa1;border-radius:18px;background:#fff;padding:10px 14px;font-weight:800;font-size:14px;color:#432c70}
+#ns90146Panel{position:fixed;inset:7% 5%;z-index:10040;background:#fff;border:2px solid #6b4fa1;border-radius:18px;padding:18px;overflow:auto;box-shadow:0 8px 30px #0003;color:#222}
+#ns90146Panel.hidden{display:none}#ns90146Panel .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}#ns90146Panel button{padding:9px 12px;border:1px solid #aaa;border-radius:10px;background:#fff;font-weight:700}#ns90146Out{white-space:pre-wrap;background:#f7f5fb;border:1px solid #ddd;border-radius:12px;padding:12px;font-size:13px;line-height:1.5}
+</style>
+<button id="ns90146Btn" type="button">🔗 증거 재연결</button>
+<div id="ns90146Panel" class="hidden"><h2>🔗 NS90.146 저장 상태 재연결</h2><p>NS90.145에서 확인된 CARD·READY·과거 성공증거를 현재 대표이름의 보라색 검색완료 상태에 다시 연결합니다. 새 검색은 하지 않으며 기존 카드와 저장자료를 삭제하지 않습니다.</p><div class="row"><button id="ns90146Scan" type="button">재연결 가능 확인</button><button id="ns90146Recover" type="button">안전 재연결 실행</button><button id="ns90146Close" type="button">닫기</button></div><pre id="ns90146Out">먼저 ‘재연결 가능 확인’을 눌러주세요.</pre></div>
+<script id="ns90146-stored-state-reconnect">
+(()=>{
+ const V='MASTER V28 · NS90.146 STORED STATE RECONNECT · NS90.140 SEARCH CORE LOCKED · ONE MASTER';
+ const $=id=>document.getElementById(id), PREFIX='magic_ns90146_evidence|';
+ const norm=x=>String(x||'').trim().toLowerCase().replace(/[\s·ㆍ・,._()\-–—:;]+/g,'');
+ const clean=x=>String(x||'').trim().replace(/\s+/g,' ');
+ function k(c,s,n){return PREFIX+[c,s,clean(n)].join('|')}
+ function valid(j){return !!(j&&String(j.desc||'').trim())}
+ function save(c,s,n,j){if(!valid(j))return false;try{localStorage.setItem(k(c,s,n),JSON.stringify(j));localStorage.setItem('magic_ns90144_searched|'+[c,s,clean(n)].join('|'),'1');return true}catch(_){return false}}
+ function load(c,s,n){try{const j=JSON.parse(localStorage.getItem(k(c,s,n))||'null');return valid(j)?j:null}catch(_){return null}}
+ function ready(section,name){try{const req=v12Request(section,name);const j=JSON.parse(localStorage.getItem('magic_ready_9053_'+req.key)||'null');return valid(j)?j:null}catch(_){return null}}
+ function reps(section){try{return parseRepNames(repTextFor(section),section).map(n=>({shown:cardInputName(n),resolved:v28RepresentativeName(section,n)}))}catch(_){return []}}
+ function index(){const a=[];try{for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i)||'';if(!/^(magic_ready_9053_|magic_v28_entity_|magic_v16_entity_|magic_v15_entity_|magic_v14_entity_|magic_v13_entity_)/.test(key))continue;let j=null;try{j=JSON.parse(localStorage.getItem(key)||'null')}catch(_){}if(!valid(j))continue;const raw=key.replace(/^(magic_ready_9053_|magic_v28_entity_|magic_v16_entity_|magic_v15_entity_|magic_v14_entity_|magic_v13_entity_)/,'');a.push({key,j,keyNorm:norm(raw)})}}catch(_){}return a}
+ function evidence(section,shown,resolved,idx){let j=ready(section,resolved)||ready(section,shown);if(j)return {type:'READY',j};const targets=[shown,resolved].map(norm).filter(Boolean);for(const e of idx){for(const t of targets){if(t&&e.keyNorm.includes(t))return {type:'LEGACY',j:e.j,key:e.key}}}return null}
+ function scanCountry(c,idx){const old=COUNTRY,out=[];try{COUNTRY=c;for(const section of REP_SECTIONS){for(const x of reps(section)){let saved=null;try{saved=ns9067SavedForRepresentative(section,x.shown)}catch(_){}const own=load(c,section,x.shown);const ev=own?{type:'RECONNECTED',j:own}:evidence(section,x.shown,x.resolved,idx);if(saved||ev)out.push({c,section,name:x.shown,saved:!!saved,ev})}}}finally{COUNTRY=old}return out}
+ function scan(){const idx=index();return {idx,rows:['ES','JP','US'].flatMap(c=>scanCountry(c,idx))}}
+ function report(o){const by={ES:[],JP:[],US:[]};o.rows.forEach(r=>by[r.c].push(r));let a=['NS90.146 STORED STATE RECONNECT','새 검색 없음 · 검색엔진 변경 없음 · 기존 자료 삭제 없음','저장 성공증거 인덱스: '+o.idx.length+'개',''];for(const c of ['ES','JP','US']){a.push(c+' 재연결 가능: '+by[c].length+'개');for(const r of by[c])a.push('  '+r.section+' | '+r.name+' | '+(r.saved?'CARD ':'')+(r.ev?r.ev.type:''));a.push('')}return a.join('\n')}
+ // Important: unlike 144/145, a deep LEGACY snapshot itself can paint the recovered row purple.
+ const prevPaint=v16PaintRow;
+ v16PaintRow=function(section,row,panel){try{if(!row.ok){const c=String(COUNTRY||''), shown=cardInputName(row.name);const j=load(c,section,shown);if(valid(j)){row.ok=true;row.pending=false;row.verified=j}}}catch(_){}return prevPaint(section,row,panel)};
+ async function recover(){const o=scan();let n=0;for(const r of o.rows){if(r.ev&&valid(r.ev.j)&&save(r.c,r.section,r.name,r.ev.j))n++}try{V16_SEARCH_STATE.clear();repAvailabilityCache.clear()}catch(_){}try{await renderAllRepresentativeCardButtonsV5()}catch(_){}$('ns90146Out').textContent='안전 재연결 완료: '+n+'개 대표이름의 저장증거를 현재 보라색 검색완료 상태에 연결했습니다.\n\n'+report(scan())+'\n\n※ CARD는 그대로 유지됩니다. 새 검색을 하지 않았고 검색엔진도 수정하지 않았습니다.'}
+ function sync(){try{const b=$('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);
+ $('ns90146Btn').onclick=()=>{$('ns90146Panel').classList.remove('hidden');$('ns90146Out').textContent=report(scan())};
+ $('ns90146Scan').onclick=()=>{$('ns90146Out').textContent=report(scan())};
+ $('ns90146Recover').onclick=recover;$('ns90146Close').onclick=()=>$('ns90146Panel').classList.add('hidden');
+})();
+</script>
+<script id="ns90146-final-version-lock">(()=>{const V='MASTER V28 · NS90.146 STORED STATE RECONNECT · NS90.140 SEARCH CORE LOCKED · ONE MASTER';function f(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}}f();setTimeout(f,0);setTimeout(f,500);setTimeout(f,2000);setTimeout(f,5000);})();</script>
