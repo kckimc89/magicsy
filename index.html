@@ -6329,3 +6329,21 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  window.addEventListener('load',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,120)});
 })();
 </script>
+
+<!-- NS90.161 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
+<script id="ns90161-final-version-lock">
+(()=>{
+ const V='MASTER V28 · NS90.161 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ sync();
+ document.addEventListener('DOMContentLoaded',sync);
+ window.addEventListener('load',sync);
+ const mo=new MutationObserver(sync);
+ try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+ [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
+ window.__NS90161_VERSION=V;
+})();
+</script>
