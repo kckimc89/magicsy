@@ -6196,6 +6196,179 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync); setTimeout(sync,100); setTimeout(sync,700); setInterval(sync,1500);
 })();
 </script>
+
+<!-- NS90.173: UNIFIED VERIFIED RECORD CORE
+     One rule for every country/category/item:
+     card exists = green; verified record exists = purple; neither = white.
+     Card deletion never deletes the verified record.
+     No country/category/item exception table is used here. -->
+<style id="ns90173-unified-style">
+.rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important}
+.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important}
+</style>
+<script id="ns90173-unified-verified-record-core">
+(()=>{
+'use strict';
+const V='MASTER V28 · NS90.173 UNIFIED VERIFIED RECORD · NO EXCEPTIONS · ONE MASTER';
+const PREFIX='magic_ns90173_verified|';
+
+function canon(v){
+  try{return normalizeItemName(cardInputName(String(v||'')))}
+  catch(_){return String(v||'').normalize('NFKC').trim().toLowerCase().replace(/\s+/g,'')}
+}
+function recKey(section,name,country){
+  return PREFIX+[String(country||COUNTRY||''),String(section||''),canon(name)].join('|');
+}
+function photoOf(s){return String(s?.photo||s?.photoRemote||(Array.isArray(s?.photos)&&s.photos[0])||'').trim()}
+function valid(s){return !!(s&&String(s.desc||'').trim()&&photoOf(s))}
+function normalizeSnap(name,s){
+  if(!valid(s))return null;
+  const p=photoOf(s);
+  return {
+    title:String(s.title||s.entityTitle||name||''),
+    desc:String(s.desc||'').trim(),
+    photo:p, photos:Array.isArray(s.photos)&&s.photos.length?s.photos.filter(Boolean):[p],
+    entityId:String(s.entityId||''), pageId:s.pageId==null?'':String(s.pageId),
+    sources:Array.isArray(s.sources)?s.sources:[],
+    representativeName:String(name||s.representativeName||''),
+    finalEntityVerified:s.finalEntityVerified!==false,
+    qualityGateVerified:s.qualityGateVerified!==false,
+    savedAt:Date.now(), unified173:true
+  };
+}
+function saveRec(section,name,s,country){
+  const n=normalizeSnap(name,s); if(!n)return false;
+  try{localStorage.setItem(recKey(section,name,country),JSON.stringify(n));return true}catch(_){return false}
+}
+function loadRec(section,name,country){
+  try{const s=JSON.parse(localStorage.getItem(recKey(section,name,country))||'null');return valid(s)?s:null}catch(_){return null}
+}
+function cardSnap(x){return normalizeSnap(x?.name||x?.entityTitle||'',{
+  title:x?.entityTitle||x?.name, desc:x?.desc, photo:x?.photoRemote,
+  entityId:x?.entityId, pageId:x?.pageId, sources:x?.sources,
+  finalEntityVerified:x?.finalEntityVerified
+})}
+
+/* Migration is generic: derive durable verified records from every existing card and
+   every established ready cache. It does not name a country, category, or representative. */
+function migrateSection(section){
+  let cards=[]; try{cards=getCustom(section)||[]}catch(_){}
+  for(const x of cards){const s=cardSnap(x);if(s)saveRec(section,x.name||x.entityTitle,s)}
+  let names=[];try{names=parseRepNames(repTextFor(section),section)}catch(_){}
+  for(const raw of names){
+    const name=cardInputName(raw);
+    if(loadRec(section,name))continue;
+    let c=null;try{c=v15CachedRepresentative(section,name)}catch(_){}
+    if(c?.verified&&valid(c.verified))saveRec(section,name,c.verified);
+  }
+}
+
+/* Successful preview is the one and only moment a search result becomes a verified record. */
+const open0=openRepresentativePreview;
+openRepresentativePreview=function(section,name,verified,panel){
+  if(valid(verified))saveRec(section,name,verified);
+  return open0.apply(this,arguments);
+};
+
+/* Successful card save also guarantees the same verified record, regardless of save route. */
+const after0=ns90155AfterRepresentativeSave;
+ns90155AfterRepresentativeSave=async function(section,item){
+  const s=cardSnap(item); if(s)saveRec(section,item.name||item.entityTitle,s);
+  return after0.apply(this,arguments);
+};
+
+/* Deletion is exact-ID only. Before deleting the card, preserve its verified record.
+   No deletion path is allowed to erase that record. */
+const del0=ns9096DeleteDurable;
+ns9096DeleteDurable=async function(section,itemId){
+  let target=null;try{target=(getCustom(section)||[]).find(x=>String(x.id)===String(itemId))||null}catch(_){}
+  if(target){const s=cardSnap(target);if(s)saveRec(section,target.name||target.entityTitle,s)}
+  return del0.apply(this,arguments);
+};
+
+/* Paint/click behavior is rebuilt from two facts only:
+   1) saved card, 2) unified verified record. No searched-marker-only purple state. */
+function paint173(section,row,panel){
+  const shown=cardInputName(row.name);
+  const saved=ns9067SavedForRepresentative(section,shown);
+  const record=loadRec(section,shown) || loadRec(section,row.resolvedName||shown);
+  if(record){row.ok=true;row.verified=record;row.pending=false}
+  const registered=!!saved, ready=!registered&&!!record;
+  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
+  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b)}
+  b.textContent=(registered?'◆ ':ready?'◆ ':'○ ')+shown;
+  b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'verified-ready':'can-make');
+  b.disabled=false;
+  b.title=registered?'저장된 카드를 미리 봅니다.':ready?'검증 기록 보존 · 검색 없이 즉시 엽니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
+  b.onclick=async()=>{
+    if(b.dataset.busy==='1')return;
+    const nowSaved=ns9067SavedForRepresentative(section,shown);
+    if(nowSaved){
+      const pv=panel.querySelector('.rep-preview-v5'); if(!pv)return;
+      const p=String(nowSaved.photoRemote||''), d=String(localStorage.getItem(editKey(section,nowSaved.id))??nowSaved.desc??'');
+      pv.innerHTML=`<div class="preview-card"><h3>${esc(nowSaved.name)}</h3><p>${esc(d)}</p>${p?`<div class="v3-photo-choices"><label><img src="${esc(p)}" alt="${esc(nowSaved.name)}"></label></div>`:''}<div class="preview-actions"><button type="button" class="ns9019-research">🔎 카드 다시 찾기</button><button type="button" class="rep-close-v5">닫기</button></div><div class="note">◆ 이미 저장된 카드입니다.</div></div>`;
+      pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
+      pv.querySelector('.ns9019-research').onclick=async()=>{
+        b.dataset.busy='1';b.textContent='… '+shown;
+        let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(_){}
+        b.dataset.busy='0';
+        if(v&&valid(v)){saveRec(section,shown,v);openRepresentativePreview(section,shown,v,panel)}
+        else {b.textContent='◆ '+shown;pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 새 자료를 확인하지 못했습니다. 기존 카드는 그대로 유지됩니다.</p></div>`}
+      };
+      return;
+    }
+    const r=loadRec(section,shown)||loadRec(section,row.resolvedName||shown);
+    if(r){openRepresentativePreview(section,shown,r,panel);return}
+    b.dataset.busy='1';b.disabled=true;b.textContent='… '+shown;
+    const pv=panel.querySelector('.rep-preview-v5');
+    if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
+    let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(e){console.warn('[NS90.173 resolve]',e)}
+    b.dataset.busy='0';b.disabled=false;
+    if(v&&valid(v)){
+      saveRec(section,shown,v);row.ok=true;row.verified=v;
+      b.textContent='◆ '+shown;b.className='rep-card-btn-v5 verified-ready';
+      openRepresentativePreview(section,shown,v,panel);
+    }else{
+      row.ok=false;row.verified=null;b.textContent='○ '+shown;b.className='rep-card-btn-v5 can-make';
+      if(pv){try{await v22ShowAssistResults(section,shown,pv,row.name)}catch(_){}}
+    }
+  };
+}
+v16PaintRow=paint173;
+
+/* Rendering always migrates generic existing evidence first, then paints from unified records. */
+const renderRep0=renderRepresentativeCardButtonsV5;
+renderRepresentativeCardButtonsV5=async function(section){
+  try{migrateSection(section)}catch(_){}
+  const r=await renderRep0.apply(this,arguments);
+  try{
+    const st=v16State(section),panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
+    if(panel)for(const row of st.rows.values())paint173(section,row,panel);
+  }catch(_){}
+  return r;
+};
+
+/* A searched marker alone can no longer create purple. Purple requires the actual reusable snapshot. */
+ns90154WasSearched=function(section,name,country){return !!loadRec(section,name,country)};
+
+/* One generic startup migration across whatever representative sections the app exposes. */
+function migrateVisible(){
+  try{for(const s of REP_SECTIONS||[])migrateSection(s)}catch(_){}
+  try{renderAllRepresentativeCardButtonsV5()}catch(_){}
+}
+function sync(){
+  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+  try{document.title='요술방망이 백과사전 · NS90.173'}catch(_){}
+  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+}
+window.__NS90173={version:V,key:recKey,load:loadRec,save:saveRec,migrate:migrateSection};
+sync();
+document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(migrateVisible,120)});
+window.addEventListener('load',()=>{sync();setTimeout(migrateVisible,250)});
+setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
+})();
+</script>
+
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
@@ -6456,4 +6629,4 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  window.addEventListener('load',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,120)});
 })();
 </script>
-\n<script id="ns90168-append-only-card-save">\n(()=>{\n const V='MASTER V28 · NS90.172 APPEND ONLY CARD SAVE · SEARCH CORE LOCKED · ONE MASTER';\n function actualKey(country,section,x){return ns9097StableCardKey(String(country||''),section,String(x?.name||x?.entityTitle||''));}\n // Never trust a legacy stableKey while merging. Identity is recalculated from the card name.\n ns90106MergeCards=function(country,section,...lists){\n   const out=[], pos=new Map();\n   for(const list of lists)for(const raw of (Array.isArray(list)?list:[])){\n     if(!raw)continue; const x={...raw};\n     const k=actualKey(country,section,x); if(!k||k.endsWith('|'))continue;\n     x.stableKey=k;\n     if(pos.has(k)){\n       const i=pos.get(k),old=out[i];\n       out[i]={...old,...Object.fromEntries(Object.entries(x).filter(([_,v])=>v!==''&&v!=null))};\n     }else{pos.set(k,out.length);out.push(x)}\n   }\n   return out;\n };\n // New representative cards are appended by their real name identity. Existing siblings are preserved.\n ns90106AppendCard=async function(section,item){\n   const country=String(COUNTRY||''),mk=cardStoreKey(country,section);\n   const db=await cardDBGet(country,section);\n   let mirror=[];try{mirror=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){}\n   const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];\n   const base=ns90106MergeCards(country,section,db,mirror,mem);\n   const wanted=actualKey(country,section,item);\n   if(base.some(x=>actualKey(country,section,x)===wanted))throw new Error('same representative already exists');\n   const fresh={...item,id:newItemId(),stableKey:wanted};\n   const merged=[...base,fresh];\n   await cardDBPut(country,section,merged.map(x=>({...x})));\n   CARD_MEM.set(mk,merged.map(x=>({...x})));\n   try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(e){\n     if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(_){}}\n   }\n   // caller verifies item.id; keep it synchronized with the newly committed id.\n   item.id=fresh.id; item.stableKey=fresh.stableKey;\n   const check=await cardDBGet(country,section);\n   if(!check.some(x=>String(x.id)===String(fresh.id)))throw new Error('NS90.172 append verify failed');\n   await ns90155AfterRepresentativeSave(section,item);\n   return true;\n };\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.172'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);\n})();\n</script>\n
+
