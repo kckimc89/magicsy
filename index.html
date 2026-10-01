@@ -6025,7 +6025,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </style>
 <script id="ns90148-clean-structural-master">
 (()=>{
- const V='MASTER V28 · NS90.151 REPRESENTATIVE STATE CORE INTEGRATION · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.152 REPRESENTATIVE STATE MACHINE · SEARCH CORE LOCKED · ONE MASTER';
  const P='magic_ns90148_searched|';
  const clean=x=>String(x||'').trim().replace(/\\s+/g,' ');
  function key(c,s,n){return P+[c,s,clean(n)].join('|')}
@@ -6055,6 +6055,76 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
    try{let b=document.getElementById('ns90148StableBadge');if(!b){b=document.createElement('div');b.id='ns90148StableBadge';b.textContent='🧱 구조 안정판 4차 · 대표이름 상태를 기존 엔진 판정에 직접 통합 · 검색엔진 잠금';const banner=document.getElementById('ns9015Banner');if(banner&&banner.parentNode)banner.insertAdjacentElement('afterend',b);else document.body.prepend(b)}}catch(_){}
  }
  sync();[0,300,1000,2500,5000].forEach(ms=>setTimeout(sync,ms));setTimeout(()=>seed(),700);
+})();
+</script>
+
+<script id="ns90152-representative-state-machine">
+// ===== NS90.152 REPRESENTATIVE STATE MACHINE =====
+// One durable state for representative labels only.
+// searched = a representative has once reached verified/card state.
+// Card existence remains authoritative for green; searched state is authoritative for purple after deletion.
+(()=>{
+ const V='MASTER V28 · NS90.152 REPRESENTATIVE STATE MACHINE · SEARCH CORE LOCKED · ONE MASTER';
+ const PREFIX='magic_ns90152_repstate_';
+ function normName(v){try{return cardInputName(v)}catch(_){return String(v||'').trim()}}
+ function sk(section,name){return PREFIX+[String(COUNTRY||''),String(section||''),normName(name)].join('|')}
+ function has(section,name){try{return localStorage.getItem(sk(section,name))==='searched'}catch(_){return false}}
+ function mark(section,name){try{localStorage.setItem(sk(section,name),'searched')}catch(_){} }
+ function saved(section,name){try{return !!ns9067SavedForRepresentative(section,normName(name))}catch(_){return false}}
+ function syncRow(section,row,panel){
+   if(!row||!panel)return;
+   const shown=normName(row.name), b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`); if(!b)return;
+   const isCard=saved(section,shown);
+   // Any representative that has a card is by definition a successfully resolved representative.
+   if(isCard)mark(section,shown);
+   // Existing verified readiness also promotes the durable state once, but the state never depends on the card lifetime afterwards.
+   if(!isCard){try{if(row.ok&&row.verified&&row.verified.desc)mark(section,shown)}catch(_){} }
+   const searched=has(section,shown);
+   if(isCard){
+     b.textContent='◆ '+shown; b.className='rep-card-btn-v5 registered ns9017-done';
+   }else if(searched){
+     b.textContent='◆ '+shown; b.className='rep-card-btn-v5 verified-ready';
+     // Recover preview data when available, but color/state no longer depends on snapshot survival.
+     try{const c=v15CachedRepresentative(section,shown);if(c?.verified?.desc){row.ok=true;row.verified=c.verified;row.pending=false}}catch(_){}
+   }else{
+     b.textContent='○ '+shown; b.className='rep-card-btn-v5 can-make';
+   }
+ }
+ const prevPaint=v16PaintRow;
+ v16PaintRow=function(section,row,panel){
+   const r=prevPaint.apply(this,arguments);
+   try{syncRow(section,row,panel)}catch(e){console.warn('[NS90.152 paint]',e)}
+   return r;
+ };
+ // Mark immediately whenever a verified representative preview is opened.
+ const prevPreview=openRepresentativePreview;
+ openRepresentativePreview=function(section,name,verified,pv){
+   try{if(verified&&verified.desc)mark(section,name)}catch(_){}
+   const r=prevPreview.apply(this,arguments);
+   try{const st=v16State(section);const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(st&&panel)for(const row of st.rows.values())syncRow(section,row,panel)}catch(_){}
+   return r;
+ };
+ // After deletion, repaint strictly from card existence + durable representative state.
+ const prevDelete=ns9096DeleteDurable;
+ ns9096DeleteDurable=async function(section,itemId){
+   // If this card corresponds to a representative, preserve that representative's searched state before card removal.
+   try{
+     const cur=getCustom(section), target=cur.find(x=>String(x.id)===String(itemId));
+     if(target){const st=v16State(section);for(const row of st.rows.values()){const shown=normName(row.name);if(sameCardIdentity(shown,target.name)||ns9067LinkedNames(section,shown).some(n=>sameCardIdentity(n,target.name)))mark(section,shown)}}
+   }catch(_){}
+   const r=await prevDelete.apply(this,arguments);
+   try{const st=v16State(section),panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(st&&panel)for(const row of st.rows.values())syncRow(section,row,panel)}catch(_){}
+   return r;
+ };
+ // Migration: current representative cards become searched states once; no network search and no card mutation.
+ function migrateVisible(){
+   try{for(const section of REP_SECTIONS){const st=v16State(section);for(const row of st.rows.values()){const shown=normName(row.name);if(saved(section,shown))mark(section,shown)}}}catch(_){}
+ }
+ const prevOpenCountry=openCountry;
+ openCountry=function(code){const r=prevOpenCountry.apply(this,arguments);setTimeout(()=>{try{migrateVisible();for(const section of REP_SECTIONS){const st=v16State(section),panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(panel)for(const row of st.rows.values())syncRow(section,row,panel)}}catch(_){}},250);return r};
+ window.__NS90152_REP_STATE={has,mark,key:sk};
+ function banner(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}try{const badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 5차 · 대표이름 3단계 상태머신 · 카드 삭제 후 검색완료 유지 · 검색엔진 잠금'}catch(_){}}
+ banner();[200,800,1800].forEach(ms=>setTimeout(banner,ms));setTimeout(migrateVisible,400);
 })();
 </script>
 </body></html>
@@ -6262,5 +6332,5 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 <!-- NS90.151: representative state integrated into the original v16PaintRow core. -->
 <script id="ns90151-version-sync">
-(()=>{const V='MASTER V28 · NS90.151 REPRESENTATIVE STATE CORE INTEGRATION · SEARCH CORE LOCKED · ONE MASTER';function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}try{const badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 4차 · 대표이름 상태를 기존 엔진 판정에 직접 통합 · 검색엔진 잠금'}catch(_){}}sync();[0,300,1000,2500].forEach(ms=>setTimeout(sync,ms));})();
+(()=>{const V='MASTER V28 · NS90.152 REPRESENTATIVE STATE MACHINE · SEARCH CORE LOCKED · ONE MASTER';function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}try{const badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 4차 · 대표이름 상태를 기존 엔진 판정에 직접 통합 · 검색엔진 잠금'}catch(_){}}sync();[0,300,1000,2500].forEach(ms=>setTimeout(sync,ms));})();
 </script>
