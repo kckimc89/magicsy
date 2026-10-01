@@ -118,7 +118,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.158 REPRESENTATIVE STATE DIAGNOSTIC · SEARCH CORE LOCKED · EXACT ONE CARD DELETE · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.158 REPRESENTATIVE STATE DIAGNOSTIC · SEARCH CORE LOCKED · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1236,18 +1236,8 @@ async function renderSection(s){
          }
        }
      }catch(_){}
-     // NS90.166: delete exactly the clicked card even when old cards accidentally share an ID.
-     // Keep ID-keyed photo/edit data until the surviving sibling has been separated.
-     try{
-       const all=getCustom(s).map(y=>({...y}));
-       let idx=all.findIndex(y=>String(y.id)===String(x.id) && sameIdentity(y.name,x.name));
-       if(idx<0) idx=all.findIndex(y=>String(y.id)===String(x.id));
-       if(idx<0) throw new Error('clicked card not found');
-       const removed=all[idx];
-       const kept=all.filter((_,i)=>i!==idx);
-       for(const y of kept){if(String(y.id)===String(removed.id)) y.id=newItemId();}
-       await ns9055SetCustomDurable(s,kept);
-     }catch(e){alert('항목 삭제를 저장하지 못했습니다. 다시 시도해 주세요.');return;}
+     localStorage.removeItem(editKey(s,x.id)); await deleteUserPhoto(`photo_${DATA_NS}${COUNTRY}_${s}_${x.id}`);
+     try{await ns9096DeleteDurable(s,x.id)}catch(e){alert('항목 삭제를 저장하지 못했습니다. 다시 시도해 주세요.');return;}
      setDeletedBase(s,getDeletedBase(s).filter(n=>!sameIdentity(n,x.name)));
      await renderSection(s);
      // Registered -> deleted -> available again, using the already cached successful search.
@@ -6079,6 +6069,67 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(repaint,80)});window.addEventListener('load',()=>{sync();setTimeout(repaint,150)});sync();setTimeout(sync,300);setTimeout(sync,1500);
 })();
 </script>
+
+<!-- NS90.167: repair stale stableKey collisions by deriving identity from the card's current name. -->
+<script id="ns90167-card-identity-repair">
+(()=>{
+ const V='MASTER V28 · NS90.167 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ function actualKey(country,section,x){
+   const n=String(x?.name||x?.entityTitle||'').trim();
+   try{return ns9097StableCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
+ }
+ // Never trust a stale stableKey saved by an older build. Rebuild it from the visible card name.
+ ns90106MergeCards=function(country,section,...lists){
+   const out=[],pos=new Map();
+   for(const list of lists) for(const raw of (Array.isArray(list)?list:[])){
+     if(!raw)continue;
+     const x={...raw}; const k=actualKey(country,section,x)||String(x.id||'');
+     if(!k)continue; x.stableKey=k;
+     if(pos.has(k)){
+       const i=pos.get(k),old=out[i];
+       out[i]={...old,...Object.fromEntries(Object.entries(x).filter(([_,v])=>v!==''&&v!=null)),stableKey:k};
+     }else{pos.set(k,out.length);out.push(x)}
+   }
+   return out;
+ };
+ // Delete only the clicked ID. While committing, also repair every survivor's stableKey from its own name.
+ ns9096DeleteDurable=async function(section,itemId){
+   const country=String(COUNTRY||''), current=getCustom(section), kept=[]; let removed=false;
+   for(const raw of current){
+     const x={...raw};
+     if(!removed && String(x.id)===String(itemId)){removed=true;continue;}
+     x.stableKey=actualKey(country,section,x); kept.push(x);
+   }
+   await cardDBPut(country,section,kept.map(x=>({...x})));
+   CARD_MEM.set(cardStoreKey(country,section),kept.map(x=>({...x})));
+   try{localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}
+   return kept;
+ };
+ // Repair stale keys already stored on this device without removing cards.
+ async function repair(){
+   try{
+     const sections=['food','animals','fruit','places','culture','singers','athletes','people','art'];
+     const country=String(COUNTRY||'');
+     for(const sec of sections){
+       const a=getCustom(sec); if(!a.length)continue;
+       const fixed=a.map(raw=>({...raw,stableKey:actualKey(country,sec,raw)}));
+       await cardDBPut(country,sec,fixed.map(x=>({...x})));
+       CARD_MEM.set(cardStoreKey(country,sec),fixed.map(x=>({...x})));
+       try{localStorage.setItem(key(sec),JSON.stringify(fixed.map(ns9055CompactCardForLocal)))}catch(_){}
+     }
+   }catch(e){console.warn('[NS90.167] key repair skipped',e)}
+ }
+ function syncVersion(){
+   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.167'}catch(_){}
+ }
+ window.addEventListener('DOMContentLoaded',()=>{syncVersion();setTimeout(syncVersion,80);setTimeout(syncVersion,500);setTimeout(repair,700)});
+ window.addEventListener('load',()=>{syncVersion();setTimeout(syncVersion,300)});
+ setInterval(syncVersion,1500);
+ try{window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+})();
+</script>
+
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
@@ -6337,23 +6388,5 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  cleanLiteralNewlines();
  document.addEventListener('DOMContentLoaded',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,80)});
  window.addEventListener('load',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,120)});
-})();
-</script>
-
-<!-- NS90.161 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
-<script id="ns90161-final-version-lock">
-(()=>{
- const V='MASTER V28 · NS90.161 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
- function sync(){
-   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
-   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
- }
- sync();
- document.addEventListener('DOMContentLoaded',sync);
- window.addEventListener('load',sync);
- const mo=new MutationObserver(sync);
- try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
- [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
- window.__NS90161_VERSION=V;
 })();
 </script>
