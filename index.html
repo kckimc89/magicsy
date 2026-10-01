@@ -6294,6 +6294,98 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  setInterval(paint,500);
 })();
 </script>
+
+<script id="ns90180-three-state-single-source">
+(()=>{
+'use strict';
+const V='MASTER V28 · NS90.180 THREE-STATE SINGLE SOURCE · CARD / READY / EMPTY · ONE MASTER';
+const STATE={CARD:'CARD_EXISTS',READY:'SEARCH_READY',EMPTY:'EMPTY'};
+const DB_SNAPSHOT=new Map();
+const k=(country,section)=>String(country||'')+'|'+String(section||'');
+const clone=a=>(Array.isArray(a)?a:[]).map(x=>({...x}));
+
+async function loadCards(country,section){
+  let arr=[];
+  try{arr=await cardDBGet(country,section);if(!Array.isArray(arr))arr=[]}catch(_){arr=[]}
+  DB_SNAPSHOT.set(k(country,section),clone(arr));
+  try{CARD_MEM.set(cardStoreKey(country,section),clone(arr))}catch(_){}
+  return arr;
+}
+function linkedCard(section,name,country){
+  const arr=DB_SNAPSHOT.get(k(country||COUNTRY,section))||[];
+  const names=ns9067LinkedNames(section,name);
+  for(const n of names){const hit=arr.find(x=>sameCardIdentity(n,x.name));if(hit)return hit}
+  return null;
+}
+function readyVerified(section,name){
+  try{const c=v15CachedRepresentative(section,name);if(c?.verified?.desc)return c.verified}catch(_){}
+  try{const v=window.ns90160LoadStoredVerified?.(section,name,COUNTRY);if(v?.desc)return v}catch(_){}
+  return null;
+}
+function stateOf(section,name){
+  if(linkedCard(section,name,COUNTRY))return STATE.CARD;
+  return readyVerified(section,name)?STATE.READY:STATE.EMPTY;
+}
+window.NS90180_STATE=STATE;
+window.ns90180StateOf=stateOf;
+
+// ONE source for card existence: the actual card database snapshot only.
+ns9067SavedForRepresentative=function(section,original){return linkedCard(section,cardInputName(original),COUNTRY)};
+// A historical "searched" flag is not readiness. Purple requires a reusable verified snapshot.
+ns90154WasSearched=function(){return false};
+
+const prevRep=renderRepresentativeCardButtonsV5;
+renderRepresentativeCardButtonsV5=async function(section){
+  await loadCards(COUNTRY,section);
+  const r=await prevRep.apply(this,arguments);
+  try{
+    const panel=document.querySelector('#'+CSS.escape(section)+' .rep-card-panel-v5');
+    if(panel){
+      for(const b of panel.querySelectorAll('.rep-card-btn-v5')){
+        const name=(b.textContent||'').replace(/^[◆◇○●\s]+/,'').trim();
+        const st=stateOf(section,name);
+        b.dataset.ns180State=st;
+        b.title=st===STATE.CARD?'실제 저장 카드 있음':st===STATE.READY?'카드 없음 · 검증된 검색결과 보존 · 즉시 미리보기':'카드/검증결과 없음 · 검색 필요';
+      }
+    }
+  }catch(_){}
+  return r;
+};
+
+// Section cards and representative buttons read the same DB snapshot.
+const prevSection=renderSection;
+renderSection=async function(section){
+  await loadCards(COUNTRY,section);
+  const r=await prevSection.apply(this,arguments);
+  try{await renderRepresentativeCardButtonsV5(section)}catch(_){}
+  return r;
+};
+
+function legend(){
+  if(document.getElementById('ns180Legend'))return;
+  const d=document.createElement('div');d.id='ns180Legend';
+  d.style.cssText='margin:8px auto 10px;max-width:900px;padding:9px 12px;border:1px solid #cfd5df;border-radius:12px;background:#fff;font-size:12px;font-weight:750;line-height:1.5';
+  d.innerHTML='🧭 <b>NS90.180 3상태 단일관리</b> · <span style="color:#287a4b">초록 = 실제 카드 있음</span> · <span style="color:#6652a3">보라 = 카드 없음 + 검증 검색결과 있음</span> · 흰색 = 검색 필요';
+  const b=document.getElementById('ns9015Banner');if(b)b.insertAdjacentElement('afterend',d);
+}
+function sync(){
+  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+  try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){}
+  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+  // 179 reset/rescan was diagnostic only; keep it out of the 180 state evaluation screen.
+  try{const x=document.getElementById('ns178-box');if(x)x.style.display='none'}catch(_){}
+  legend();
+}
+async function refreshVisible(){
+  try{for(const sec of REP_SECTIONS){if(document.getElementById(sec))await renderRepresentativeCardButtonsV5(sec)}}catch(_){}
+}
+sync();
+document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(refreshVisible,120)});
+window.addEventListener('load',()=>{sync();setTimeout(refreshVisible,250)});
+setTimeout(sync,50);setTimeout(sync,500);setInterval(sync,1200);
+})();
+</script>
+<script>(()=>{const V='MASTER V28 · NS90.180 THREE-STATE SINGLE SOURCE · CARD / READY / EMPTY · ONE MASTER';try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V;document.title='요술방망이 백과사전 · NS90.180';}catch(_){}})();</script>
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
