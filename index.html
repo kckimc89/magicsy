@@ -6251,3 +6251,61 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
+
+<!-- NS90.149 DELETE STATE SEPARATION: card deletion never deletes representative search success. -->
+<script id="ns90149-delete-state-separation">
+(()=>{
+ const V='MASTER V28 · NS90.149 DELETE STATE SEPARATION · SEARCH CORE LOCKED · ONE MASTER';
+ const P='magic_ns90148_searched|';
+ const clean=x=>String(x||'').trim().replace(/\s+/g,' ');
+ const stateKey=(c,s,n)=>P+[c,s,clean(n)].join('|');
+ function isRepresentative(section,name){
+   try{return parseRepNames(repTextFor(section),section).map(cardInputName).some(n=>clean(n)===clean(cardInputName(name)))}catch(_){return false}
+ }
+ function compact(x){
+   if(!x||!String(x.desc||'').trim())return null;
+   const photo=String(x.photoRemote||x.photo||((Array.isArray(x.photos)&&x.photos[0])||''));
+   return {title:String(x.entityTitle||x.title||x.name||''),desc:String(x.desc||''),photo,photos:photo?[photo]:[],entityId:String(x.entityId||''),pageId:x.pageId==null?'':String(x.pageId),sources:Array.isArray(x.sources)?x.sources:[]};
+ }
+ // Wrap the final durable delete implementation. Capture representative success BEFORE deletion,
+ // then restore READY + searched marker AFTER deletion. Search/resolver functions are untouched.
+ try{
+   const previousDelete=ns9096DeleteDurable;
+   ns9096DeleteDurable=async function(section,itemId){
+     const country=String(COUNTRY||''); let name='',snap=null,rep=false;
+     try{
+       const target=(getCustom(section)||[]).find(x=>String(x.id)===String(itemId));
+       if(target){name=cardInputName(target.name);rep=isRepresentative(section,name);if(rep){snap=compact(target)||ns9053LoadReady(v12Request(section,name))||null;}}
+     }catch(_){}
+     const result=await previousDelete(section,itemId);
+     if(rep&&name){
+       try{localStorage.setItem(stateKey(country,section,name),'1')}catch(_){}
+       try{if(snap&&snap.desc)ns9053SaveReady(v12Request(section,name),snap)}catch(_){}
+       try{const mem=typeof ns9099LoadResearch==='function'?ns9099LoadResearch(section,name):null;if(mem&&mem.desc)ns9053SaveReady(v12Request(section,name),mem)}catch(_){}
+     }
+     return result;
+   };
+ }catch(_){}
+ // Make the searched marker sufficient when durable research memory survived but READY was compacted.
+ try{
+   const previousPaint=v16PaintRow;
+   v16PaintRow=function(section,row,panel){
+     try{
+       const country=String(COUNTRY||''),name=cardInputName(row.name);
+       if(!row.ok&&localStorage.getItem(stateKey(country,section,name))==='1'){
+         let snap=ns9053LoadReady(v12Request(section,row.resolvedName||name))||ns9053LoadReady(v12Request(section,name));
+         if(!snap&&typeof ns9099LoadResearch==='function')snap=ns9099LoadResearch(section,name);
+         if(snap&&snap.desc){row.ok=true;row.verified=snap;row.pending=false;}
+       }
+     }catch(_){}
+     return previousPaint(section,row,panel);
+   };
+ }catch(_){}
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+   try{let badge=document.getElementById('ns90148StableBadge');if(badge)badge.textContent='🧱 구조 안정판 2차 · 카드 삭제와 검색 성공상태 분리 · 검색엔진 잠금'}catch(_){}
+ }
+ sync();[0,300,1000,2500,5000].forEach(ms=>setTimeout(sync,ms));
+})();
+</script>
