@@ -6069,58 +6069,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(repaint,80)});window.addEventListener('load',()=>{sync();setTimeout(repaint,150)});sync();setTimeout(sync,300);setTimeout(sync,1500);
 })();
 </script>
-
-
-<!-- NS90.164 SNAPSHOT EXACT-ONE DELETE. Search/resolver core untouched. -->
-<script id="ns90164-snapshot-exact-one-delete">
-(()=>{
- const V='MASTER V28 · NS90.164 SNAPSHOT EXACT-ONE DELETE · SIBLING PRESERVE · SEARCH CORE LOCKED · ONE MASTER';
- // IMPORTANT: do not merge DB/localStorage/memory during deletion. The visible card list is
- // already represented by CARD_MEM/getCustom. Merging older stores here could resurrect stale
- // identity metadata and collapse an unrelated sibling. Remove one array entry only.
- ns9096DeleteDurable=async function(section,itemId){
-   const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
-   const visible=(CARD_MEM.has(mk)?CARD_MEM.get(mk):getCustom(section)).map(x=>({...x}));
-   let idx=visible.findIndex(x=>String(x.id)===String(itemId));
-   if(idx<0)return visible;
-   const target=visible[idx];
-   // Keep the deleted representative's verified research memory for instant purple reopen.
-   try{if(typeof ns9099SaveResearch==='function')ns9099SaveResearch(section,target)}catch(_){}
-   try{if(typeof ns90154MarkSearched==='function')ns90154MarkSearched(section,target.name)}catch(_){}
-   try{if(typeof ns9098RememberForResearch==='function')await ns9098RememberForResearch(section,target)}catch(_){}
-   // splice removes EXACTLY ONE entry, even if legacy data accidentally reused an id/stableKey.
-   const kept=visible.slice(); kept.splice(idx,1);
-   // Write the complete surviving visible snapshot as one transaction. No identity normalization,
-   // no stableKey grouping, no cross-store merge, and no sibling repair/deletion pass.
-   await cardDBPut(country,section,kept.map(x=>({...x})));
-   CARD_MEM.set(mk,kept.map(x=>({...x})));
-   try{localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(e){
-     if(typeof isQuotaError==='function'&&isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}}
-   }
-   // Representative state only; never touch another card.
-   try{setDeletedBase(section,getDeletedBase(section).filter(n=>!sameCardIdentity(n,target.name)))}catch(_){}
-   try{unmarkCandidate(section,target.name)}catch(_){}
-   return kept;
- };
- window.__NS90164_VERSION=V;
-})();
-</script>
-
-<!-- NS90.164 FINAL VERSION LOCK -->
-<script id="ns90164-final-version-lock">
-(()=>{
- const V='MASTER V28 · NS90.164 SNAPSHOT EXACT-ONE DELETE · SIBLING PRESERVE · READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
- function sync(){
-   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
-   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
- }
- sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync);
- const mo=new MutationObserver(sync); try{mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
- [0,50,150,300,600,1000,1500,2500,4000,6000].forEach(ms=>setTimeout(sync,ms));
- window.__NS90164_VERSION=V;
-})();
-</script>
-</body></html>
+\n<script id="ns90165-exact-id-delete-only">\n// NS90.165: minimal fix on NS90.161. Delete exactly the clicked card ID only.\n// Do not use stableKey/sameStable victim expansion; that could remove a sibling representative.\n(()=>{\n const prevResearchSave=(section,target)=>{\n  try{if(target&&typeof ns9099SaveResearch==='function')ns9099SaveResearch(section,target)}catch(_){}\n  try{if(target&&typeof ns90154MarkSearched==='function')ns90154MarkSearched(section,target.name)}catch(_){}\n };\n ns9096DeleteDurable=async function(section,itemId){\n  const country=String(COUNTRY||''), current=getCustom(section);\n  const idx=current.findIndex(x=>String(x.id)===String(itemId));\n  if(idx<0)return current;\n  const target=current[idx]; prevResearchSave(section,target);\n  const kept=current.slice(); kept.splice(idx,1);\n  await cardDBPut(country,section,kept.map(x=>({...x})));\n  CARD_MEM.set(cardStoreKey(country,section),kept.map(x=>({...x})));\n  try{localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}\n  const check=await ns9096Timeout(cardDBGet(country,section),2200,[]);\n  if((check||[]).some(x=>String(x.id)===String(itemId)))throw new Error('exact-id delete verify failed');\n  return kept;\n };\n try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.165 EXACT ID DELETE · NS90.161 CORE LOCKED · ONE MASTER'}catch(_){}\n})();\n</script>\n</body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
@@ -6381,10 +6330,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
-<!-- NS90.161 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
+<!-- NS90.165 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
 <script id="ns90161-final-version-lock">
 (()=>{
- const V='MASTER V28 · NS90.161 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.165 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
