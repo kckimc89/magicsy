@@ -118,7 +118,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.158 REPRESENTATIVE STATE DIAGNOSTIC · SEARCH CORE LOCKED · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.158 REPRESENTATIVE STATE DIAGNOSTIC · SEARCH CORE LOCKED · EXACT ONE CARD DELETE · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1236,8 +1236,18 @@ async function renderSection(s){
          }
        }
      }catch(_){}
-     localStorage.removeItem(editKey(s,x.id)); await deleteUserPhoto(`photo_${DATA_NS}${COUNTRY}_${s}_${x.id}`);
-     try{await ns9096DeleteDurable(s,x.id)}catch(e){alert('항목 삭제를 저장하지 못했습니다. 다시 시도해 주세요.');return;}
+     // NS90.166: delete exactly the clicked card even when old cards accidentally share an ID.
+     // Keep ID-keyed photo/edit data until the surviving sibling has been separated.
+     try{
+       const all=getCustom(s).map(y=>({...y}));
+       let idx=all.findIndex(y=>String(y.id)===String(x.id) && sameIdentity(y.name,x.name));
+       if(idx<0) idx=all.findIndex(y=>String(y.id)===String(x.id));
+       if(idx<0) throw new Error('clicked card not found');
+       const removed=all[idx];
+       const kept=all.filter((_,i)=>i!==idx);
+       for(const y of kept){if(String(y.id)===String(removed.id)) y.id=newItemId();}
+       await ns9055SetCustomDurable(s,kept);
+     }catch(e){alert('항목 삭제를 저장하지 못했습니다. 다시 시도해 주세요.');return;}
      setDeletedBase(s,getDeletedBase(s).filter(n=>!sameIdentity(n,x.name)));
      await renderSection(s);
      // Registered -> deleted -> available again, using the already cached successful search.
@@ -6069,7 +6079,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(repaint,80)});window.addEventListener('load',()=>{sync();setTimeout(repaint,150)});sync();setTimeout(sync,300);setTimeout(sync,1500);
 })();
 </script>
-\n<script id="ns90165-exact-id-delete-only">\n// NS90.165: minimal fix on NS90.161. Delete exactly the clicked card ID only.\n// Do not use stableKey/sameStable victim expansion; that could remove a sibling representative.\n(()=>{\n const prevResearchSave=(section,target)=>{\n  try{if(target&&typeof ns9099SaveResearch==='function')ns9099SaveResearch(section,target)}catch(_){}\n  try{if(target&&typeof ns90154MarkSearched==='function')ns90154MarkSearched(section,target.name)}catch(_){}\n };\n ns9096DeleteDurable=async function(section,itemId){\n  const country=String(COUNTRY||''), current=getCustom(section);\n  const idx=current.findIndex(x=>String(x.id)===String(itemId));\n  if(idx<0)return current;\n  const target=current[idx]; prevResearchSave(section,target);\n  const kept=current.slice(); kept.splice(idx,1);\n  await cardDBPut(country,section,kept.map(x=>({...x})));\n  CARD_MEM.set(cardStoreKey(country,section),kept.map(x=>({...x})));\n  try{localStorage.setItem(key(section),JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}\n  const check=await ns9096Timeout(cardDBGet(country,section),2200,[]);\n  if((check||[]).some(x=>String(x.id)===String(itemId)))throw new Error('exact-id delete verify failed');\n  return kept;\n };\n try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.165 EXACT ID DELETE · NS90.161 CORE LOCKED · ONE MASTER'}catch(_){}\n})();\n</script>\n</body></html>
+</body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
@@ -6330,10 +6340,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
-<!-- NS90.165 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
+<!-- NS90.161 FINAL VERSION LOCK: appended after every legacy layer; no search/card/state logic changes. -->
 <script id="ns90161-final-version-lock">
 (()=>{
- const V='MASTER V28 · NS90.165 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.161 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
