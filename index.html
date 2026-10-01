@@ -118,7 +118,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -1689,7 +1689,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2155,7 +2155,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER',
+ version:'MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2482,6 +2482,14 @@ function ns90106MergeCards(country,section,...lists){
  }
  return out;
 }
+async function ns90155AfterRepresentativeSave(section,item){
+ try{
+  if(!item||item.source!=='recommended'||!ns90155IsRepresentative(section,item.name))return;
+  ns90154MarkSearched(section,item.name);
+  const snap={title:String(item.entityTitle||item.name||''),desc:String(item.desc||''),photo:String(item.photoRemote||''),photos:item.photoRemote?[String(item.photoRemote)]:[],entityId:String(item.entityId||''),pageId:item.pageId==null?'':String(item.pageId),sources:Array.isArray(item.sources)?item.sources:[],representativeName:String(item.name||''),savedAt:Date.now()};
+  if(snap.desc){try{ns9053SaveReady(v12Request(section,item.name),snap)}catch(_){}}
+ }catch(_){ }
+}
 async function ns90106AppendCard(section,item){
  const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
  // Read all three stores immediately before commit; this prevents stale UI arrays from
@@ -2498,6 +2506,7 @@ async function ns90106AppendCard(section,item){
  const check=await cardDBGet(country,section);
  const wanted=ns90106CardIdentity(country,section,item);
  if(!check.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('NS90.106 append verify failed');
+ await ns90155AfterRepresentativeSave(section,item);
  return true;
 }
 function openRepresentativePreview(section,name,verified,panel){
@@ -2704,6 +2713,13 @@ async function v22SearchHits(name,section){
 }
 async function v22SuggestOtherSection(name,current){let corpus=name;try{const u='https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(name)+'&srlimit=6&format=json&origin=*';const r=await fetch(u);if(r.ok){const j=await r.json();corpus+=' '+(j.query?.search||[]).map(x=>x.title+' '+x.snippet.replace(/<[^>]+>/g,' ')).join(' ')}}catch(e){}const cur=v22SectionScore(current,corpus);let best=null;for(const s of Object.keys(V22_SECTION_LABEL)){if(s===current)continue;const score=v22SectionScore(s,corpus);if(!best||score>best.score)best={section:s,score}}return best&&best.score>=2&&best.score>cur+1?best:null}
 function v22ScrollToSection(section){const el=document.getElementById(section);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.getElementById(section+'List')?.querySelector('.item:last-child')?.scrollIntoView({behavior:'smooth',block:'center'}),350)}}
+function ns90155IsRepresentative(section,name){
+ try{
+  const target=cardInputName(name);
+  return parseRepNames(repTextFor(section),section).some(n=>sameCardIdentity(cardInputName(n),target));
+ }catch(_){return false}
+}
+function ns90155CardSource(section,name){return ns90155IsRepresentative(section,name)?'recommended':'manual'}
 async function v18ManualAssist(section,typedName){const name=String(typedName||'').trim();if(!name)return;const panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');if(!panel)return alert('검색도움 화면을 준비하지 못했습니다.');const pv=panel.querySelector('.rep-preview-v5');if(!pv)return;const other=await v22SuggestOtherSection(name,section);if(other){pv.innerHTML=`<div class="preview-card"><h3>🧭 카테고리를 확인해 주세요</h3><p><b>${esc(name)}</b>은(는) ‘${esc(v22SectionLabel(section))}’보다 ‘${esc(v22SectionLabel(other.section))}’에 더 가까워 보여요.</p><div class="v22-category-choice"><button class="v22-move">📂 ${esc(v22SectionLabel(other.section))}에서 찾아보기</button><button class="v22-stay">🔎 ${esc(v22SectionLabel(section))}에서 계속 찾기</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-move').onclick=()=>{pv.innerHTML='';document.getElementById(other.section)?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>v18ManualAssist(other.section,name),300)};pv.querySelector('.v22-stay').onclick=()=>v22ShowAssistResults(section,name,pv);pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}return v22ShowAssistResults(section,name,pv)}
 function ns9068SemanticCandidateFit(name,section,h){
  const ctx=v27AssistContext(name,section), title=String(h?.title||''), corpus=(title+' '+(h?.summary?.description||'')+' '+(h?.summary?.text||'')).toLowerCase();
@@ -2737,7 +2753,7 @@ async function v22ShowAssistResults(section,name,pv,originName){
   if(!exact&&['singers','athletes','people'].includes(section)){pv.innerHTML='<div class="preview-card"><b>인물 자체로 확인되지 않아 제외했습니다.</b><p>책·작품·장소처럼 인물과 관련만 있는 결과는 카드로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   let found=exact?{desc:exact.desc}:null;if(!found&&h.summary?.text&&h.catScore>0)found={desc:h.summary.text.split(/(?<=[.!?。！？])\s+/).slice(0,4).join(' ')};
   if(!found){pv.innerHTML='<div class="preview-card"><b>이 카테고리의 항목으로 충분히 확인하지 못했습니다.</b><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
-  let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(originName||h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대상과 일치하는 대표 사진을 확인하지 못해 사진 없이 보여드려요.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);const displayName=originName||h.title;if(hasIdentity(displayName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:displayName,desc:found.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||h.wikibaseId||''),entityTitle:String(exact?.title||h.title),searchAlias:String(h.title||''),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList()
+  let photo=exact?.photo||'';pv.innerHTML=`<div class="preview-card"><h3>${esc(originName||h.title)}</h3><p>${esc(found.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대상과 일치하는 대표 사진을 확인하지 못해 사진 없이 보여드려요.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);const displayName=originName||h.title;if(hasIdentity(displayName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:displayName,desc:found.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,photoRemote:photo,entityId:String(exact?.entityId||h.wikibaseId||''),entityTitle:String(exact?.title||h.title),searchAlias:String(h.title||''),pageId:exact?.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList()
 }
 function manualRepresentative(section,name){
  // "자동 카드 불가" means the strict automatic gate failed, not that the name is unknown.
@@ -2982,7 +2998,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3079,9 +3095,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(!exact){pv.innerHTML='<div class="preview-card"><b>대상 자체로 확인되지 않아 제외했습니다.</b><p>책·작품·장소처럼 관련만 있는 결과는 카드로 만들지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   const photo=exact.photo||''; const person=NS9070_PERSON_SECTIONS.has(section);
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
-  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
+  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9071-entity-first-same-identity-gate">
 // ===== NS90.71 ENTITY-FIRST SAME-IDENTITY GATE =====
@@ -3138,11 +3154,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
   pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
-  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9072-final-entity-validation">
 // ===== NS90.72 FINAL ENTITY VALIDATION =====
@@ -3195,11 +3211,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
   pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
-  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:!!exact.finalEntityVerified,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:!!exact.finalEntityVerified,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9073-verified-save-path">
 // ===== NS90.73 VERIFIED SAVE PATH =====
@@ -3277,7 +3293,7 @@ renderRepresentativeCardButtonsV5=async function(section){
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9074-active-multilingual-name-discovery">
 // ===== NS90.74 ACTIVE MULTILINGUAL NAME DISCOVERY =====
@@ -3342,9 +3358,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=exact.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||h.summary?.text||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 같은 대상으로 확인되었습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9075-exact-entity-name-bridge">
 // ===== NS90.75 EXACT ENTITY NAME BRIDGE =====
@@ -3397,9 +3413,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=exact.photo||h.entityPhoto||ns9070CommonsPhoto(h.entity)||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||h.summary?.text||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 같은 대상으로 확인되었습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9076-context-name-interpreter">
 // ===== NS90.76 CONTEXT NAME INTERPRETER =====
@@ -3472,9 +3488,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const desc=exact.desc||h.summary?.text||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">같은 대상으로 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9080-context-candidate-ranker">
 // ===== NS90.80 CONTEXT CANDIDATE RANKER =====
@@ -3529,7 +3545,7 @@ async function ns9080InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9080InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9081-candidate-trace">
 // ===== NS90.81 CANDIDATE TRACE =====
@@ -3585,7 +3601,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  rows.map((r,i)=>`<div style="padding:8px 0;border-top:1px solid #d9dee7"><b>${i+1}. ${esc(r.title)}</b> ${r.qid?`<span>(${esc(r.qid)})</span>`:''}<br><span>검색: ${esc(r.query)} · ${esc(r.lang)} · 점수 ${r.score==null?'—':Math.round(r.score)} · subject ${r.subject??'—'} · cat ${r.cat??'—'} · type ${r.type??'—'} · country ${r.country??'—'} · penalty ${r.penalty??'—'} · role +${r.roleBonus??0}/-${r.rolePenalty??0}</span><br><b>${esc(r.reason||'')}</b><br><span>${esc(String(r.desc||r.snippet||'').slice(0,180))}</span></div>`).join('');
  pv.appendChild(box);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9082-semantic-winner-selector">
 // ===== NS90.82 SEMANTIC WINNER SELECTOR =====
@@ -3646,7 +3662,7 @@ async function ns9082InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9082InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9083-identity-first-winner">
 // ===== NS90.83 IDENTITY-FIRST WINNER =====
@@ -3709,7 +3725,7 @@ async function ns9083InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9083InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9084-verified-winner-to-card">
 // ===== NS90.84 VERIFIED WINNER TO CARD =====
@@ -3745,9 +3761,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'',desc=snap.desc||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">같은 대상으로 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9085-concept-fallback">
 // ===== NS90.85 CONCEPT FALLBACK =====
@@ -3810,9 +3826,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">같은 개념으로 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9086-concept-card-mode">
 // ===== NS90.86 CONCEPT CARD MODE =====
@@ -3877,9 +3893,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">개념은 확인했지만 대표 사진은 찾지 못했습니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9087-concept-identity-card">
 // ===== NS90.87 CONCEPT IDENTITY CARD =====
@@ -3936,9 +3952,9 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  // description or photo is allowed to leak into a broad concept card.
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">개념은 확인했습니다. 정확한 개념 자체의 대표 사진을 찾지 못해 사진 없이 저장합니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9088-country-context-concept-card">
 // ===== NS90.88 COUNTRY CONTEXT CONCEPT CARD =====
@@ -3989,11 +4005,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const photo=snap.photo||'';
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(snap.desc)}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">나라와 문화 맥락은 확인했습니다. 알맞은 대표 사진을 찾지 못해 사진 없이 저장합니다.</p>'}<div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
 // Candidate trace is development-only; keep it out of the child-facing UI.
 (function(){const st=document.createElement('style');st.textContent='details:has(summary[style*="font-weight:800"]){display:none!important}';document.head.appendChild(st)})();
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9089-country-category-identity-gate">
 // ===== NS90.89 COUNTRY + CATEGORY IDENTITY GATE =====
@@ -4018,12 +4034,12 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{
   const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');
-  const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true,countryVerified:true};
+  const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true,countryContext:true,countryVerified:true};
   try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>\n
 
 <script id="ns9090-final-route-bypass">
@@ -4045,7 +4061,7 @@ async function ns9090RenderBroad(section,originName,pv){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{
   const a=getCustom(section); if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');
-  const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:'manual',photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias||'',pageId:'',conceptMode:true,countryContext:true,countryVerified:true,finalRouteVerified:true};
+  const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:'',entityTitle:originName,searchAlias:snap.searchAlias||'',pageId:'',conceptMode:true,countryContext:true,countryVerified:true,finalRouteVerified:true};
   try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
@@ -4055,7 +4071,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(ns9090IsBroad(section,originName)) return ns9090RenderBroad(section,originName,pv);
  return ns9090_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9091-concept-photo-target">
 // ===== NS90.91 CONCEPT PHOTO TARGET =====
@@ -4111,7 +4127,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)) snap.photo=await ns9091ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9092-human-culture-photo-priority">
 // ===== NS90.92 HUMAN CULTURE PHOTO PRIORITY =====
@@ -4162,7 +4178,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9092ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9093-culture-scene-photo-ranker">
 // ===== NS90.93 CULTURE SCENE PHOTO RANKER =====
@@ -4224,7 +4240,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9093CultureScenePhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9094-universal-artwork-identity">
 // ===== NS90.94 UNIVERSAL ARTWORK IDENTITY =====
@@ -4279,13 +4295,13 @@ async function ns9094ShowArtwork(section,name,pv,originName){
  if(!x.photo){pv.innerHTML='<div class="preview-card"><b>작품 자체는 확인했지만 작품 이미지를 찾지 못했습니다.</b><p>다른 관련 사진으로 대신하지 않습니다.</p><button class="rep-close-v5">닫기</button></div>';pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';return}
  pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(x.desc)}</p><div class="v3-photo-choices"><img src="${esc(x.photo)}" alt="${esc(originName)}"></div><div class="preview-actions"><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
- pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(x.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:x.desc||'',emoji:'⭐',source:'manual',photoVerified:true,photoRemote:x.photo,entityId:String(x.entityId||''),entityTitle:String(x.title||originName),searchAlias:String(x.title||''),pageId:String(x.pageId||'')};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,x.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
+ pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(x.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:x.desc||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:true,photoRemote:x.photo,entityId:String(x.entityId||''),entityTitle:String(x.title||originName),searchAlias:String(x.title||''),pageId:String(x.pageId||'')};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,x.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 }
 v22ShowAssistResults=async function(section,name,pv,originName){
  if(String(section)==='art') return ns9094ShowArtwork(section,name,pv,originName);
  return ns9094_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9096-safe-helpers">
 // ===== NS90.96 SAFE ARTWORK FALLBACK + DELETE VERIFY =====
@@ -4379,7 +4395,7 @@ async function ns9095ExpandedArtworkDiscovery(originName){
 }
 // Replace only the discovery function used by the NS90.94 artwork adapter.
 ns9094ArtworkDiscovery=ns9095ExpandedArtworkDiscovery;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9097-stable-card-key-final-artwork-gate">
 // ===== NS90.97 STABLE CARD KEY + FINAL ARTWORK GATE =====
@@ -4444,7 +4460,7 @@ ns9094ArtworkDiscovery=async function(originName){
  const x=await ns9096Timeout(ns9097_prev_artwork_discovery(originName),18000,null);
  return await ns9097VerifyArtworkResult(originName,x);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9098-delete-research-cycle">
 // ===== NS90.98 DELETE + RESEARCH CYCLE =====
@@ -4495,7 +4511,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }
  return kept;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9099-durable-research-memory">
 // ===== NS90.99 DURABLE RESEARCH MEMORY =====
@@ -4537,7 +4553,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }catch(_){ }
  return await ns9099PrevDelete(section,itemId);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90100-universal-artwork-recall">
 // ===== NS90.100 UNIVERSAL ARTWORK RECALL =====
@@ -4615,7 +4631,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob) && !e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90101-multiscript-artwork-bridge">
 // ===== NS90.101 MULTISCRIPT ARTWORK BRIDGE =====
@@ -4695,7 +4711,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90102-universal-artwork-series-resolver">
 // ===== NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER =====
@@ -4784,7 +4800,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90103-universal-artwork-title-discovery">
 // ===== NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY =====
@@ -4876,7 +4892,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns90103ArtworkEntityOK(e,blob))return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90105-success-freeze-series-fallback">
 // ===== NS90.106 STABLE CARD STORAGE =====
@@ -4955,7 +4971,7 @@ ns9094ArtworkDiscovery=async function(originName){
  // 3) Only then: generic numbered-series fallback.
  return await ns90105SeriesFallback(originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90107-universal-artwork-last-mile-discovery">
 // ===== NS90.107 UNIVERSAL ARTWORK LAST-MILE DISCOVERY =====
@@ -5044,7 +5060,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(old)return old; // Freeze all NS90.106 successes and storage behavior.
  return await ns9096Timeout(ns90107LastMile(originName),26000,null);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90108-universal-artwork-evidence-resolver">
 // ===== NS90.108 UNIVERSAL ARTWORK EVIDENCE RESOLVER =====
@@ -5116,7 +5132,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(old)return old; // Never alter a NS90.107 success.
  return await ns9096Timeout(ns90108EvidenceResolve(originName),30000,null);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90110-safe-diagnostic-trace">
 // ===== NS90.110 SAFE DIAGNOSTIC TRACE =====
@@ -5167,13 +5183,13 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
  }catch(e){rows=[];timedOut=true}
  const box=pv.querySelector('.ns90110-diag'); if(box)box.outerHTML=ns90110DiagHtml(originName,rows,timedOut);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90111-real-nonblocking-artwork-discovery">
 // ===== NS90.111 REAL NON-BLOCKING ARTWORK DISCOVERY =====
 // Failure-only rescue. Existing successful cards/storage stay untouched.
 // Every network request is abortable; no diagnostic search is invoked.
-const NS90111_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90111_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90111_prev_discovery=ns9094ArtworkDiscovery;
 const ns90111_prev_show=ns90110_prev_show_artwork; // show routine before NS90.110 diagnostic wrapper
 function ns90111FetchJson(url,ms=1800){
@@ -5276,7 +5292,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90111_VERSION
 // ===== NS90.112 STABLE SUCCESS BRIDGE =====
 // Keep NS90.106 append/merge storage and NS90.111 non-blocking discovery.
 // Important change: a verified fallback result is rendered directly; never rediscover it.
-const NS90112_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90112_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 function ns90112AliasSeeds(origin){
  const out=[], add=v=>{v=String(v||'').trim();if(v&&!out.includes(v))out.push(v)};
  add(origin);
@@ -5337,7 +5353,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90112_VERSION
 // ===== NS90.113 ARTWORK QUALITY GATE =====
 // Freeze NS90.112 discovery/storage. Improve only the verified artwork snapshot:
 // prefer entity-owned artwork images and enrich short descriptions from the entity's own Wikipedia page.
-const NS90113_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90113_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90113_prev_hydrate=ns90111Hydrate;
 async function ns90113WikiExtract(e){
  for(const site of ['kowiki','jawiki','enwiki']){
@@ -5387,7 +5403,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90113_VERSION
 // Preserve NS90.113 exactly. Before any new artwork network search, try the durable
 // NS90.99 success snapshot, but only after re-validating its entity as an artwork.
 // This is universal: no country/title-specific table or exception is used.
-const NS90114_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90114_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90114_prev_show=ns9094ShowArtwork;
 async function ns90114VerifiedMemory(section,origin){
  let mem=null; try{mem=ns9099LoadResearch(section,origin)}catch(_){return null}
@@ -5426,7 +5442,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90114_VERSION
 // Preserve all NS90.114 successes. Only after they fail, discover alternate/native/English
 // titles from multilingual search evidence and send the verified entity through the SAME
 // artwork quality gate. No country or artwork exception table is used.
-const NS90115_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90115_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90115_prev_show=ns9094ShowArtwork;
 function ns90115Norm(s){return String(s||'').toLowerCase().normalize('NFKC').replace(/[《》〈〉「」『』()\[\]·・:：,，.。'"“”‘’\-–—_]/g,' ').replace(/\s+/g,' ').trim()}
 function ns90115Tokens(s){return ns90115Norm(s).split(' ').filter(x=>x.length>1)}
@@ -5508,7 +5524,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90115_VERSION
 // Freeze NS90.115. Failure-only reverse discovery: representative title -> surrounding
 // artwork evidence (creator/collection/series/page) -> linked candidate entity -> SAME quality gate.
 // No country/title-specific exception table.
-const NS90116_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90116_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90116_prev_show=ns9094ShowArtwork;
 async function ns90116Timed(url,ms=1800){try{return await ns90111FetchJson(url,ms)}catch(_){return null}}
 async function ns90116WikiSearch(term,lang){
@@ -5586,7 +5602,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90116_VERSION
 <script id="ns90117-artwork-candidate-observer">
 // ===== NS90.117 ARTWORK CANDIDATE OBSERVER =====
 // Failure-only observer. Existing successful card/search paths are untouched.
-const NS90117_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90117_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90117_prev_show=ns9094ShowArtwork;
 async function ns90117Observe(origin){
  const deadline=Date.now()+12000, seeds=[]; const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
@@ -5646,7 +5662,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90117_VERSION
 // Preserve the existing successful resolver first. On failure, accept a differently-titled
 // candidate only when independent artwork evidence agrees: real work entity + image +
 // creator/series/work-type evidence + clean non-person/non-place semantics. No named-work table.
-const NS90118_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90118_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90118_base_show=ns90117_prev_show;
 function ns90118Claim(e,p){return !!(e?.claims?.[p]?.length)}
 function ns90118WorkEvidence(e,blob){
@@ -5718,7 +5734,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90118_VERSION
 // ===== NS90.119 CANDIDATE PIPELINE BRIDGE =====
 // Collect once, retain every candidate, then evaluate the same retained set.
 // This prevents a good observer candidate from disappearing before the evidence resolver.
-const NS90119_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90119_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90119_frozen_show=ns90118_base_show;
 async function ns90119Collect(origin){
  const deadline=Date.now()+15000,seeds=[];const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
@@ -5792,7 +5808,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90119_VERSION
 // Failure-only bridge: keep the NS90.119 candidate set, rehydrate promising artwork
 // candidates with a slower detail retry, recover an image from the verified entity/page,
 // and snapshot fetchable images as data URLs for more durable saved cards.
-const NS90120_VERSION='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+const NS90120_VERSION='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
 const ns90120_frozen_show=ns9094ShowArtwork;
 async function ns90120FetchJson(url,ms=4200){
  const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
@@ -5873,7 +5889,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.133: NS90.131 LOCKED CORE + completely isolated failure-only fallback. -->
 <script id="ns90133-locked-core-isolated-fallback">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  const LOCKED_CORE=ns9094ShowArtwork; // exact NS90.131 entry point; never replaced internally.
  function failed(pv){
    const t=String(pv?.textContent||'');
@@ -5915,7 +5931,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.134: version sync + Spain person-card cleanup layer. Locked core unchanged. -->
 <script>
 (()=>{
- const NS134_LABEL='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const NS134_LABEL='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  function sync134(){
    for(const el of document.querySelectorAll('body *')){
      if(el.children.length===0 && /MASTER V28\s*[·•]\s*NS90\.131 DURABLE COMMON RESEARCH MEMORY\s*[·•]\s*ONE MASTER/i.test(el.textContent||'')) el.textContent=NS134_LABEL;
@@ -5935,11 +5951,11 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <style id="ns90154-style">#ns90154Badge{margin:8px auto 12px;max-width:760px;padding:9px 12px;border:1px solid #9bb8a6;border-radius:12px;background:#f3faf5;text-align:center;font-size:14px;font-weight:800;color:#315b3f}</style>
 <script id="ns90154-clean-version-guard">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  function clean(){
   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
-  try{let x=document.getElementById('ns90154Badge');if(!x){x=document.createElement('div');x.id='ns90154Badge';x.textContent='🧱 구조 안정판 7차 · 대표상태 코어 1개 · 이전 상태패치 제거 · 검색엔진 잠금';const b=document.getElementById('ns9015Banner');if(b)b.insertAdjacentElement('afterend',x)}}catch(_){}
+  try{let x=document.getElementById('ns90154Badge');if(!x){x=document.createElement('div');x.id='ns90154Badge';x.textContent='🧱 구조 안정판 8차 · 대표이름 성공경로를 대표카드로 통합 · 검색엔진 잠금';const b=document.getElementById('ns9015Banner');if(b)b.insertAdjacentElement('afterend',x)}}catch(_){}
   try{const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),rm=[];while(w.nextNode()){const n=w.currentNode,t=String(n.nodeValue||'').trim();if(t==='\\n'||t==='\\n\\n'||t==='\\n\\n\\n')rm.push(n)}rm.forEach(n=>n.remove())}catch(_){}
  }
  clean(); document.addEventListener('DOMContentLoaded',clean); window.addEventListener('load',clean);
@@ -5950,7 +5966,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+  const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -5961,7 +5977,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.131: durable common research memory; failure-safe recall before network discovery. -->
 <script id="ns90131-durable-common-research-memory">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  const prevShow=ns9094ShowArtwork;
  function validSnap(s){
    if(!s||!String(s.desc||'').trim()) return false;
@@ -6022,7 +6038,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -6056,7 +6072,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -6110,7 +6126,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -6118,7 +6134,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.154 CLEAN STATE CORE · SEARCH CORE LOCKED · ONE MASTER';
+ const V='MASTER V28 · NS90.155 REPRESENTATIVE ROUTE UNIFICATION · SEARCH CORE LOCKED · ONE MASTER';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
