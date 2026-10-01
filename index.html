@@ -109,7 +109,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 </style>
 <style id="v13-guard">.item img[src=''],.item img:not([src]){display:none!important}</style><style id="ns9016-style">.rep-card-btn-v5.ns9016-done{background:#e9ddff!important;border-color:#7b52b9!important;color:#4b267c!important;font-weight:800!important}.rep-card-btn-v5.can-make{cursor:pointer}.rep-card-btn-v5:disabled{cursor:default}</style>
 <style id="ns9017-state-fix">
-/* NS90.175: neutral = not made, purple diamond = completed card */
+/* NS90.17: neutral = not made, purple diamond = completed card */
 .rep-card-btn-v5.can-make{background:#fff!important;border:1.5px solid #aeb5c2!important;color:#333!important;box-shadow:none!important;opacity:1!important}
 .rep-card-btn-v5.can-make:hover{background:#f7f7fa!important;border-color:#7d8797!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
@@ -118,7 +118,7 @@ body.view-cards #detail .cards .item>.actions{display:none}
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
-</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.175</div>
+</head><body><div id="ns9015Banner" style="position:sticky;top:0;z-index:9999;background:#173f70;color:white;text-align:center;font-weight:800;padding:10px 8px;font-size:15px;letter-spacing:.2px">✅ MASTER V28 · NS90.158 REPRESENTATIVE STATE DIAGNOSTIC · SEARCH CORE LOCKED · ONE MASTER</div>
 <style>
 #kbBtn{position:fixed;right:14px;bottom:14px;z-index:12020;border:0;border-radius:999px;padding:13px 17px;background:#244b76;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #kbPanel{display:none;position:fixed;inset:0;z-index:12030;background:#f7f4ec;overflow:auto;padding:16px}
@@ -599,7 +599,7 @@ function confirmedDescKey(country,s,id){return `${DATA_NS}confirmed_${country}_$
 function deletedBaseKey(s){return `${DATA_NS}deleted_${COUNTRY}_${s}`}
 function getDeletedBase(s){try{return JSON.parse(localStorage.getItem(deletedBaseKey(s))||'[]')}catch{return[]}}
 function setDeletedBase(s,a){localStorage.setItem(deletedBaseKey(s),JSON.stringify([...new Set(a)]))}
-// NS90.175: card metadata is mirrored in IndexedDB so cards no longer depend on the nearly-full localStorage quota.
+// NS90.55: card metadata is mirrored in IndexedDB so cards no longer depend on the nearly-full localStorage quota.
 const CARD_DB='magic_wand_cards_ns9055', CARD_STORE='cards', CARD_MEM=new Map();
 function cardStoreKey(country,s){return String(country||COUNTRY)+'|'+String(s)}
 function openCardDB(){return new Promise((resolve,reject)=>{const q=indexedDB.open(CARD_DB,1);q.onupgradeneeded=()=>{const db=q.result;if(!db.objectStoreNames.contains(CARD_STORE))db.createObjectStore(CARD_STORE)};q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)})}
@@ -608,7 +608,7 @@ async function cardDBGet(country,s){try{const db=await openCardDB();return await
 function getCustom(s){const mk=cardStoreKey(COUNTRY,s);if(CARD_MEM.has(mk))return CARD_MEM.get(mk).map(x=>({...x}));try{return JSON.parse(localStorage.getItem(key(s))||'[]')}catch{return[]}}
 function isQuotaError(e){return !!e&&(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22||e.code===1014)}
 function clearExpendableSearchCaches(){
- // NS90.175: preserve verified candidates compactly, then remove regenerable heavy resolver caches.
+ // NS90.54: preserve verified candidates compactly, then remove regenerable heavy resolver caches.
  try{if(typeof ns9053StorageCleanup==='function')return ns9053StorageCleanup()}catch(e){}
  const disposable=['magicwand_photo_','place_desc_v30_','rebuilt_','autophoto_','trial_candidates_used_'];
  const legacyEntity=['magic_v13_entity_','magic_v14_entity_','magic_v15_entity_','magic_v16_entity_','magic_v28_entity_'];
@@ -627,11 +627,11 @@ function v20StorageInfo(){
 function ns9055CompactCardForLocal(x){const y={...x};if(/^data:/i.test(String(y.photoRemote||'')))y.photoRemote='';return y}
 function setCustom(s,a){
  const country=String(COUNTRY||''), mk=cardStoreKey(country,s), copy=a.map(x=>({...x})); CARD_MEM.set(mk,copy);
- // IndexedDB is the authoritative card store from NS90.175 onward.
- cardDBPut(country,s,copy).catch(e=>console.error('[NS90.175] IndexedDB card save failed',e));
+ // IndexedDB is the authoritative card store from NS90.55 onward.
+ cardDBPut(country,s,copy).catch(e=>console.error('[NS90.56] IndexedDB card save failed',e));
  // Keep only a compact compatibility mirror when localStorage has room. Failure here is no longer a card-save failure.
  const k=key(s),payload=JSON.stringify(copy.map(ns9055CompactCardForLocal));
- try{localStorage.setItem(k,payload)}catch(e){if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(k,payload)}catch(_){}}else console.warn('[NS90.175] local mirror skipped',e)}
+ try{localStorage.setItem(k,payload)}catch(e){if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(k,payload)}catch(_){}}else console.warn('[NS90.56] local mirror skipped',e)}
  return true;
 }
 async function ns9055SetCustomDurable(s,a){const country=String(COUNTRY||''),copy=a.map(x=>({...x}));CARD_MEM.set(cardStoreKey(country,s),copy);await cardDBPut(country,s,copy);setCustom(s,copy);return true}
@@ -642,7 +642,7 @@ async function ns9055HydrateCards(){
   const arr=db.length?db:legacy; if(arr.length){CARD_MEM.set(cardStoreKey(c,sec),arr);if(!db.length)try{await cardDBPut(c,sec,arr)}catch(e){}}
  }
  try{if(!document.getElementById('detail').classList.contains('hidden'))for(const sec of sections)await renderSection(sec)}catch(e){}
- console.info('[NS90.175] card storage hydrated');
+ console.info('[NS90.56] card storage hydrated');
 }
 setTimeout(()=>ns9055HydrateCards(),20);
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -1225,7 +1225,7 @@ async function renderSection(s){
    }};
    card.querySelector('.delete').onclick=async()=>{
      if(!requireDeletePin())return; if(!confirm(`「${x.name}」 항목을 삭제할까요?`))return;
-     // NS90.175: preserve representative-search success BEFORE any card/edit/photo deletion.
+     // NS90.176: preserve representative-search success BEFORE any card/edit/photo deletion.
      // This is independent of the card source and applies to every representative item.
      try{
        if(typeof ns90155IsRepresentative==='function' && ns90155IsRepresentative(s,x.name)){
@@ -1306,7 +1306,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 renderHome();
 
-// ===== NS90.175 iPad Safari first-refresh stabilizer =====
+// ===== NS90.66 iPad Safari first-refresh stabilizer =====
 // Safari can restore a stale scroll/layout snapshot before the first paint.  Re-run the
 // home layout after real viewport information is available, without requiring a touch.
 (function ns9065StableHomeBoot(){
@@ -1550,7 +1550,7 @@ const V3_ALIAS={
  '안드레스 이니에스타':['Andrés Iniesta','Andres Iniesta'],
  '파우 가솔':['Pau Gasol']
  };
-// NS90.175 — ONE SEARCH PIPELINE regression bridge.
+// NS90.58 — ONE SEARCH PIPELINE regression bridge.
 // Representative buttons and manually-added candidates resolve through the same canonical identity aliases.
 Object.assign(V3_ALIAS,{
  '하몬 이베리코':['이몬 하베리코','하몬이베리코','Jamón ibérico','Jamon iberico','Iberian ham'],
@@ -1698,9 +1698,9 @@ function V8_kind(section,name){
  return 'person';
 }
 
-// ===== NS90.175=====
+// ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.175';
+const NS9015_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -1767,7 +1767,7 @@ function oneNameFit(q,title){
  return 0;
 }
 function oneEntityNameGate(query,title,aliases){
- // NS90.175비슷한 상위개념을 같은 대상으로 인정하지 않는다.
+ // NS90.25 ENTITY-LOCK: 비슷한 상위개념을 같은 대상으로 인정하지 않는다.
  // 예: 천도복숭아→복숭아, 석류→석류석, 만다린→동명이물 차단.
  const q=oneNormName(query), t=oneNormName(title);
  const all=[query,...(aliases||[])].filter(Boolean);
@@ -1784,7 +1784,7 @@ function oneEntityNameGate(query,title,aliases){
  return false;
 }
 function sharedTypeFit(type,title,desc){
- // NS90.175: every category and every search branch uses the same universal type resolver.
+ // NS90.63: every category and every search branch uses the same universal type resolver.
  // Function declarations are hoisted, so the shared resolver below is safe to call here.
  const universal=ns9062TypeFit(type,title,desc);
  if(universal>0)return universal;
@@ -1793,7 +1793,7 @@ function sharedTypeFit(type,title,desc){
  const bad={food:['선수','athlete'],fruit:['영화','소설','가수','그룹','음반','노래','만화','애니메이션','게임','광물','보석','석류석','배우','인물','film','novel','singer','band','album','song','comic','animation','game','mineral','gem','garnet','person'],animal:['회화','오일'],plant:['회화','오일','기름'],place:['가수','선수'],culture:['식물','동물'],person:['작품','영화','책'],art:['가수','선수','singer','athlete']}[type]||[];
  return good.filter(k=>x.includes(k)).length*2-bad.filter(k=>x.includes(k)).length*3;
 }
-// ===== NS90.175=====
+// ===== NS90.64 ATHLETE NAME NORMALIZER =====
 // Resolve broad/specialized category words without item-specific exceptions.
 // Strong positive evidence wins; negative words only reject when no positive category evidence exists.
 function ns9062TypeFit(type,title,desc){
@@ -1815,7 +1815,7 @@ function ns9062TypeFit(type,title,desc){
 }
 async function oneWikiSearch(name,topic){
  const names=sharedAliases(name), queries=[];
- // NS90.175이름만 단독 검색하지 않는다. 모든 검색어에 현재 주제를 붙인다.
+ // NS90.23 TOPIC-LOCK: 이름만 단독 검색하지 않는다. 모든 검색어에 현재 주제를 붙인다.
  // 카테고리가 바뀌어도 이 함수 하나만 사용하고 topic만 입력값으로 바뀐다.
  for(const n of names.slice(0,4)){
   queries.push(n+' '+topic.ko);
@@ -1835,10 +1835,10 @@ async function onePage(title){try{
  const r=await fetch(u),j=await r.json();return Object.values(j.query?.pages||{})[0]||null;
 }catch(e){return null}}
 
-// ===== NS90.175=====
+// ===== NS90.45 ART EN PHOTO BRIDGE =====
 // When the Korean sitelink has no image, preserve the verified English page thumbnail for the SAME Wikidata entity.
 // This especially recovers artworks whose image is available on enwiki but not as Wikidata P18.
-// ===== NS90.175=====
+// ===== NS90.26 MULTILINGUAL ENTITY BRIDGE =====
 // One shared engine: aliases may be Korean, English or scientific names.
 // Resolve the same entity across languages, then prefer Korean article text when available.
 async function onePageLang(lang,title){try{
@@ -1891,10 +1891,10 @@ async function oneWikidataPhotoBridge(clean,topic,aliases){
     if(photo)return {p:pg,desc,score:50,identityTitle:e.labels?.en?.value||pg.title,entityId:qid,bridgePhoto:photo};
    }
   }
- }catch(e){console.warn('[NS90.175ikidata photo bridge]',e)}
+ }catch(e){console.warn('[NS90.44 Wikidata photo bridge]',e)}
  return null;
 }
-// ===== NS90.175=====
+// ===== NS90.46 ART TITLE IDENTITY BRIDGE =====
 // Artwork titles are unusually multilingual. Resolve the canonical English title first,
 // then keep the same entity while Korean text/photo recovery runs through the common engine.
 const NS9046_ART_CANON={
@@ -1916,13 +1916,13 @@ async function ns9049ArtPhotoSearchFallback(clean,topic,titles){
    const photo=pg.thumbnail?.source||pg.original?.source||'';
    if(photo)return photo;
   }
- }catch(e){console.warn('[NS90.175 art search fallback]',e)}
- // NS90.175: if Wikipedia pageimages/REST/P18 are empty, search Commons using the
+ }catch(e){console.warn('[NS90.50 art search fallback]',e)}
+ // NS90.50: if Wikipedia pageimages/REST/P18 are empty, search Commons using the
  // already verified canonical artwork title. Identity is not changed; only the photo is recovered.
  for(const q of qs.slice(0,8))try{
   const urls=await V3_commons(q,'art');
   if(urls&&urls.length)return urls[0];
- }catch(e){console.warn('[NS90.175ommons canonical photo fallback]',e)}
+ }catch(e){console.warn('[NS90.50 Commons canonical photo fallback]',e)}
  return '';
 }
 async function ns9046ArtTitleBridge(clean,topic){
@@ -1933,7 +1933,7 @@ async function ns9046ArtTitleBridge(clean,topic){
   const desc=(p.extract||'').replace(/\s+/g,' ').trim();
   if(desc.length<45||sharedTypeFit('art',p.title||title,desc)<=0)continue;
   let photo=p.thumbnail?.source||p.original?.source||'';
-  // NS90.175: artwork photo search fallback. Some artworks expose a representative image through
+  // NS90.50: artwork photo search fallback. Some artworks expose a representative image through
   // Wikipedia REST summary even when action=query pageimages returns no thumbnail.
   // Keep the already-verified canonical title/entity and recover only its image.
   if(!photo){
@@ -1941,14 +1941,14 @@ async function ns9046ArtTitleBridge(clean,topic){
     const ru='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent((p.title||title).replace(/ /g,'_'));
     const rj=await (await fetch(ru)).json();
     photo=rj?.thumbnail?.source||rj?.originalimage?.source||'';
-   }catch(e){console.warn('[NS90.175 art REST photo]',e)}
+   }catch(e){console.warn('[NS90.50 art REST photo]',e)}
   }
   const qid=p.pageprops?.wikibase_item||'';
   if(!photo&&qid){
    try{const e=(await V3_wd([qid]))?.[qid],fn=V3_claim(e,'P18')[0];if(fn)photo=await V3_fileUrl(fn)}catch(e){}
   }
   if(!photo) photo=await ns9049ArtPhotoSearchFallback(clean,topic,[p.title||title,spec.en,...spec.alts]);
-  // NS90.175 final fallback: search the exact canonical English title + artist words on enwiki.
+  // NS90.49 final fallback: search the exact canonical English title + artist words on enwiki.
   // This remains inside the same verified artwork identity path; it does not substitute a different subject.
   if(!photo){
    for(const fq of [spec.en+' artwork',...(spec.alts||[]).map(x=>x+' artwork')].slice(0,6)){
@@ -1958,7 +1958,7 @@ async function ns9046ArtTitleBridge(clean,topic){
      const pages=Object.values(j.query?.pages||{});
      const hit=pages.find(pg=>pg.thumbnail?.source && ([p.title||title,spec.en,...spec.alts].some(a=>oneNameSimilarity(a,pg.title||'')>=0.72)));
      if(hit){photo=hit.thumbnail.source;break}
-    }catch(e){console.warn('[NS90.175 final art photo fallback]',e)}
+    }catch(e){console.warn('[NS90.49 final art photo fallback]',e)}
    }
   }
   // Keep English identity even when Korean display text is available.
@@ -1970,7 +1970,7 @@ async function ns9046ArtTitleBridge(clean,topic){
  return null;
 }
 
-// ===== NS90.175=====
+// ===== NS90.61 MULTILINGUAL NAME RESOLVER =====
 // If the exact multilingual identity path misses, retry the SAME aliases with
 // category/country context. This is one shared retry layer, not item-specific engines.
 const NS9059_EN_HINT={food:'Spanish food',fruit:'fruit Spain',animal:'animal Spain',plant:'plant Spain',place:'Spain landmark',culture:'Spanish culture',person:'Spain',art:'Spanish artwork'};
@@ -1997,7 +1997,7 @@ async function ns9059StagedRetry(clean,topic,aliases){
     if(qid){const ko=await oneKoPageFromEntity(qid);if(ko&&ko.missing===undefined){const kd=(ko.extract||'').replace(/\s+/g,' ').trim();if(kd.length>=45){chosen=ko;chosenDesc=kd}}}
     return {p:chosen,desc:chosenDesc,score:900,identityTitle:p.title||t.q,bridgePhoto:p.thumbnail?.source||p.original?.source||chosen.thumbnail?.source||chosen.original?.source||'',entityId:qid};
    }
-  }catch(e){console.warn('[NS90.175 multilingual retry]',t.q,e)}
+  }catch(e){console.warn('[NS90.61 multilingual retry]',t.q,e)}
  }
  return null;
 }
@@ -2005,10 +2005,10 @@ async function oneResolve(section,name,forcedKind=''){
  window.NS9047_DIAG={name:String(name||''),section,stage:'start'};
  const clean=String(name||'').replace(/^(동물|식물)\s*[—\-:]\s*/,'').replace(/\s+/g,' ').trim();
  const topic=oneTopic(section,name); if(forcedKind)topic.kind=forcedKind;
- // NS90.175: 모든 카테고리가 이 한 검색 파이프라인과 동일한 대상 일치 검증을 사용한다. 대표후보 데이터만 보강한다.
+ // NS90.22: 모든 카테고리가 이 한 검색 파이프라인과 동일한 대상 일치 검증을 사용한다. 대표후보 데이터만 보강한다.
  // 후보명이 위키 문서명과 조금 달라도(예: 통용명/별칭) 검색 상위 결과의 설명과 주제 적합도로 검증한다.
  let best=null,bestScore=-999;
- // NS90.175: 검색 결과 순위에만 의존하지 않고, 후보명/별칭의 정확한 문서를 먼저 확인한다.
+ // NS90.24: 검색 결과 순위에만 의존하지 않고, 후보명/별칭의 정확한 문서를 먼저 확인한다.
  // 이 단계도 모든 카테고리가 공통으로 사용하며, 통과 기준은 동일한 주제 검증이다.
  const aliases=sharedAliases(clean);
  const artTitleBridged=await ns9046ArtTitleBridge(clean,topic);
@@ -2030,21 +2030,21 @@ async function oneResolve(section,name,forcedKind=''){
   const h=hits[i], p=await onePage(h.title); if(!p)continue;
   const desc=(p.extract||'').replace(/\s+/g,' ').trim(); if(desc.length<45)continue;
   const nf=Math.max(...aliases.map(a=>oneNameFit(a,h.title))), tf=sharedTypeFit(topic.kind,h.title,desc);
-  // NS90.175: 검색 상위라는 이유만으로 다른 대상을 통과시키지 않는다.
+  // NS90.22: 검색 상위라는 이유만으로 다른 대상을 통과시키지 않는다.
   // 후보 이름/별칭과 실제 문서명이 충분히 가까운 경우에만 설명·사진 단계로 진행한다.
   if(!oneEntityNameGate(clean,h.title,aliases))continue;
-  // NS90.175: 이름이 비슷해도 현재 주제라는 적극적 증거가 없으면 통과시키지 않는다.
+  // NS90.23: 이름이 비슷해도 현재 주제라는 적극적 증거가 없으면 통과시키지 않는다.
   // 자두(가수), 석류석(광물), 만다린(만화/인물) 같은 동명이물을 여기서 공통 차단한다.
   if(tf<=0)continue;
   const rankBonus=Math.max(0,5-i);
   const score=nf+tf+rankBonus+(p.thumbnail?.source?2:0)+(desc.length>90?1:0);
   if(score>bestScore){bestScore=score;best={p,desc}}
  }
- // NS90.175 second-stage bridge: exact multilingual entity -> page image/P18.
+ // NS90.44 second-stage bridge: exact multilingual entity -> page image/P18.
  if(!best){const sr=await ns9059StagedRetry(clean,topic,aliases);if(sr){best=sr;bestScore=sr.score||0;window.NS9047_DIAG={name:clean,section,stage:'staged-retry-ok',identity:sr.identityTitle||'',photo:!!sr.bridgePhoto};}}
  if(!best){const wb=await oneWikidataPhotoBridge(clean,topic,aliases);if(wb){best=wb;bestScore=wb.score||0;}}
  if(!best){window.NS9047_DIAG={name:clean,section,stage:'no-entity'};return null;}
- // NS90.175a candidate is not ready until a real representative image URL is secured.
+ // NS90.44 ART IDENTITY DIAG AUTO RECOVERY: a candidate is not ready until a real representative image URL is secured.
  // First use the resolved Wikipedia thumbnail. If it is absent (common for artworks),
  // fetch P18 from the exact same Wikidata entity and resolve that Commons file.
  let photo=best.bridgePhoto||best.p.thumbnail?.source||best.p.original?.source||'';
@@ -2056,14 +2056,14 @@ async function oneResolve(section,name,forcedKind=''){
        const fn=V3_claim(ents?.[qid],'P18')[0];
        if(fn) photo=await V3_fileUrl(fn);
      }
-   }catch(e){console.warn('[NS90.175photo fallback]',e)}
+   }catch(e){console.warn('[NS90.44 P18 photo fallback]',e)}
  }
  const finalName=best.p.title||clean;
- // ===== NS90.175=====
- // Keep the NS90.175 screen/representative-item UI unchanged.
+ // ===== NS90.27 SAFE CARD QUALITY GATE =====
+ // Keep the NS90.26 screen/representative-item UI unchanged.
  // This gate only blocks an obviously mismatched resolved entity before a card is offered.
  const rawDesc=(best.desc||'').replace(/\s+/g,' ').trim();
- // NS90.175: when an English/scientific exact alias resolves to the same Wikidata entity
+ // NS90.40: when an English/scientific exact alias resolves to the same Wikidata entity
  // and we then swap in its Korean sitelink for display, validate identity against the
  // exact foreign identity title as well as the Korean display title. This fixes valid
  // multilingual entities without weakening the entity lock for unrelated homonyms.
@@ -2077,7 +2077,7 @@ async function oneResolve(section,name,forcedKind=''){
  const photoOk=!!photo;
  window.NS9047_DIAG={name:clean,section,stage:(best.artCanonical&&!photoOk?'art-photo-quality-gate':'quality-gate'),identityTitle,finalName,identityOk,typeOk,descOk,photoOk,qid:best.entityId||best.p.pageprops?.wikibase_item||'',canonical:!!best.artCanonical};
  if(!identityOk||!typeOk||!descOk||!photoOk)return null;
- // ===== NS90.175=====
+ // ===== NS90.29 KOREAN PREVIEW FALLBACK =====
  // Prefer Korean text for the exact same Wikidata entity. If no Korean article exists,
  // keep the verified entity snapshot for the later repair layer instead of changing identity.
  let descForCard=rawDesc;
@@ -2088,12 +2088,12 @@ async function oneResolve(section,name,forcedKind=''){
      if(kd.length>=45 && sharedTypeFit(topic.kind,kp.title||finalName,kd)>0) descForCard=kd;
    }catch(e){}
  }
- // ===== NS90.175=====
+ // ===== NS90.29 KOREAN PREVIEW FALLBACK =====
  // The preview must never expose an English-only extract to the child.
  // Identity/photo resolution stays untouched. When the same entity has no usable Korean article,
  // use one shared category-aware Korean fallback rather than switching to a different entity.
  if(!isMostlyKorean(descForCard)){
-   // ===== NS90.175=====
+   // ===== NS90.30 RICH KOREAN DESCRIPTION =====
    // Keep the verified entity/photo, but turn useful facts in the English extract into
    // a richer child-friendly Korean preview before falling back to a generic category text.
    const en=(descForCard||'').toLowerCase();
@@ -2129,7 +2129,7 @@ async function oneResolve(section,name,forcedKind=''){
    descForCard=facts.join(' ');
    if(descForCard.length<70) descForCard=`${clean}에 대해 사진과 함께 생김새, 쓰임, 배경과 특징을 차근차근 살펴보세요.`;
  }
- // ===== NS90.175=====
+ // ===== NS90.40 MULTILINGUAL IDENTITY FIX =====
  // Add country context without changing the resolved entity, photo, candidate list or UI.
  // The context comes from the same country/section overview already used by the encyclopedia,
  // so this remains one shared engine rather than per-item exception code.
@@ -2163,10 +2163,10 @@ async function oneResolve(section,name,forcedKind=''){
  // Append country context only AFTER that layer so it cannot be shortened away.
  const entityDesc=v13CardDescription(descForCard.trim(),clean,topic.kind);
  const cardDesc=(entityDesc+(countryContext?`\n\n${countries?.[COUNTRY]?.flag||'🌍'} ${countries?.[COUNTRY]?.name||'이 나라'}에서는\n${countryContext.replace(/^\s*[^에]+에서는\s*/, ' ')}`:'')).trim();
- return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.175 검색 복구 기준 · NS90.175 검증 나라 연결 + NS90.175 풍부한 한국어 설명 + NS90.175 한국어 미리보기 보장 + NS90.175 한국어 설명 브리지 + NS90.175 안전 카드 품질 게이트 + NS90.175 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
+ return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.175',
+ version:'MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2214,7 +2214,7 @@ function v11ChildDescription(raw,name,section){
  }
  return out||String(raw||'').slice(0,320);
 }
-// ===== NS90.175> ONE PIPELINE =====
+// ===== NS90.15 ONE INPUT -> ONE PIPELINE =====
 function cardInputName(raw){return String(raw||'').replace(/^(동물|식물)\s*[—\-:]\s*/,'').replace(/^[《〈「『"']+|[》〉」』"']+$/g,'').replace(/\s+/g,' ').trim()}
 function cardInputKind(section,raw){return oneTopic(section,raw).kind}
 async function cardPipeline(section,rawName){return await ONE_CARD_ENGINE.resolve({section,name:cardInputName(rawName)})}
@@ -2234,7 +2234,7 @@ function ns9066KnownAlias(section,original){
 }
 function v28RepresentativeName(section,rawName){
  const original=cardInputName(rawName);
- // NS90.175: the educational representative label is canonical and never changes.
+ // NS90.67: the educational representative label is canonical and never changes.
  // Learned aliases are search/storage links only; they must not create a second representative name.
  return original;
 }
@@ -2288,7 +2288,7 @@ function repTextFor(section){
  if(Array.isArray(ov)) return ov[2]||'';
  return ov.names||'';
 }
-// ===== NS90.175=====
+// ===== NS90.64 ATHLETE NAME NORMALIZER =====
 // Representative athlete labels intentionally show "name — sport" for learning,
 // but the shared card resolver must receive the person's identity only.
 // The sport remains display/context metadata and is never appended to the entity name.
@@ -2391,9 +2391,9 @@ function v14RegressionStaticCheck(){
 // ===== V12 ABSOLUTELY ONE REQUEST PATH =====
 function v12Request(section,rawName,forcedKind=''){
  const display=cardInputName(rawName),kind=forcedKind||cardInputKind(section,rawName);
- return {section,rawName:String(rawName||''),name:display,kind,key:['NS90.175-ONE',section,kind,display].join('|')};
+ return {section,rawName:String(rawName||''),name:display,kind,key:['NS90.15-ONE',section,kind,display].join('|')};
 }
-// ===== NS90.175=====
+// ===== NS90.54 LEGACY PHOTO MIGRATION + PREVIEW REUSE =====
 // Older Safari builds could fall back to localStorage for user photos. Those base64 images can
 // consume almost the entire localStorage quota. Move them to IndexedDB without deleting photos.
 async function ns9054MigrateLegacyPhotos(){
@@ -2407,9 +2407,9 @@ async function ns9054MigrateLegacyPhotos(){
      await setUserPhoto(k,v);
      const check=await getUserPhoto(k);
      if(check===v){localStorage.removeItem(k);moved++;}
-   }catch(e){console.warn('[NS90.175] legacy photo migration skipped',k,e)}
+   }catch(e){console.warn('[NS90.54] legacy photo migration skipped',k,e)}
  }
- if(moved)console.info('[NS90.175] migrated legacy photos to IndexedDB',moved);
+ if(moved)console.info('[NS90.54] migrated legacy photos to IndexedDB',moved);
  return moved;
 }
 async function ns9054PrepareStorage(){
@@ -2417,9 +2417,9 @@ async function ns9054PrepareStorage(){
  try{ns9053StorageCleanup()}catch(e){}
  try{localStorage.setItem('magic_ns9054_storage_ready',String(Date.now()))}catch(e){}
 }
-/* NS90.175automatic storage migration disabled */
+/* NS90.143 READ-ONLY DIAG: automatic storage migration disabled */
 
-// ===== NS90.175=====
+// ===== NS90.53 COMPACT READY SNAPSHOT + SAFE STORAGE CLEANUP =====
 // Purple-ready candidates keep only the small, reusable preview data.
 // Regenerable resolver caches can then be removed without losing purple readiness.
 const NS9053_READY_PREFIX='magic_ready_9053_';
@@ -2444,8 +2444,8 @@ function ns9053StorageCleanup(keepReqKey=''){
  remove.forEach(k=>localStorage.removeItem(k));
  return remove.length;
 }
-function ns9053EnsureStorage(){try{if(!localStorage.getItem('magic_ns9053_cleanup_done')){const n=ns9053StorageCleanup();localStorage.setItem('magic_ns9053_cleanup_done',String(Date.now()));console.info('[NS90.175] cleaned regenerable caches',n)}}catch(e){}}
-/* NS90.175automatic cache cleanup disabled */
+function ns9053EnsureStorage(){try{if(!localStorage.getItem('magic_ns9053_cleanup_done')){const n=ns9053StorageCleanup();localStorage.setItem('magic_ns9053_cleanup_done',String(Date.now()));console.info('[NS90.53] cleaned regenerable caches',n)}}catch(e){}}
+/* NS90.143 READ-ONLY DIAG: automatic cache cleanup disabled */
 async function v12ResolveRequest(req){
  const compact=ns9053LoadReady(req);if(compact)return compact;
  try{const c=localStorage.getItem('magic_v28_entity_'+req.key);if(c){const j=JSON.parse(c);if(j&&j.desc){ns9053SaveReady(req,j);return j}}}catch(e){}
@@ -2471,7 +2471,7 @@ async function precheckRepresentative(section,name){
  const result=verified&&verified.desc?{ok:true,verified}:{ok:false,verified:null};
  repAvailabilityCache.set(req.key,result);return result;
 }
-// ===== NS90.175=====
+// ===== NS90.106 STABLE CARD STORAGE =====
 // Add-card writes are append/merge operations. A stale preview snapshot may never replace
 // cards that were saved earlier. Delete continues to use the established durable delete path.
 function ns90106CardIdentity(country,section,x){
@@ -2516,7 +2516,7 @@ async function ns90106AppendCard(section,item){
  }
  const check=await cardDBGet(country,section);
  const wanted=ns90106CardIdentity(country,section,item);
- if(!check.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('NS90.175 append verify failed');
+ if(!check.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('NS90.106 append verify failed');
  await ns90155AfterRepresentativeSave(section,item);
  return true;
 }
@@ -2543,7 +2543,7 @@ function openRepresentativePreview(section,name,verified,panel){
      const saved=getCustom(section).some(x=>x.id===item.id);
      if(ok!==true||!saved)throw new Error('primary card save verification failed');
    }catch(e){
-     console.error('[NS90.175] primary card save failed',e);
+     console.error('[NS90.56] primary card save failed',e);
      if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=await ns90106AppendCard(section,item);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
      alert(isQuotaError(e)?'저장공간을 자동 정리했지만 카드 저장에 필요한 공간이 아직 부족합니다. 기존 카드는 지우지 않았습니다. 백업 후 다시 확인해 주세요.':'카드 저장 중 오류가 발생했습니다. 다시 한 번 눌러 주세요.');
      return;
@@ -2582,7 +2582,7 @@ window.v23ChooseAmongComparable=v23ChooseAmongComparable;
 
 // Exact selected-page snapshot for assisted search.
 // This prevents "selected Yutoku title + Fushimi photo" style drift.
-// ===== NS90.175=====
+// ===== NS90.69 SECOND PASS IDENTITY + PHOTO GATE =====
 // One shared engine remains unchanged. These helpers only strengthen the failure/recovery path.
 async function ns9069WikidataEntity(id){
  if(!id)return null;
@@ -2651,7 +2651,7 @@ function v27CleanExactDescription(raw,name){
 async function v27RepairVerifiedDescription(verified,displayName){
  if(!verified)return verified;
  let page=null;
- // NS90.175: never replace a good Korean description with an English one.
+ // NS90.28: never replace a good Korean description with an English one.
  // First bind the description to the exact same entity's Korean Wikipedia page.
  try{
    if(verified.entityId) page=await oneKoPageFromEntity(verified.entityId);
@@ -2753,7 +2753,7 @@ async function v22ShowAssistResults(section,name,pv,originName){
  let hits=await v22SearchHits(name,section); const topic=oneTopic(section,name);
  const filterGood=rows=>rows.filter(h=>{const corpus=(h.title||'')+' '+(h.summary?.description||'')+' '+(h.summary?.text||'');return h.catScore>0&&sharedTypeFit(topic.kind,h.title||'',corpus)>0&&(h.secondPass||ns9068SemanticCandidateFit(name,section,h))});
  let good=filterGood(hits), usedSecond=false;
- // NS90.175: only after the normal shared engine/recovery path has no useful candidate,
+ // NS90.69: only after the normal shared engine/recovery path has no useful candidate,
  // discover alternate/multilingual identities through Wikidata, then send them back through the same gates.
  if(!good.length){pv.innerHTML=`<div class="preview-card">🔎 첫 이름으로 맞는 후보가 없어 다른 표기·언어 이름을 한 번 더 찾고 있어요…</div>`;const second=await ns9069WikidataHits(name,section);good=filterGood(second);usedSecond=true}
  const shown=good.slice(0,8);
@@ -2835,7 +2835,7 @@ window.v28StaticRegressionCheck=v28StaticRegressionCheck;
 function v26FinalRepText(section){
  const ov=COUNTRY_OVERVIEWS?.[COUNTRY]?.[section];
  const raw=Array.isArray(ov)?(ov[2]||''):(ov?.names||'');
- // NS90.175: always show the original representative names in the overview.
+ // NS90.67: always show the original representative names in the overview.
  return String(raw||'');
 }
 function v26RefreshOverviewRep(section){
@@ -2844,7 +2844,7 @@ function v26RefreshOverviewRep(section){
  const txt=v26FinalRepText(section);if(!txt)return;
  rep.innerHTML='<b>대표적으로 알아둘 이름</b><br>'+txt;
 }
-// ===== NS90.175=====
+// ===== NS90.154 CLEAN REPRESENTATIVE STATE CORE =====
 // Single durable representative state. Search engine/resolvers are untouched.
 const NS90154_REP_PREFIX='magic_ns90154_repstate|';
 function ns90154RepName(v){try{return cardInputName(v)}catch(_){return String(v||'').trim()}}
@@ -2858,7 +2858,7 @@ function v16PaintRow(section,row,panel){
  if(registered) ns90154MarkSearched(section,shown);
  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b);}
- // NS90.175card existence decides green; otherwise the established
+ // NS90.151 SINGLE SOURCE: card existence decides green; otherwise the established
  // durable verified cache decides purple. Never infer white merely because a card was deleted.
  let durable=null;
  if(!registered){
@@ -2868,7 +2868,7 @@ function v16PaintRow(section,row,panel){
  const ready=!registered&&(!!(row.ok&&row.verified&&row.verified.desc)||ns90154WasSearched(section,shown));
  b.textContent=(registered?'◆ ':ready?'◆ ':'○ ')+shown;
  b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'verified-ready':'can-make');
- // NS90.175: candidate readiness and saved-card existence are separate states.
+ // NS90.51: candidate readiness and saved-card existence are separate states.
  // saved = green, verified ready = purple, not yet verified = white.
  b.disabled=false;
  b.title=registered?'저장된 카드를 미리 봅니다.':ready?'검색 확인 완료 · 눌러서 미리보기를 다시 엽니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
@@ -2885,7 +2885,7 @@ function v16PaintRow(section,row,panel){
        pv.querySelector('.ns9019-research').onclick=async()=>{
          b.dataset.busy='1'; b.textContent='… '+shown;
          pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 다시 찾고 있어요…</div>`;
-         let verified=null;try{verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown})}catch(e){console.warn('[NS90.175 research]',e)}
+         let verified=null;try{verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown})}catch(e){console.warn('[NS90.19 research]',e)}
          b.dataset.busy='0';b.textContent='◆ '+shown;
          if(verified&&verified.desc)openRepresentativePreview(section,shown,verified,panel);
          else pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 카드 자료를 확인하지 못했습니다.</p></div>`;
@@ -2893,7 +2893,7 @@ function v16PaintRow(section,row,panel){
      }
      return;
    }
-   // NS90.175: purple means the verified snapshot is already ready. Reopen it directly;
+   // NS90.52: purple means the verified snapshot is already ready. Reopen it directly;
    // never start a new network search merely because the saved card was deleted.
    if(ready && row.verified && row.verified.desc){
      openRepresentativePreview(section,shown,row.verified,panel);
@@ -2904,15 +2904,15 @@ function v16PaintRow(section,row,panel){
    if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
    let verified=null;
    try{
-     // NS90.175: every category takes the exact same direct path.
+     // NS90.18: every category takes the exact same direct path.
      // No category precheck/repair bridge is allowed between a click and the common engine.
      verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown});
-   }catch(e){console.warn('[NS90.175 direct click resolve]',e)}
+   }catch(e){console.warn('[NS90.18 direct click resolve]',e)}
    b.dataset.busy='0'; b.disabled=false;
    if(verified&&verified.desc){
      ns9053SaveReady(v12Request(section,shown),verified);
      row.ok=true; row.verified=verified;
-     // NS90.175: a successful direct search is immediately visible as a purple ◆ ready item.
+     // NS90.41: a successful direct search is immediately visible as a purple ◆ ready item.
      // It becomes green only after the card is actually saved.
      b.textContent='◆ '+shown; b.disabled=false; b.className='rep-card-btn-v5 verified-ready';
      b.title='검색 확인 완료 · 눌러서 미리보기를 다시 엽니다.';
@@ -2920,11 +2920,11 @@ function v16PaintRow(section,row,panel){
    }else{
      row.ok=false; row.verified=null;
      if(pv){const d=window.NS9047_DIAG||{};const dg=d.name===shown?`<div class="note" style="margin-top:10px">진단: ${esc(d.stage||'unknown')} · 이름 ${d.identityOk===false?'실패':d.identityOk===true?'통과':'-'} · 종류 ${d.typeOk===false?'실패':d.typeOk===true?'통과':'-'} · 설명 ${d.descOk===false?'실패':d.descOk===true?'통과':'-'} · 사진 ${d.photoOk===false?'실패':d.photoOk===true?'통과':'-'}</div>`:'';pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>첫 이름으로는 카드 자료를 확인하지 못했습니다.</p>${dg}<p><b>비슷한 이름을 자동으로 찾아봅니다.</b></p></div>`;}
-     // NS90.175: direct representative failure automatically hands off to the existing
+     // NS90.66: direct representative failure automatically hands off to the existing
      // assisted-search engine. The user still confirms the correct entity before saving.
-     if(pv){try{await v22ShowAssistResults(section,shown,pv,row.name)}catch(e){console.warn('[NS90.175 canonical alias assist]',e)}}
+     if(pv){try{await v22ShowAssistResults(section,shown,pv,row.name)}catch(e){console.warn('[NS90.67 canonical alias assist]',e)}}
    }
-   // NS90.175: keep successful searches purple. Failed searches return to white ○.
+   // NS90.41: keep successful searches purple. Failed searches return to white ○.
    if(!(verified&&verified.desc)){
      b.textContent='○ '+shown; b.disabled=false; b.className='rep-card-btn-v5 can-make';
    }
@@ -2933,7 +2933,7 @@ function v16PaintRow(section,row,panel){
 function v15CachedRepresentative(section,name){
  const req=v12Request(section,name);
  const compact=ns9053LoadReady(req);if(compact)return {ok:true,verified:compact,cached:true};
- // NS90.175: verified readiness survives card creation/deletion and page reloads.
+ // NS90.51: verified readiness survives card creation/deletion and page reloads.
  // The current resolver stores its successful verified snapshot under magic_v28_entity_.
  for(const prefix of ['magic_v28_entity_','magic_v15_entity_','magic_v16_entity_']){
   try{const c=localStorage.getItem(prefix+req.key);if(c){const j=JSON.parse(c);if(j&&j.desc)return {ok:true,verified:j,cached:true}}}catch(e){}
@@ -2995,7 +2995,7 @@ async function renderRepresentativeCardButtonsV5(section){
  // Never clear innerHTML here: existing buttons and preview stay visible.
  for(const row of st.rows.values())v16PaintRow(section,row,panel);
  v16PaintStatus(section);
- // NS90.175: no automatic queue. A network search starts only when the user clicks one candidate.
+ // NS90.16: no automatic queue. A network search starts only when the user clicks one candidate.
 }
 function renderAllRepresentativeCardButtonsV5(){
  // Compatibility helper; render visible sections without resetting their state.
@@ -3009,7 +3009,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.175',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3024,9 +3024,9 @@ window.__MAGIC_V7_DIAGNOSTIC={
 };
 </script>
 <div aria-modal="true" class="v21-modal hidden" id="v21Modal" role="dialog"><div class="v21-big"><div id="v21BigContent"></div><div class="v21-big-nav"><button id="v21Prev">← 이전</button><button id="v21Close">작게 보기</button><button id="v21Next">다음 →</button></div></div></div>
-<!-- NS90.175: Preserve NS90.175 durable card store; unify representative/manual identity aliases and regression bridges across all card categories. -->
+<!-- NS90.59: Preserve NS90.56 durable card store; unify representative/manual identity aliases and regression bridges across all card categories. -->
 <script id="ns9070-active-name-entity-photo-recovery">
-// ===== NS90.175=====
+// ===== NS90.70 ACTIVE NAME + ENTITY PHOTO RECOVERY =====
 // The ONE shared card engine is preserved. This layer runs only after its normal path fails.
 const NS9070_PERSON_SECTIONS=new Set(['singers','athletes','people']);
 function ns9070ClaimId(e,p){return e?.claims?.[p]?.[0]?.mainsnak?.datavalue?.value?.id||''}
@@ -3108,11 +3108,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9071-entity-first-same-identity-gate">
-// ===== NS90.175=====
-// Preserve the ONE shared engine and all successful NS90.175 routes.
+// ===== NS90.71 ENTITY-FIRST SAME-IDENTITY GATE =====
+// Preserve the ONE shared engine and all successful NS90.70 routes.
 // Tighten only assisted candidate selection: related-to is never same-as.
 async function ns9071EntityForKoTitle(title){
  try{
@@ -3136,7 +3136,7 @@ async function ns9071VerifiedCandidate(name,section,h){
  }
  return true;
 }
-// Replace only NS90.175's assisted result wrapper. Normal representative-card success is untouched.
+// Replace only NS90.70's assisted result wrapper. Normal representative-card success is untouched.
 v22ShowAssistResults=async function(section,name,pv,originName){
  originName=cardInputName(originName||name);
  pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(v22SectionLabel(section))}</b> 범위에서 기존 공통엔진으로 먼저 찾고 있어요…</div>`;
@@ -3169,11 +3169,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9072-final-entity-validation">
-// ===== NS90.175=====
-// Preserve the ONE engine and successful NS90.175 routes. For person categories,
+// ===== NS90.72 FINAL ENTITY VALIDATION =====
+// Preserve the ONE engine and successful NS90.71 routes. For person categories,
 // validate the FINAL selected entity before description/photo/save. Never accept
 // a same-titled book, novel, airport, museum or other related entity as a person.
 async function ns9072FinalPersonSnapshot(h,section,originName){
@@ -3226,10 +3226,10 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9073-verified-save-path">
-// ===== NS90.175=====
+// ===== NS90.73 VERIFIED SAVE PATH =====
 // One engine preserved. Person cards can become "saved/complete" only after the
 // exact final entity is verified as a human and the same identity. Legacy saved
 // person cards are audited once: valid ones are migrated; wrong-entity cards are
@@ -3299,16 +3299,16 @@ renderRepresentativeCardButtonsV5=async function(section){
   if(NS9070_PERSON_SECTIONS.has(section)){
     await ns9073AuditPersonCards(section);
     const st=v16State(section);
-    // A stale row from NS90.175 must not keep a removed card looking complete.
+    // A stale row from NS90.72 must not keep a removed card looking complete.
     for(const row of st.rows.values())row.registered=false;
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9074-active-multilingual-name-discovery">
-// ===== NS90.175=====
-// Preserve the ONE shared engine and all NS90.175 verified save paths.
+// ===== NS90.74 ACTIVE MULTILINGUAL NAME DISCOVERY =====
+// Preserve the ONE shared engine and all NS90.73 verified save paths.
 // This layer only improves recovery after the normal representative-name path fails.
 async function ns9074ExactNameHit(name,section){
  const n=cardInputName(name); if(!n)return null;
@@ -3371,10 +3371,10 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9075-exact-entity-name-bridge">
-// ===== NS90.175=====
+// ===== NS90.75 EXACT ENTITY NAME BRIDGE =====
 // ONE shared engine preserved. This bridge runs only inside the existing assisted
 // failure path. Before broad alias discovery, an exact Wikipedia title/redirect is
 // resolved to its Wikidata entity, then the existing snapshot/save path is reused.
@@ -3426,16 +3426,16 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9076-context-name-interpreter">
-// ===== NS90.175=====
+// ===== NS90.76 CONTEXT NAME INTERPRETER =====
 // The stable shared engine remains untouched. This layer runs only after the
 // exact-name bridge fails. It interprets the requested representative name in
 // country + section context, resolves a same-concept Wikidata entity, and then
 // hands that resolved title back to the existing verified snapshot/save route.
 function ns9076CountryWords(){
- // NS90.175: the app's real country state is COUNTRY (e.g. JP/ES).
+ // NS90.89: the app's real country state is COUNTRY (e.g. JP/ES).
  // Earlier fallback layers looked only for non-existent window.currentCountry
  // variables, so country context silently became empty. Resolve from COUNTRY first.
  const code=String((typeof COUNTRY!=='undefined'&&COUNTRY)||window.COUNTRY||'').trim();
@@ -3501,11 +3501,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9080-context-candidate-ranker">
-// ===== NS90.175=====
-// Keep the proven NS90.175 discovery route, but do not accept the first valid hit.
+// ===== NS90.80 CONTEXT CANDIDATE RANKER =====
+// Keep the proven NS90.76 discovery route, but do not accept the first valid hit.
 // Rank all context-valid candidates by subject evidence + country + requested
 // section. Category/country are validators and ranking signals, never subjects.
 function ns9080Norm(v){return String(v||'').toLowerCase().replace(/<[^>]*>/g,' ').replace(/[\s·ㆍ()\[\]{}「」『』'"“”‘’.,:;!?_\-]/g,'')}
@@ -3546,7 +3546,7 @@ async function ns9080InterpretName(name,section){
  const accepted=[];
  for(const h of candidates.slice(0,60)){
   const e=await ns9076EntityFromWikiTitle(h.title,h.lang);if(!e)continue;
-  // Preserve the NS90.175 common context/type gate as the admission gate.
+  // Preserve the NS90.76 common context/type gate as the admission gate.
   if(!ns9076ContextFit(n,section,e,h.snippet))continue;
   const r=ns9080Rank(n,section,e,h,h.queryIndex,h.hitIndex);
   if(r.score<25)continue;
@@ -3556,11 +3556,11 @@ async function ns9080InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9080InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9081-candidate-trace">
-// ===== NS90.175=====
-// Diagnostic-only layer: preserve NS90.175 behavior, but expose the real candidates
+// ===== NS90.81 CANDIDATE TRACE =====
+// Diagnostic-only layer: preserve NS90.80 behavior, but expose the real candidates
 // and the exact admission/ranking reason after a representative-name search.
 window.__NS9081_TRACE=[];
 async function ns9081InterpretName(name,section){
@@ -3588,7 +3588,7 @@ async function ns9081InterpretName(name,section){
   row.gate=!!ns9076ContextFit(n,section,e,h.snippet);
   const r=ns9080Rank(n,section,e,h,h.queryIndex,h.hitIndex);
   Object.assign(row,{score:r.score,subject:r.subject,cat:r.cat,type:r.type,country:r.country,penalty:r.penalty});
-  row.reason=!row.gate?'NS90.175 문맥/종류 관문 탈락':(r.score<25?'점수 25 미만':'통과');
+  row.reason=!row.gate?'NS90.76 문맥/종류 관문 탈락':(r.score<25?'점수 25 미만':'통과');
   trace.push(row);
   if(row.gate && r.score>=25) accepted.push({score:r.score,title:r.title,entity:e,wikibaseId:String(e.id||''),summary:{description:row.desc,text:row.desc},entityPhoto:ns9070CommonsPhoto(e),ns9076Interpreted:true,ns9080Ranked:true});
  }
@@ -3607,16 +3607,16 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  const box=document.createElement('details'); box.className='ns9081-trace'; box.open=true;
  box.style.cssText='margin-top:12px;padding:12px;border:2px dashed #7b8aa0;border-radius:12px;background:#f7f9fc;font-size:13px;line-height:1.45';
  const selected=window.__NS9081_SELECTED;
- box.innerHTML=`<summary style="font-weight:800;cursor:pointer">🔎 NS90.175 후보 추적 — ${esc(cardInputName(originName||name))}</summary>
+ box.innerHTML=`<summary style="font-weight:800;cursor:pointer">🔎 NS90.81 후보 추적 — ${esc(cardInputName(originName||name))}</summary>
  <div style="margin:8px 0"><b>최종 선택:</b> ${selected?esc(selected.title)+' / '+Math.round(selected.score)+'점':'없음'}</div>`+
  rows.map((r,i)=>`<div style="padding:8px 0;border-top:1px solid #d9dee7"><b>${i+1}. ${esc(r.title)}</b> ${r.qid?`<span>(${esc(r.qid)})</span>`:''}<br><span>검색: ${esc(r.query)} · ${esc(r.lang)} · 점수 ${r.score==null?'—':Math.round(r.score)} · subject ${r.subject??'—'} · cat ${r.cat??'—'} · type ${r.type??'—'} · country ${r.country??'—'} · penalty ${r.penalty??'—'} · role +${r.roleBonus??0}/-${r.rolePenalty??0}</span><br><b>${esc(r.reason||'')}</b><br><span>${esc(String(r.desc||r.snippet||'').slice(0,180))}</span></div>`).join('');
  pv.appendChild(box);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9082-semantic-winner-selector">
-// ===== NS90.175=====
-// Preserve NS90.175 candidate discovery. Change only winner selection:
+// ===== NS90.82 SEMANTIC WINNER SELECTOR =====
+// Preserve NS90.81 candidate discovery. Change only winner selection:
 // prefer an entity whose description expresses the requested section's semantic role,
 // and demote same-name but wrong-role entities (school, fictional character, work, place, etc.).
 function ns9082Lower(v){return String(v||'').toLowerCase();}
@@ -3664,7 +3664,7 @@ async function ns9082InterpretName(name,section){
   const base=ns9080Rank(n,section,e,h,h.queryIndex,h.hitIndex), role=ns9082RoleScore(section,e,h);
   const score=base.score+role.bonus-role.penalty;
   Object.assign(row,{score,subject:base.subject,cat:base.cat,type:base.type,country:base.country,penalty:base.penalty,roleBonus:role.bonus,rolePenalty:role.penalty});
-  row.reason=!row.gate?'NS90.175 문맥/종류 관문 탈락':(score<25?'점수 25 미만':'통과');
+  row.reason=!row.gate?'NS90.76 문맥/종류 관문 탈락':(score<25?'점수 25 미만':'통과');
   trace.push(row);
   if(row.gate && score>=25) accepted.push({score,title:base.title,entity:e,wikibaseId:String(e.id||''),summary:{description:row.desc,text:row.desc},entityPhoto:ns9070CommonsPhoto(e),ns9076Interpreted:true,ns9080Ranked:true,ns9082SemanticWinner:true});
  }
@@ -3673,11 +3673,11 @@ async function ns9082InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9082InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9083-identity-first-winner">
-// ===== NS90.175=====
-// Preserve NS90.175 candidate discovery and the stable card/save path.
+// ===== NS90.83 IDENTITY-FIRST WINNER =====
+// Preserve NS90.81 candidate discovery and the stable card/save path.
 // Winner order: subject identity first, semantic role second, country/context third.
 // Category words validate a candidate; they never outweigh the requested subject.
 function ns9083Semantic(section,e,h){
@@ -3727,7 +3727,7 @@ async function ns9083InterpretName(name,section){
   const associationRelief=(section==='culture' && base.subject>=110 && sem.good && base.penalty===80)?80:0;
   const score=base.score+identityBonus+roleBonus-rolePenalty+associationRelief;
   Object.assign(row,{score,subject:base.subject,cat:base.cat,type:base.type,country:base.country,penalty:Math.max(0,base.penalty-associationRelief),roleBonus:identityBonus+roleBonus+associationRelief,rolePenalty});
-  row.reason=!row.gate?'NS90.175 문맥/종류 관문 탈락':(score<25?'점수 25 미만':(base.subject>=110?'동일 대상 우선 통과':'통과'));
+  row.reason=!row.gate?'NS90.76 문맥/종류 관문 탈락':(score<25?'점수 25 미만':(base.subject>=110?'동일 대상 우선 통과':'통과'));
   trace.push(row);
   if(row.gate && score>=25) accepted.push({score,title:base.title,entity:e,wikibaseId:String(e.id||''),summary:{description:row.desc,text:row.desc},entityPhoto:ns9070CommonsPhoto(e),ns9076Interpreted:true,ns9080Ranked:true,ns9083IdentityFirst:true});
  }
@@ -3736,11 +3736,11 @@ async function ns9083InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9083InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9084-verified-winner-to-card">
-// ===== NS90.175=====
-// Do not change discovery/ranking. When NS90.175 has already selected a strong
+// ===== NS90.84 VERIFIED WINNER TO CARD =====
+// Do not change discovery/ranking. When NS90.83 has already selected a strong
 // same-subject entity, hand THAT verified entity directly to the existing card
 // preview/save path instead of resolving the title again and losing identity.
 const ns9084_prev_show=v22ShowAssistResults;
@@ -3774,11 +3774,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9085-concept-fallback">
-// ===== NS90.175=====
-// Freeze NS90.175 strong-identity winners. Only when no exact/same-subject winner
+// ===== NS90.85 CONCEPT FALLBACK =====
+// Freeze NS90.84 strong-identity winners. Only when no exact/same-subject winner
 // exists, derive the representative's core concept and look for that concept in
 // country + section context. Category words are context, never the subject.
 function ns9085CoreName(name,section){
@@ -3830,7 +3830,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  await ns9085_prev_show(section,name,pv,originName);
  const sel=window.__NS9081_SELECTED;
  const row=(window.__NS9081_TRACE||[]).find(r=>String(r.qid||'')===String(sel?.wikibaseId||sel?.entity?.id||''));
- // NS90.175 exact/same-subject success is frozen.
+ // NS90.84 exact/same-subject success is frozen.
  if(row && Number(row.subject||0)>=110)return;
  const concept=await ns9085ConceptWinner(originName,section); if(!concept)return;
  const snap=await ns9085Snapshot(concept,section,originName); if(!snap||!snap.desc)return;
@@ -3839,11 +3839,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9086-concept-card-mode">
-// ===== NS90.175=====
-// Freeze NS90.175 strong same-entity winners. For representative labels that are
+// ===== NS90.86 CONCEPT CARD MODE =====
+// Freeze NS90.84 strong same-entity winners. For representative labels that are
 // broader concepts (e.g. a culture label), do not force a similarly named place
 // or facility to become the card subject. Resolve the core concept first and
 // build a representative concept card while keeping the original visible title.
@@ -3906,10 +3906,10 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9087-concept-identity-card">
-// ===== NS90.175=====
+// ===== NS90.87 CONCEPT IDENTITY CARD =====
 // Preserve every successful exact/same-entity route. A representative label that
 // explicitly names a broad category concept (for example, a culture concept)
 // must never inherit the identity/description/photo of a similarly named resort,
@@ -3965,11 +3965,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9088-country-context-concept-card">
-// ===== NS90.175=====
-// Keep NS90.175 exact/same-entity successes untouched. Broad representative
+// ===== NS90.88 COUNTRY CONTEXT CONCEPT CARD =====
+// Keep NS90.87 exact/same-entity successes untouched. Broad representative
 // concepts are authored from country + section + representative context, while
 // a related concrete entity may provide an illustration only, never identity/text.
 async function ns9088ContextPhoto(originName,section){
@@ -4020,10 +4020,10 @@ v22ShowAssistResults=async function(section,name,pv,originName){
 };
 // Candidate trace is development-only; keep it out of the child-facing UI.
 (function(){const st=document.createElement('style');st.textContent='details:has(summary[style*="font-weight:800"]){display:none!important}';document.head.appendChild(st)})();
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9089-country-category-identity-gate">
-// ===== NS90.175=====
+// ===== NS90.89 COUNTRY + CATEGORY IDENTITY GATE =====
 // Root fix: all fallback searches now receive the actual active country from COUNTRY.
 // For broad culture labels, never accept a concrete same-name facility from another
 // country as the card identity. Existing exact/same-entity successes remain untouched.
@@ -4050,11 +4050,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>\n
 
 <script id="ns9090-final-route-bypass">
-// ===== NS90.175=====
+// ===== NS90.90 FINAL ROUTE BYPASS =====
 // Broad concept labels take one deterministic route. Do NOT enter the older
 // candidate chain first: that chain can finish later and overwrite the preview.
 // Ordinary names keep the frozen resolver chain unchanged.
@@ -4082,11 +4082,11 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(ns9090IsBroad(section,originName)) return ns9090RenderBroad(section,originName,pv);
  return ns9090_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9091-concept-photo-target">
-// ===== NS90.175=====
-// Keep NS90.175's successful concept text/route frozen. Improve only the
+// ===== NS90.91 CONCEPT PHOTO TARGET =====
+// Keep NS90.90's successful concept text/route frozen. Improve only the
 // illustration selection: prefer a photo whose own title/entity names the core
 // concept, and reject maps/flags/logos/diagrams and generic country images.
 async function ns9091ConceptPhoto(originName,section){
@@ -4138,11 +4138,11 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)) snap.photo=await ns9091ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9092-human-culture-photo-priority">
-// ===== NS90.175=====
-// Freeze the successful NS90.175/90.91 concept route and description.
+// ===== NS90.92 HUMAN CULTURE PHOTO PRIORITY =====
+// Freeze the successful NS90.90/90.91 concept route and description.
 // Only refine culture-photo choice: human life/cultural scenes first;
 // animal-only illustrations are rejected for culture concept cards.
 function ns9092PhotoScore(url, core, aliases){
@@ -4189,11 +4189,11 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9092ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9093-culture-scene-photo-ranker">
-// ===== NS90.175=====
-// Keep the successful NS90.175-90.92 concept/card/save path frozen.
+// ===== NS90.93 CULTURE SCENE PHOTO RANKER =====
+// Keep the successful NS90.90-90.92 concept/card/save path frozen.
 // Photo-only refinement: rank lived cultural scenes above raw natural phenomena.
 // Universal rules only: no country-name or representative-name exceptions.
 function ns9093SceneScore(url, core, aliases){
@@ -4241,7 +4241,7 @@ async function ns9093CultureScenePhoto(originName,section){
  }
  const ranked=[...found].map(([photo,score])=>({photo,score})).sort((a,b)=>b.score-a.score);
  if(ranked.length&&ranked[0].score>20)return ranked[0].photo;
- // Preserve the known-good NS90.175 fallback if no stronger cultural scene exists.
+ // Preserve the known-good NS90.92 fallback if no stronger cultural scene exists.
  const fallback=await ns9092ConceptPhoto(originName,section);
  return ns9093SceneScore(fallback,core,aliases)>-99999?fallback:'';
 }
@@ -4251,10 +4251,10 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9093CultureScenePhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9094-universal-artwork-identity">
-// ===== NS90.175=====
+// ===== NS90.94 UNIVERSAL ARTWORK IDENTITY =====
 // ONE MASTER / ONE ENGINE preserved. This is a category-aware identity adapter inside
 // the same resolver: title aliases -> entity type -> same work -> work image -> same save path.
 // No country-name or artwork-name exceptions are used here.
@@ -4312,10 +4312,10 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(String(section)==='art') return ns9094ShowArtwork(section,name,pv,originName);
  return ns9094_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9096-safe-helpers">
-// ===== NS90.175=====
+// ===== NS90.96 SAFE ARTWORK FALLBACK + DELETE VERIFY =====
 function ns9096Timeout(p,ms,fallback){return Promise.race([Promise.resolve(p).catch(()=>fallback),new Promise(r=>setTimeout(()=>r(fallback),ms))])}
 async function ns9096DeleteDurable(section,itemId){
  const country=String(COUNTRY||'');
@@ -4333,9 +4333,9 @@ async function ns9096DeleteDurable(section,itemId){
 }
 </script>
 <script id="ns9095-multilingual-artwork-durable-delete">
-// ===== NS90.175=====
+// ===== NS90.95 MULTILINGUAL ARTWORK + DURABLE DELETE =====
 // ONE MASTER / ONE ENGINE preserved.
-// Existing NS90.175 artwork resolution remains the first pass. Only when it finds no
+// Existing NS90.94 artwork resolution remains the first pass. Only when it finds no
 // verified work do we expand discovery through multilingual Wikipedia search -> Wikidata QID
 // -> the same artwork identity/photo/save path. No title/country-specific exceptions.
 async function ns9095WikiEntityHits(term,lang){
@@ -4362,7 +4362,7 @@ function ns9095CountryEvidence(e,text){
 }
 const ns9095DirectArtworkDiscovery=ns9094ArtworkDiscovery;
 async function ns9095ExpandedArtworkDiscovery(originName){
- // Freeze successful NS90.175 behavior: first pass wins unchanged.
+ // Freeze successful NS90.94 behavior: first pass wins unchanged.
  const first=await ns9096Timeout(ns9095DirectArtworkDiscovery(originName),9000,null);
  if(first)return first;
  const aliases=[]; try{aliases.push(...sharedAliases(originName))}catch(_){}
@@ -4404,12 +4404,12 @@ async function ns9095ExpandedArtworkDiscovery(originName){
  }
  return best;
 }
-// Replace only the discovery function used by the NS90.175 artwork adapter.
+// Replace only the discovery function used by the NS90.94 artwork adapter.
 ns9094ArtworkDiscovery=ns9095ExpandedArtworkDiscovery;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9097-stable-card-key-final-artwork-gate">
-// ===== NS90.175=====
+// ===== NS90.97 STABLE CARD KEY + FINAL ARTWORK GATE =====
 // One master / one engine. Storage identity is the representative card name, not a related entity QID.
 function ns9097StableCardKey(country,section,name){return [String(country||COUNTRY),String(section||''),normalizeItemName(name)].join('|')}
 function ns9097NormalizeCards(section,arr){
@@ -4471,10 +4471,10 @@ ns9094ArtworkDiscovery=async function(originName){
  const x=await ns9096Timeout(ns9097_prev_artwork_discovery(originName),18000,null);
  return await ns9097VerifyArtworkResult(originName,x);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9098-delete-research-cycle">
-// ===== NS90.175=====
+// ===== NS90.98 DELETE + RESEARCH CYCLE =====
 // One master / one engine. Delete means: remove the representative card everywhere,
 // clear stale completion/deletion bookkeeping, but preserve the last verified snapshot
 // so the same representative can be opened/searched again immediately.
@@ -4522,10 +4522,10 @@ ns9096DeleteDurable=async function(section,itemId){
  }
  return kept;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns9099-durable-research-memory">
-// ===== NS90.175=====
+// ===== NS90.99 DURABLE RESEARCH MEMORY =====
 // Card data may be deleted, but a successful verified snapshot is independent learning data.
 // Keep it under the stable representative identity so delete -> ○ -> search/open works again.
 function ns9099MemoryKey(section,name){
@@ -4554,7 +4554,7 @@ v15CachedRepresentative=function(section,name){
  const mem=ns9099LoadResearch(section,name); if(mem)return {ok:true,verified:mem,cached:true,researchMemory:true};
  return null;
 };
-// Replace only the NS90.175 delete wrapper. The authoritative card deletion remains unchanged;
+// Replace only the NS90.98 delete wrapper. The authoritative card deletion remains unchanged;
 // the extra durable memory is written before deletion and is never cleared by card cleanup.
 const ns9099PrevDelete=ns9096DeleteDurable;
 ns9096DeleteDurable=async function(section,itemId){
@@ -4564,10 +4564,10 @@ ns9096DeleteDurable=async function(section,itemId){
  }catch(_){ }
  return await ns9099PrevDelete(section,itemId);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90100-universal-artwork-recall">
-// ===== NS90.175=====
+// ===== NS90.100 UNIVERSAL ARTWORK RECALL =====
 // Preserve every successful resolver first. Only a failed artwork search enters this
 // generic recall pass: contextual full-text discovery -> work-entity verification -> image.
 // No country/title-specific exception table is used.
@@ -4632,7 +4632,7 @@ async function ns90100RecallArtwork(originName){
 }
 ns9094ArtworkDiscovery=async function(originName){
  const old=await ns9096Timeout(ns90100_prev_artwork_discovery(originName),18000,null);
- if(old)return old; // freeze all NS90.175 successes, including delete -> research -> recreate.
+ if(old)return old; // freeze all NS90.99 successes, including delete -> research -> recreate.
  const x=await ns90100RecallArtwork(originName); if(!x)return null;
  // Final gate: validate the chosen work again, but allow the generic recall bridge to
  // supply identity when multilingual labels do not resemble the Korean display title.
@@ -4642,10 +4642,10 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob) && !e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90101-multiscript-artwork-bridge">
-// ===== NS90.175=====
+// ===== NS90.101 MULTISCRIPT ARTWORK BRIDGE =====
 // ONE MASTER principle: all established successful paths run first.
 // Only a failed artwork lookup reaches this universal multilingual/multiscript bridge.
 const ns90101_prev_artwork_discovery=ns9094ArtworkDiscovery;
@@ -4714,7 +4714,7 @@ async function ns90101Bridge(originName){
 }
 ns9094ArtworkDiscovery=async function(originName){
  const old=await ns9096Timeout(ns90101_prev_artwork_discovery(originName),22000,null);
- if(old)return old; // Freeze every NS90.175 and earlier success.
+ if(old)return old; // Freeze every NS90.100 and earlier success.
  const x=await ns90101Bridge(originName); if(!x)return null;
  const e=await ns9096Timeout(ns9094FullEntity(String(x.entityId||'')),4000,null); if(!e)return null;
  const blob=[x.title,x.desc,ns9094Val(e,'descriptions','ko'),ns9094Val(e,'descriptions','ja'),ns9094Val(e,'descriptions','en')].join(' ');
@@ -4722,10 +4722,10 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90102-universal-artwork-series-resolver">
-// ===== NS90.175=====
+// ===== NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER =====
 // ONE MASTER: preserve every successful path. Only failed artwork searches reach here.
 // Generic strategy: parse a numbered series title, resolve the subject/core independently,
 // harvest its multilingual labels, rebuild series-title queries, then pass candidates through
@@ -4803,7 +4803,7 @@ async function ns90102SeriesResolve(originName){
 }
 ns9094ArtworkDiscovery=async function(originName){
  const old=await ns9096Timeout(ns90102_prev_artwork_discovery(originName),24000,null);
- if(old)return old; // Freeze NS90.175 and all earlier successes.
+ if(old)return old; // Freeze NS90.101 and all earlier successes.
  const x=await ns90102SeriesResolve(originName); if(!x)return null;
  const e=await ns9096Timeout(ns9094FullEntity(String(x.entityId||'')),4000,null); if(!e)return null;
  const blob=[x.title,x.desc,ns9094Val(e,'descriptions','ko'),ns9094Val(e,'descriptions','ja'),ns9094Val(e,'descriptions','en')].join(' ');
@@ -4811,11 +4811,11 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90103-universal-artwork-title-discovery">
-// ===== NS90.175=====
-// ONE MASTER. Runs only after every NS90.175-and-earlier artwork path fails.
+// ===== NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY =====
+// ONE MASTER. Runs only after every NS90.102-and-earlier artwork path fails.
 // Generic purpose: discover the real multilingual title of an artwork/series from the
 // representative label, then return that identity to the SAME common artwork pipeline.
 // No country/title exception table.
@@ -4903,11 +4903,11 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns90103ArtworkEntityOK(e,blob))return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90105-success-freeze-series-fallback">
-// ===== NS90.175=====
-// Base is NS90.175. Existing resolver always runs first and wins unchanged.
+// ===== NS90.106 STABLE CARD STORAGE =====
+// Base is NS90.103. Existing resolver always runs first and wins unchanged.
 // Only a true failure reaches these generic fallbacks. No country/title exception table.
 const ns90105_prev_artwork_discovery=ns9094ArtworkDiscovery;
 function ns90105ArtEntityOK(e,blob){
@@ -4973,7 +4973,7 @@ async function ns90105SeriesFallback(originName){
  return x;
 }
 ns9094ArtworkDiscovery=async function(originName){
- // 1) Frozen NS90.175 path: unchanged and always first.
+ // 1) Frozen NS90.103 path: unchanged and always first.
  const old=await ns90105_prev_artwork_discovery(originName);
  if(old)return old;
  // 2) Generic exact-identity recovery protects previously discoverable non-series works.
@@ -4982,11 +4982,11 @@ ns9094ArtworkDiscovery=async function(originName){
  // 3) Only then: generic numbered-series fallback.
  return await ns90105SeriesFallback(originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90107-universal-artwork-last-mile-discovery">
-// ===== NS90.175=====
-// NS90.175 storage and every successful resolver are frozen. This code runs ONLY after
+// ===== NS90.107 UNIVERSAL ARTWORK LAST-MILE DISCOVERY =====
+// NS90.106 storage and every successful resolver are frozen. This code runs ONLY after
 // all existing artwork discovery returns null. It uses plain multilingual Wikipedia
 // full-text discovery (without forced artwork suffixes), then the SAME Wikidata artwork
 // identity/entity/photo gates. No country/title-specific exception table.
@@ -5068,14 +5068,14 @@ async function ns90107LastMile(originName){
 }
 ns9094ArtworkDiscovery=async function(originName){
  const old=await ns9096Timeout(ns90107_prev_artwork_discovery(originName),30000,null);
- if(old)return old; // Freeze all NS90.175 successes and storage behavior.
+ if(old)return old; // Freeze all NS90.106 successes and storage behavior.
  return await ns9096Timeout(ns90107LastMile(originName),26000,null);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90108-universal-artwork-evidence-resolver">
-// ===== NS90.175=====
-// Frozen: NS90.175 discovery + NS90.175 stable storage. This is failure-only.
+// ===== NS90.108 UNIVERSAL ARTWORK EVIDENCE RESOLVER =====
+// Frozen: NS90.107 discovery + NS90.106 stable storage. This is failure-only.
 // Generic evidence consensus: transliterated/title search + artwork entity + creator/series + image.
 const ns90108_prev_artwork_discovery=ns9094ArtworkDiscovery;
 function ns90108RomanizeHangul(str){
@@ -5140,14 +5140,14 @@ async function ns90108EvidenceResolve(originName){
 }
 ns9094ArtworkDiscovery=async function(originName){
  const old=await ns9096Timeout(ns90108_prev_artwork_discovery(originName),32000,null);
- if(old)return old; // Never alter a NS90.175 success.
+ if(old)return old; // Never alter a NS90.107 success.
  return await ns9096Timeout(ns90108EvidenceResolve(originName),30000,null);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90110-safe-diagnostic-trace">
-// ===== NS90.175=====
-// Keeps NS90.175/109 card search + storage behavior. Diagnostic calls are bounded and always finish.
+// ===== NS90.110 SAFE DIAGNOSTIC TRACE =====
+// Keeps NS90.108/109 card search + storage behavior. Diagnostic calls are bounded and always finish.
 const ns90110_prev_show_artwork=ns9094ShowArtwork;
 function ns90110Short(x,n=90){x=String(x||'').replace(/\s+/g,' ').trim();return x.length>n?x.slice(0,n-1)+'…':x}
 async function ns90110Diagnose(originName){
@@ -5174,7 +5174,7 @@ async function ns90110Diagnose(originName){
  rows.sort((a,b)=>(b.art+b.identity)-(a.art+a.identity)); return rows.slice(0,8);
 }
 function ns90110DiagHtml(originName,rows,timedOut){
- let head='<div style="margin-top:12px;padding:12px;border-top:1px dashed #aaa"><b>🔎 NS90.175 안전 진단 — '+esc(originName)+'</b>';
+ let head='<div style="margin-top:12px;padding:12px;border-top:1px dashed #aaa"><b>🔎 NS90.110 안전 진단 — '+esc(originName)+'</b>';
  if(timedOut) head+='<p><b>진단 제한시간에 도달했습니다.</b> 응답한 후보까지만 표시합니다.</p>';
  if(!rows.length)return head+'<p>후보를 가져오지 못했습니다. 검색어 단계 또는 네트워크 응답에서 막힌 것으로 보입니다.</p></div>';
  return head+'<p style="font-size:.9em">카드 판정은 바꾸지 않고, 제한시간 안에 확인된 후보와 탈락 이유만 표시합니다.</p>'+rows.map((r,i)=>'<div style="margin:8px 0;padding:9px;border:1px solid #ddd;border-radius:10px;background:#fff"><b>'+(i+1)+'. '+esc(ns90110Short(r.title,55))+'</b> <small>('+esc(r.id)+' / '+esc(r.lang)+')</small><br><small>동일성 '+r.identity+' · 작품증거 '+r.art+' · 이미지 '+(r.photo?'있음':'없음')+' · 작가 '+(r.creator?'있음':'없음')+' · 연작관계 '+(r.series?'있음':'없음')+'</small><br><b>판정:</b> '+esc(r.reason)+(r.desc?'<br><small>'+esc(ns90110Short(r.desc,120))+'</small>':'')+'</div>').join('')+'</div>';
@@ -5194,15 +5194,15 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
  }catch(e){rows=[];timedOut=true}
  const box=pv.querySelector('.ns90110-diag'); if(box)box.outerHTML=ns90110DiagHtml(originName,rows,timedOut);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.175';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 </script>
 <script id="ns90111-real-nonblocking-artwork-discovery">
-// ===== NS90.175=====
+// ===== NS90.111 REAL NON-BLOCKING ARTWORK DISCOVERY =====
 // Failure-only rescue. Existing successful cards/storage stay untouched.
 // Every network request is abortable; no diagnostic search is invoked.
-const NS90111_VERSION='MASTER V28 · NS90.175';
+const NS90111_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90111_prev_discovery=ns9094ArtworkDiscovery;
-const ns90111_prev_show=ns90110_prev_show_artwork; // show routine before NS90.175 diagnostic wrapper
+const ns90111_prev_show=ns90110_prev_show_artwork; // show routine before NS90.110 diagnostic wrapper
 function ns90111FetchJson(url,ms=1800){
  const c=new AbortController(), t=setTimeout(()=>c.abort(),ms);
  return fetch(url,{signal:c.signal,cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(t));
@@ -5300,10 +5300,10 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90111_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90111_VERSION;
 </script>
 <script id="ns90112-stable-success-bridge">
-// ===== NS90.175=====
-// Keep NS90.175 append/merge storage and NS90.175 non-blocking discovery.
+// ===== NS90.112 STABLE SUCCESS BRIDGE =====
+// Keep NS90.106 append/merge storage and NS90.111 non-blocking discovery.
 // Important change: a verified fallback result is rendered directly; never rediscover it.
-const NS90112_VERSION='MASTER V28 · NS90.175';
+const NS90112_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 function ns90112AliasSeeds(origin){
  const out=[], add=v=>{v=String(v||'').trim();if(v&&!out.includes(v))out.push(v)};
  add(origin);
@@ -5350,8 +5350,8 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
  pv.innerHTML='<div class="preview-card">🎨 <b>작품을 찾고 있어요…</b><p>응답이 늦은 검색은 건너뛰고 다음 검색을 계속합니다.</p></div>';
  const x=await Promise.race([ns9094ArtworkDiscovery(originName),new Promise(r=>setTimeout(()=>r(null),20000))]);
  if(x){
-   // NS90.175: use the exact verified object that succeeded. This prevents a second
-   // network search from losing the success and routes save through NS90.175 merge storage.
+   // NS90.112: use the exact verified object that succeeded. This prevents a second
+   // network search from losing the success and routes save through NS90.106 merge storage.
    return openRepresentativePreview(section,name,x,pv);
  }
  pv.innerHTML='<div class="preview-card"><b>예술작품에서 같은 작품으로 확인되는 대상을 찾지 못했습니다.</b><p>응답이 늦은 검색은 자동으로 건너뛰었습니다. 기존 카드는 그대로 보존됩니다.</p><button class="rep-close-v5">닫기</button></div>';
@@ -5361,10 +5361,10 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90112_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90112_VERSION;
 </script>
 <script id="ns90113-artwork-quality-gate">
-// ===== NS90.175=====
-// Freeze NS90.175 discovery/storage. Improve only the verified artwork snapshot:
+// ===== NS90.113 ARTWORK QUALITY GATE =====
+// Freeze NS90.112 discovery/storage. Improve only the verified artwork snapshot:
 // prefer entity-owned artwork images and enrich short descriptions from the entity's own Wikipedia page.
-const NS90113_VERSION='MASTER V28 · NS90.175';
+const NS90113_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90113_prev_hydrate=ns90111Hydrate;
 async function ns90113WikiExtract(e){
  for(const site of ['kowiki','jawiki','enwiki']){
@@ -5410,11 +5410,11 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90113_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90113_VERSION;
 </script>
 <script id="ns90114-verified-success-resurrection">
-// ===== NS90.175=====
-// Preserve NS90.175 exactly. Before any new artwork network search, try the durable
-// NS90.175 success snapshot, but only after re-validating its entity as an artwork.
+// ===== NS90.114 VERIFIED SUCCESS RESURRECTION =====
+// Preserve NS90.113 exactly. Before any new artwork network search, try the durable
+// NS90.99 success snapshot, but only after re-validating its entity as an artwork.
 // This is universal: no country/title-specific table or exception is used.
-const NS90114_VERSION='MASTER V28 · NS90.175';
+const NS90114_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90114_prev_show=ns9094ShowArtwork;
 async function ns90114VerifiedMemory(section,origin){
  let mem=null; try{mem=ns9099LoadResearch(section,origin)}catch(_){return null}
@@ -5449,11 +5449,11 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90114_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90114_VERSION;
 </script>
 <script id="ns90115-universal-expanded-title-discovery">
-// ===== NS90.175=====
-// Preserve all NS90.175 successes. Only after they fail, discover alternate/native/English
+// ===== NS90.115 UNIVERSAL EXPANDED TITLE DISCOVERY =====
+// Preserve all NS90.114 successes. Only after they fail, discover alternate/native/English
 // titles from multilingual search evidence and send the verified entity through the SAME
 // artwork quality gate. No country or artwork exception table is used.
-const NS90115_VERSION='MASTER V28 · NS90.175';
+const NS90115_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90115_prev_show=ns9094ShowArtwork;
 function ns90115Norm(s){return String(s||'').toLowerCase().normalize('NFKC').replace(/[《》〈〉「」『』()\[\]·・:：,，.。'"“”‘’\-–—_]/g,' ').replace(/\s+/g,' ').trim()}
 function ns90115Tokens(s){return ns90115Norm(s).split(' ').filter(x=>x.length>1)}
@@ -5509,7 +5509,7 @@ async function ns90115Expanded(origin){
 }
 ns9094ShowArtwork=async function(section,name,pv,originName){
  originName=cardInputName(originName||name);
- // Give the entire frozen NS90.175 path first chance. It owns all known successes.
+ // Give the entire frozen NS90.114 path first chance. It owns all known successes.
  let done=false;
  const proxy=document.createElement('div');
  try{
@@ -5531,11 +5531,11 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90115_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90115_VERSION;
 </script>
 <script id="ns90116-universal-reverse-artwork-discovery">
-// ===== NS90.175=====
-// Freeze NS90.175. Failure-only reverse discovery: representative title -> surrounding
+// ===== NS90.116 UNIVERSAL REVERSE ARTWORK DISCOVERY =====
+// Freeze NS90.115. Failure-only reverse discovery: representative title -> surrounding
 // artwork evidence (creator/collection/series/page) -> linked candidate entity -> SAME quality gate.
 // No country/title-specific exception table.
-const NS90116_VERSION='MASTER V28 · NS90.175';
+const NS90116_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90116_prev_show=ns9094ShowArtwork;
 async function ns90116Timed(url,ms=1800){try{return await ns90111FetchJson(url,ms)}catch(_){return null}}
 async function ns90116WikiSearch(term,lang){
@@ -5611,9 +5611,9 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90116_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90116_VERSION;
 </script>
 <script id="ns90117-artwork-candidate-observer">
-// ===== NS90.175=====
+// ===== NS90.117 ARTWORK CANDIDATE OBSERVER =====
 // Failure-only observer. Existing successful card/search paths are untouched.
-const NS90117_VERSION='MASTER V28 · NS90.175';
+const NS90117_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90117_prev_show=ns9094ShowArtwork;
 async function ns90117Observe(origin){
  const deadline=Date.now()+12000, seeds=[]; const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
@@ -5669,11 +5669,11 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90117_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90117_VERSION;
 </script>
 <script id="ns90118-universal-artwork-evidence-resolver">
-// ===== NS90.175=====
+// ===== NS90.118 UNIVERSAL ARTWORK EVIDENCE RESOLVER =====
 // Preserve the existing successful resolver first. On failure, accept a differently-titled
 // candidate only when independent artwork evidence agrees: real work entity + image +
 // creator/series/work-type evidence + clean non-person/non-place semantics. No named-work table.
-const NS90118_VERSION='MASTER V28 · NS90.175';
+const NS90118_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90118_base_show=ns90117_prev_show;
 function ns90118Claim(e,p){return !!(e?.claims?.[p]?.length)}
 function ns90118WorkEvidence(e,blob){
@@ -5734,7 +5734,7 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
  pv.innerHTML='<div class="preview-card">🧩 <b>작품의 제목뿐 아니라 작가·작품종류·사진·연작 정보를 함께 확인하고 있어요…</b><p>기존 성공 카드는 변경하지 않습니다.</p></div>';
  const resolved=await Promise.race([ns90118Resolve(originName),new Promise(r=>setTimeout(()=>r(null),13500))]);
  if(resolved)return openRepresentativePreview(section,name,resolved,pv);
- // 3) Still unresolved: keep NS90.175 observer so the next failure remains explainable.
+ // 3) Still unresolved: keep NS90.117 observer so the next failure remains explainable.
  const rows=await Promise.race([ns90117Observe(originName),new Promise(r=>setTimeout(()=>r([]),13000))]);
  ns90117Render(originName,rows,pv);
 };
@@ -5742,10 +5742,10 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90118_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90118_VERSION;
 </script>
 <script id="ns90119-candidate-pipeline-bridge">
-// ===== NS90.175=====
+// ===== NS90.119 CANDIDATE PIPELINE BRIDGE =====
 // Collect once, retain every candidate, then evaluate the same retained set.
 // This prevents a good observer candidate from disappearing before the evidence resolver.
-const NS90119_VERSION='MASTER V28 · NS90.175';
+const NS90119_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90119_frozen_show=ns90118_base_show;
 async function ns90119Collect(origin){
  const deadline=Date.now()+15000,seeds=[];const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
@@ -5815,11 +5815,11 @@ try{document.getElementById('ns9015Banner').textContent='✅ '+NS90119_VERSION}c
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90119_VERSION;
 </script>
 <script id="ns90120-entity-detail-image-bridge">
-// ===== NS90.175=====
-// Failure-only bridge: keep the NS90.175 candidate set, rehydrate promising artwork
+// ===== NS90.120 ENTITY DETAIL + IMAGE BRIDGE =====
+// Failure-only bridge: keep the NS90.119 candidate set, rehydrate promising artwork
 // candidates with a slower detail retry, recover an image from the verified entity/page,
 // and snapshot fetchable images as data URLs for more durable saved cards.
-const NS90120_VERSION='MASTER V28 · NS90.175';
+const NS90120_VERSION='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
 const ns90120_frozen_show=ns9094ShowArtwork;
 async function ns90120FetchJson(url,ms=4200){
  const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
@@ -5882,7 +5882,7 @@ async function ns90120Resolve(origin,rows){
 }
 ns9094ShowArtwork=async function(section,name,pv,originName){
  originName=cardInputName(originName||name);
- // First run NS90.175 unchanged. If it succeeds, do not interfere.
+ // First run NS90.119 unchanged. If it succeeds, do not interfere.
  const proxy=document.createElement('div');
  try{await Promise.race([Promise.resolve(ns90120_frozen_show(section,name,proxy,originName)),new Promise(r=>setTimeout(r,26000))])}catch(_){}
  if(proxy.querySelector('button')&&!/후보 관찰 모드|검색 후보 자체를 확보하지 못했습니다|찾지 못했습니다|건너뛰었습니다|no-entity/.test(proxy.textContent||'')){
@@ -5897,11 +5897,11 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
 try{document.getElementById('ns9015Banner').textContent='✅ '+NS90120_VERSION}catch(_){}
 if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION;
 </script>
-<!-- NS90.175: NS90.175completely isolated failure-only fallback. -->
+<!-- NS90.133: NS90.131 LOCKED CORE + completely isolated failure-only fallback. -->
 <script id="ns90133-locked-core-isolated-fallback">
 (()=>{
- const V='MASTER V28 · NS90.175';
- const LOCKED_CORE=ns9094ShowArtwork; // exact NS90.175 entry point; never replaced internally.
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
+ const LOCKED_CORE=ns9094ShowArtwork; // exact NS90.131 entry point; never replaced internally.
  function failed(pv){
    const t=String(pv?.textContent||'');
    return /찾지 못|확인하지 못|후보 관찰 모드|검색 후보 자체를 확보하지 못|엔티티 상세 없음|대표 사진 없음/.test(t) && !pv.querySelector('button[onclick*="openRepresentativePreview"]');
@@ -5909,7 +5909,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  function esc(s){return String(s||'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
  async function isolated(section,name,pv){
    // This layer has no write/delete hooks. It can only discover a candidate and hand it
-   // back to the same proven NS90.175 preview/card path.
+   // back to the same proven NS90.131 preview/card path.
    const box=document.createElement('div'); box.className='preview-card';
    box.innerHTML='<b>🔎 격리된 보조 검색</b><p>기존 공통 엔진과 연구기억은 변경하지 않고 원어명 후보만 확인합니다.</p>';
    pv.appendChild(box);
@@ -5924,7 +5924,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
    box.innerHTML='<b>🔎 격리된 보조 검색 결과</b><p>검증 가능한 같은 대상을 찾지 못했습니다. 기존 공통 엔진·연구기억·카드는 변경하지 않았습니다.</p>';
  }
  ns9094ShowArtwork=async function(section,name,pv,originName){
-   // 1) Run the exact NS90.175 locked core first and await it fully.
+   // 1) Run the exact NS90.131 locked core first and await it fully.
    await LOCKED_CORE(section,name,pv,originName);
    // 2) Successful/remembered core result: stop. Fallback is never called.
    if(!failed(pv)) return;
@@ -5939,10 +5939,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
 })();
 </script>
-<!-- NS90.175: version sync + Spain person-card cleanup layer. Locked core unchanged. -->
+<!-- NS90.134: version sync + Spain person-card cleanup layer. Locked core unchanged. -->
 <script>
 (()=>{
- const NS134_LABEL='MASTER V28 · NS90.175';
+ const NS134_LABEL='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  function sync134(){
    for(const el of document.querySelectorAll('body *')){
      if(el.children.length===0 && /MASTER V28\s*[·•]\s*NS90\.131 DURABLE COMMON RESEARCH MEMORY\s*[·•]\s*ONE MASTER/i.test(el.textContent||'')) el.textContent=NS134_LABEL;
@@ -5954,7 +5954,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  setTimeout(sync134,100); setTimeout(sync134,1000);
 })();
 </script>
-<!-- NS90.175search core untouched; diagnostic/recovery/test UI removed. -->
+<!-- NS90.148 CLEAN STRUCTURAL MASTER: search core untouched; diagnostic/recovery/test UI removed. -->
 
 
 
@@ -5962,7 +5962,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <style id="ns90154-style">#ns90154Badge{margin:8px auto 12px;max-width:760px;padding:9px 12px;border:1px solid #9bb8a6;border-radius:12px;background:#f3faf5;text-align:center;font-size:14px;font-weight:800;color:#315b3f}</style>
 <script id="ns90154-clean-version-guard">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  function clean(){
   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
@@ -5974,7 +5974,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </script>
 
 
-<!-- NS90.175no search/card/delete mutation -->
+<!-- NS90.158 READ-ONLY REPRESENTATIVE STATE DIAGNOSTIC: no search/card/delete mutation -->
 <style>
 #ns90158DiagBtn{position:fixed;left:14px;bottom:14px;z-index:13050;border:0;border-radius:999px;padding:11px 15px;background:#5b4b9a;color:#fff;font-weight:900;box-shadow:0 4px 14px #0003}
 #ns90158Diag{display:none;position:fixed;inset:0;z-index:13060;background:#f7f4ec;overflow:auto;padding:16px}
@@ -5982,7 +5982,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 #ns90158Diag .dcard{background:#fff;border-radius:16px;padding:12px;margin:10px 0;box-shadow:0 2px 10px #0001}.dmono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;word-break:break-all}.dok{color:#315f3b}.dno{color:#8a3d3d}
 </style>
 <button id="ns90158DiagBtn" type="button">🔎 대표상태 진단</button>
-<div id="ns90158Diag"><div class="dwrap"><div class="dhead"><div><b>NS90.175 대표상태 읽기 전용 진단</b><div style="font-size:12px">저장/검색/카드/삭제 기능을 변경하지 않습니다.</div></div><button id="ns90158Close" type="button">닫기</button></div><div id="ns90158Out"></div></div></div>
+<div id="ns90158Diag"><div class="dwrap"><div class="dhead"><div><b>NS90.159 대표상태 읽기 전용 진단</b><div style="font-size:12px">저장/검색/카드/삭제 기능을 변경하지 않습니다.</div></div><button id="ns90158Close" type="button">닫기</button></div><div id="ns90158Out"></div></div></div>
 <script>
 (()=>{
  const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_-]/g,'');
@@ -6020,10 +6020,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </script>
 
 
-<!-- NS90.175: purple READY opens stored verified result immediately; network search only for white state. -->
+<!-- NS90.160: purple READY opens stored verified result immediately; network search only for white state. -->
 <script id="ns90160-ready-instant-open">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.160 READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
  const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_\-–—]/g,'');
  function sameName(name,obj,key){
    const n=norm(name); if(!n)return false; const vals=[];
@@ -6064,16 +6064,16 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
    ns9053SaveReady=function(req,verified){const r=oldMark(req,verified);try{if(verified?.desc&&req?.section&&req?.name)ns90154MarkSearched(req.section,req.name,COUNTRY)}catch(_){}return r};
  }catch(_){}
  // Rebuild only the representative UI state so existing purple items acquire their stored snapshot.
- function repaint(){try{REP_SECTIONS.forEach(sec=>{const st=v16State(sec);for(const row of st.rows.values()){if(!ns9067SavedForRepresentative(sec,cardInputName(row.name))){const c=v15CachedRepresentative(sec,row.resolvedName||cardInputName(row.name))||v15CachedRepresentative(sec,cardInputName(row.name));if(c?.verified?.desc){row.ok=true;row.verified=c.verified;row.pending=false}}}const el=document.getElementById(sec);if(el)renderRepresentativeCardButtonsV5(sec)})}catch(e){console.warn('[NS90.175 repaint]',e)}}
+ function repaint(){try{REP_SECTIONS.forEach(sec=>{const st=v16State(sec);for(const row of st.rows.values()){if(!ns9067SavedForRepresentative(sec,cardInputName(row.name))){const c=v15CachedRepresentative(sec,row.resolvedName||cardInputName(row.name))||v15CachedRepresentative(sec,cardInputName(row.name));if(c?.verified?.desc){row.ok=true;row.verified=c.verified;row.pending=false}}}const el=document.getElementById(sec);if(el)renderRepresentativeCardButtonsV5(sec)})}catch(e){console.warn('[NS90.160 repaint]',e)}}
  function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){} }
  document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(repaint,80)});window.addEventListener('load',()=>{sync();setTimeout(repaint,150)});sync();setTimeout(sync,300);setTimeout(sync,1500);
 })();
 </script>
 
-<!-- NS90.175: repair stale stableKey collisions by deriving identity from the card's current name. -->
+<!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 VERSION LOCK + READY INSTANT OPEN · SEARCH CORE LOCKED · ONE MASTER';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns9097StableCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -6117,11 +6117,11 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
        CARD_MEM.set(cardStoreKey(country,sec),fixed.map(x=>({...x})));
        try{localStorage.setItem(key(sec),JSON.stringify(fixed.map(ns9055CompactCardForLocal)))}catch(_){}
      }
-   }catch(e){console.warn('[NS90.175] key repair skipped',e)}
+   }catch(e){console.warn('[NS90.176] key repair skipped',e)}
  }
  function syncVersion(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.175'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.176'}catch(_){}
  }
  window.addEventListener('DOMContentLoaded',()=>{syncVersion();setTimeout(syncVersion,80);setTimeout(syncVersion,500);setTimeout(repair,700)});
  window.addEventListener('load',()=>{syncVersion();setTimeout(syncVersion,300)});
@@ -6133,7 +6133,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 RECORD STORE · SEARCH CORE LOCKED · ONE MASTER';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -6146,19 +6146,19 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  function dedupe(c,s,arr){const out=[],seen=new Set();for(const r of (arr||[])){if(!r)continue;const x={...r};const k=ident(c,s,x);if(!k||k.endsWith('|')||seen.has(k))continue;seen.add(k);x.stableKey=k;if(!x.id)x.id=newItemId();out.push(x)}return out}
  async function migrate(c,s){const b=bucket(c,s);let rows=await all(c,s);if(!rows.length){let legacy=[];try{legacy=oldGet.call(window,s)||[]}catch(_){};try{const dbOld=await cardDBGet(c,s);legacy=[...legacy,...dbOld]}catch(_){};rows=dedupe(c,s,legacy);for(const x of rows)await put(c,s,x)}else rows=dedupe(c,s,rows);MEM.set(b,rows.map(x=>({...x})));READY.add(b);return rows}
  getCustom=function(s){const b=bucket(COUNTRY,s);if(READY.has(b))return (MEM.get(b)||[]).map(x=>({...x}));return oldGet.call(window,s)};
- setCustom=function(s,a){const c=String(COUNTRY||''),b=bucket(c,s),clean=dedupe(c,s,a);MEM.set(b,clean.map(x=>({...x})));READY.add(b);(async()=>{const before=await all(c,s),keep=new Set(clean.map(x=>String(x.id)));for(const x of before)if(!keep.has(String(x.id)))await del(c,s,x.id);for(const x of clean)await put(c,s,x)})().catch(e=>console.error('[NS90.175 set]',e));return true};
+ setCustom=function(s,a){const c=String(COUNTRY||''),b=bucket(c,s),clean=dedupe(c,s,a);MEM.set(b,clean.map(x=>({...x})));READY.add(b);(async()=>{const before=await all(c,s),keep=new Set(clean.map(x=>String(x.id)));for(const x of before)if(!keep.has(String(x.id)))await del(c,s,x.id);for(const x of clean)await put(c,s,x)})().catch(e=>console.error('[NS90.176 set]',e));return true};
  ns9055SetCustomDurable=async function(s,a){setCustom(s,a);const c=String(COUNTRY||''),clean=dedupe(c,s,a);for(const x of clean)await put(c,s,x);return true};
  ns90106AppendCard=async function(s,item){const c=String(COUNTRY||''),b=bucket(c,s);if(!READY.has(b))await migrate(c,s);const cur=(MEM.get(b)||[]).map(x=>({...x})),k=ident(c,s,item);if(cur.some(x=>ident(c,s,x)===k))throw new Error('same representative already exists');const fresh={...item,id:newItemId(),stableKey:k};await put(c,s,fresh);cur.push(fresh);MEM.set(b,cur);item.id=fresh.id;item.stableKey=k;await ns90155AfterRepresentativeSave(s,item);return true};
  ns9096DeleteDurable=async function(s,id){const c=String(COUNTRY||''),b=bucket(c,s);if(!READY.has(b))await migrate(c,s);const cur=MEM.get(b)||[],i=cur.findIndex(x=>String(x.id)===String(id));if(i<0)return cur;await del(c,s,id);const next=cur.filter((_,n)=>n!==i);MEM.set(b,next.map(x=>({...x})));return next};
  async function boot(){for(const c of ['ES','JP','US'])for(const s of secs)await migrate(c,s);try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of secs)await renderSection(s)}catch(_){} }
- function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.175'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
- boot().catch(e=>console.error('[NS90.175 boot]',e));sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.176'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ boot().catch(e=>console.error('[NS90.176 boot]',e));sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
 })();
 </script>
 
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 VERSION LOCK + NONDESTRUCTIVE CARD SAVE · SEARCH CORE LOCKED · ONE MASTER';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -6190,242 +6190,17 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  };
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.175'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.176'}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
  }
  sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync); setTimeout(sync,100); setTimeout(sync,700); setInterval(sync,1500);
 })();
 </script>
-
-<!-- NS90.175: UNIFIED VERIFIED RECORD CORE
-     One rule for every country/category/item:
-     card exists = green; verified record exists = purple; neither = white.
-     Card deletion never deletes the verified record.
-     No country/category/item exception table is used here. -->
-<style id="ns90173-unified-style">
-.rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important}
-.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important}
-</style>
-<script id="ns90173-unified-verified-record-core">
-(()=>{
-'use strict';
-const V='MASTER V28 · NS90.175';
-const PREFIX='magic_ns90173_verified|';
-
-function canon(v){
-  try{return normalizeItemName(cardInputName(String(v||'')))}
-  catch(_){return String(v||'').normalize('NFKC').trim().toLowerCase().replace(/\s+/g,'')}
-}
-function recKey(section,name,country){
-  return PREFIX+[String(country||COUNTRY||''),String(section||''),canon(name)].join('|');
-}
-function photoOf(s){return String(s?.photo||s?.photoRemote||(Array.isArray(s?.photos)&&s.photos[0])||'').trim()}
-function valid(s){return !!(s&&String(s.desc||'').trim()&&photoOf(s))}
-function normalizeSnap(name,s){
-  if(!valid(s))return null;
-  const p=photoOf(s);
-  return {
-    title:String(s.title||s.entityTitle||name||''),
-    desc:String(s.desc||'').trim(),
-    photo:p, photos:Array.isArray(s.photos)&&s.photos.length?s.photos.filter(Boolean):[p],
-    entityId:String(s.entityId||''), pageId:s.pageId==null?'':String(s.pageId),
-    sources:Array.isArray(s.sources)?s.sources:[],
-    representativeName:String(name||s.representativeName||''),
-    finalEntityVerified:s.finalEntityVerified!==false,
-    qualityGateVerified:s.qualityGateVerified!==false,
-    savedAt:Date.now(), unified173:true
-  };
-}
-function saveRec(section,name,s,country){
-  const n=normalizeSnap(name,s); if(!n)return false;
-  try{localStorage.setItem(recKey(section,name,country),JSON.stringify(n));return true}catch(_){return false}
-}
-function loadRec(section,name,country){
-  try{const s=JSON.parse(localStorage.getItem(recKey(section,name,country))||'null');return valid(s)?s:null}catch(_){return null}
-}
-function cardSnap(x){return normalizeSnap(x?.name||x?.entityTitle||'',{
-  title:x?.entityTitle||x?.name, desc:x?.desc, photo:x?.photoRemote,
-  entityId:x?.entityId, pageId:x?.pageId, sources:x?.sources,
-  finalEntityVerified:x?.finalEntityVerified
-})}
-
-/* Migration is generic: derive durable verified records from every existing card and
-   every established ready cache. It does not name a country, category, or representative. */
-function migrateSection(section){
-  let cards=[]; try{cards=getCustom(section)||[]}catch(_){}
-  for(const x of cards){const s=cardSnap(x);if(s)saveRec(section,x.name||x.entityTitle,s)}
-  let names=[];try{names=parseRepNames(repTextFor(section),section)}catch(_){}
-  for(const raw of names){
-    const name=cardInputName(raw);
-    if(loadRec(section,name))continue;
-    let c=null;try{c=v15CachedRepresentative(section,name)}catch(_){}
-    if(c?.verified&&valid(c.verified))saveRec(section,name,c.verified);
-  }
-}
-
-/* Successful preview is the one and only moment a search result becomes a verified record. */
-const open0=openRepresentativePreview;
-openRepresentativePreview=function(section,name,verified,panel){
-  if(valid(verified))saveRec(section,name,verified);
-  return open0.apply(this,arguments);
-};
-
-/* Successful card save also guarantees the same verified record, regardless of save route. */
-const after0=ns90155AfterRepresentativeSave;
-ns90155AfterRepresentativeSave=async function(section,item){
-  const s=cardSnap(item); if(s)saveRec(section,item.name||item.entityTitle,s);
-  return after0.apply(this,arguments);
-};
-
-/* Deletion is exact-ID only. Before deleting the card, preserve its verified record.
-   No deletion path is allowed to erase that record. */
-const del0=ns9096DeleteDurable;
-ns9096DeleteDurable=async function(section,itemId){
-  let target=null;try{target=(getCustom(section)||[]).find(x=>String(x.id)===String(itemId))||null}catch(_){}
-  if(target){const s=cardSnap(target);if(s)saveRec(section,target.name||target.entityTitle,s)}
-  return del0.apply(this,arguments);
-};
-
-/* Paint/click behavior is rebuilt from two facts only:
-   1) saved card, 2) unified verified record. No searched-marker-only purple state. */
-function paint173(section,row,panel){
-  const shown=cardInputName(row.name);
-  const saved=ns9067SavedForRepresentative(section,shown);
-  const record=loadRec(section,shown) || loadRec(section,row.resolvedName||shown);
-  if(record){row.ok=true;row.verified=record;row.pending=false}
-  const registered=!!saved, ready=!registered&&!!record;
-  let b=panel.querySelector(`[data-rep-key="${CSS.escape(row.key)}"]`);
-  if(!b){b=document.createElement('button');b.type='button';b.dataset.repKey=row.key;panel.querySelector('.rep-card-buttons-v5').appendChild(b)}
-  b.textContent=(registered?'◆ ':ready?'◆ ':'○ ')+shown;
-  b.className='rep-card-btn-v5 '+(registered?'registered ns9017-done':ready?'verified-ready':'can-make');
-  b.disabled=false;
-  b.title=registered?'저장된 카드를 미리 봅니다.':ready?'검증 기록 보존 · 검색 없이 즉시 엽니다.':'누르면 이 항목 하나만 공통 카드 엔진으로 찾습니다.';
-  b.onclick=async()=>{
-    if(b.dataset.busy==='1')return;
-    const nowSaved=ns9067SavedForRepresentative(section,shown);
-    if(nowSaved){
-      const pv=panel.querySelector('.rep-preview-v5'); if(!pv)return;
-      const p=String(nowSaved.photoRemote||''), d=String(localStorage.getItem(editKey(section,nowSaved.id))??nowSaved.desc??'');
-      pv.innerHTML=`<div class="preview-card"><h3>${esc(nowSaved.name)}</h3><p>${esc(d)}</p>${p?`<div class="v3-photo-choices"><label><img src="${esc(p)}" alt="${esc(nowSaved.name)}"></label></div>`:''}<div class="preview-actions"><button type="button" class="ns9019-research">🔎 카드 다시 찾기</button><button type="button" class="rep-close-v5">닫기</button></div><div class="note">◆ 이미 저장된 카드입니다.</div></div>`;
-      pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
-      pv.querySelector('.ns9019-research').onclick=async()=>{
-        b.dataset.busy='1';b.textContent='… '+shown;
-        let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(_){}
-        b.dataset.busy='0';
-        if(v&&valid(v)){saveRec(section,shown,v);openRepresentativePreview(section,shown,v,panel)}
-        else {b.textContent='◆ '+shown;pv.innerHTML=`<div class="preview-card"><b>${esc(shown)}</b><p>이번 검색에서는 새 자료를 확인하지 못했습니다. 기존 카드는 그대로 유지됩니다.</p></div>`}
-      };
-      return;
-    }
-    const r=loadRec(section,shown)||loadRec(section,row.resolvedName||shown);
-    if(r){openRepresentativePreview(section,shown,r,panel);return}
-    b.dataset.busy='1';b.disabled=true;b.textContent='… '+shown;
-    const pv=panel.querySelector('.rep-preview-v5');
-    if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
-    let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(e){console.warn('[NS90.175 resolve]',e)}
-    b.dataset.busy='0';b.disabled=false;
-    if(v&&valid(v)){
-      saveRec(section,shown,v);row.ok=true;row.verified=v;
-      b.textContent='◆ '+shown;b.className='rep-card-btn-v5 verified-ready';
-      openRepresentativePreview(section,shown,v,panel);
-    }else{
-      row.ok=false;row.verified=null;b.textContent='○ '+shown;b.className='rep-card-btn-v5 can-make';
-      if(pv){try{await v22ShowAssistResults(section,shown,pv,row.name)}catch(_){}}
-    }
-  };
-}
-v16PaintRow=paint173;
-
-/* Rendering always migrates generic existing evidence first, then paints from unified records. */
-const renderRep0=renderRepresentativeCardButtonsV5;
-renderRepresentativeCardButtonsV5=async function(section){
-  try{migrateSection(section)}catch(_){}
-  const r=await renderRep0.apply(this,arguments);
-  try{
-    const st=v16State(section),panel=document.getElementById(section)?.querySelector('.rep-card-panel-v5');
-    if(panel)for(const row of st.rows.values())paint173(section,row,panel);
-  }catch(_){}
-  return r;
-};
-
-/* A searched marker alone can no longer create purple. Purple requires the actual reusable snapshot. */
-ns90154WasSearched=function(section,name,country){return !!loadRec(section,name,country)};
-
-/* One generic startup migration across whatever representative sections the app exposes. */
-function migrateVisible(){
-  try{for(const s of REP_SECTIONS||[])migrateSection(s)}catch(_){}
-  try{renderAllRepresentativeCardButtonsV5()}catch(_){}
-}
-function sync(){
-  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-  try{document.title='요술방망이 백과사전 · NS90.175'}catch(_){}
-  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
-}
-window.__NS90173={version:V,key:recKey,load:loadRec,save:saveRec,migrate:migrateSection};
-sync();
-document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(migrateVisible,120)});
-window.addEventListener('load',()=>{sync();setTimeout(migrateVisible,250)});
-setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
-})();
-</script>
-
-
-<script id="ns90175-version-lock">
-(function(){
-  "use strict";
-  const LABEL='NS90.175 CLEAN REBUILD · ONE MASTER · NO EXCEPTIONS';
-  function lockVersion(){
-    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-    const nodes=[]; let n;
-    while(n=walker.nextNode()) {
-      if(/NS90\.\d+/.test(n.nodeValue||"")) nodes.push(n);
-    }
-    nodes.forEach(x=>x.nodeValue=(x.nodeValue||"").replace(/NS90\.\d+(?:[^\n<]*)?/g,LABEL));
-    document.documentElement.dataset.masterVersion="NS90.175";
-  }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",lockVersion);
-  else lockVersion();
-  new MutationObserver(lockVersion).observe(document.documentElement,{subtree:true,childList:true,characterData:true});
-})();
-</script>
-
-
-<script id="ns90175-clean-rebuild">
-(function(){
-"use strict";
-const MARK="MW_NS90175_CLEAN_REBUILD_DONE";
-function eligibleKey(k){
-  return /(?:magic|wand|ency|card|verified|candidate|preview|searchResult)/i.test(k||"") &&
-         !/(?:backup|parent|pin|setting|title|name)/i.test(k||"");
-}
-async function cleanRebuild(){
-  if(!confirm("CLEAN REBUILD를 시작합니다.\n\n완성 카드와 검색/검증 캐시를 공통 엔진 기준으로 초기화합니다. 설정·이름·부모모드·백업 데이터는 건드리지 않습니다.\n\n계속할까요?")) return;
-  try{
-    const dels=[];
-    for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(eligibleKey(k)) dels.push(k); }
-    dels.forEach(k=>localStorage.removeItem(k));
-    for(let i=0;i<sessionStorage.length;i++){ const k=sessionStorage.key(i); if(eligibleKey(k)) sessionStorage.removeItem(k); }
-    localStorage.setItem(MARK,new Date().toISOString());
-    alert("공통 카드/검증 상태를 초기화했습니다.\n이제 한 개의 MASTER 엔진에서 다시 검색·검증할 수 있습니다.");
-    location.reload();
-  }catch(e){ alert("초기화 중 오류: "+(e&&e.message?e.message:e)); }
-}
-function mount(){
-  if(document.getElementById("ns175clean")) return;
-  const b=document.createElement("button");
-  b.id="ns175clean"; b.textContent="🧹 CLEAN REBUILD";
-  b.style.cssText="position:fixed;right:14px;bottom:78px;z-index:999998;padding:10px 14px;border:0;border-radius:14px;background:#5b67c8;color:white;font-weight:800;font-size:15px;box-shadow:0 4px 16px #0003";
-  b.onclick=cleanRebuild; document.body.appendChild(b);
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount);else mount();
-})();
-</script>
-
 </body></html>
-<!-- NS90.175: exact NS90.175 proven ONE MASTER baseline restore. No search/resolver logic added. -->
+<!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.175';
+  const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -6433,10 +6208,10 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   try{ if(window.__NS9021_ONE_ENGINE) window.__NS9021_ONE_ENGINE.version=V; }catch(_){ }
 })();
 </script>
-<!-- NS90.175: durable common research memory; failure-safe recall before network discovery. -->
+<!-- NS90.131: durable common research memory; failure-safe recall before network discovery. -->
 <script id="ns90131-durable-common-research-memory">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  const prevShow=ns9094ShowArtwork;
  function validSnap(s){
    if(!s||!String(s.desc||'').trim()) return false;
@@ -6469,7 +6244,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
    };
  }
  // Existing ONE MASTER path is unchanged. We only reuse a previously verified snapshot;
- // if none exists, NS90.175 runs exactly as before.
+ // if none exists, NS90.120 runs exactly as before.
  ns9094ShowArtwork=async function(section,name,pv,originName){
    const canonical=cardInputName(originName||name);
    const s=memory(section,canonical)||memory(section,name);
@@ -6494,10 +6269,10 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
 })();
 </script>
-<!-- NS90.175: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
+<!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -6528,10 +6303,10 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  sync(); setTimeout(sync,0); setTimeout(sync,250);
 })();
 </script>
-<!-- NS90.175: country data cleanup only. Search engine is intentionally untouched. -->
+<!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -6579,53 +6354,53 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  }
  // Data maintenance only: no resolver/search/candidate function is replaced or patched.
  sync(); setTimeout(sync,0); setTimeout(sync,250); setTimeout(sync,1200);
- /* NS90.175.135 automatic data cleanup disabled */
+ /* NS90.143 READ-ONLY DIAG: NS90.135 automatic data cleanup disabled */
 })();
 </script>
-<!-- NS90.175 final visible version sync; no search logic changes. -->
+<!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
 </script>
-<!-- NS90.175: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
+<!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.176 DELETE PRESERVE VERIFIED STATE · SEARCH CORE LOCKED · ONE MASTER';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
  async function exportCards(){const out={};try{const db=await openCardDB();await new Promise((resolve,reject)=>{const tx=db.transaction(CARD_STORE,'readonly'),q=tx.objectStore(CARD_STORE).openCursor();q.onsuccess=()=>{const c=q.result;if(c){out[String(c.key)]=c.value;c.continue()}else resolve()};q.onerror=()=>reject(q.error)})}catch(_){}return out}
- async function buildTransfer(withPhotos=false){return {app:'요술방망이 나라 백과사전',format:'NS90.175-transfer-1',version:V,createdAt:new Date().toISOString(),local:exportLocal(),cards:await exportCards(),photos:withPhotos?await exportUserPhotos():{}}}
- function valid(d){return d&&d.app==='요술방망이 나라 백과사전'&&d.format==='NS90.175-transfer-1'&&d.local&&d.cards}
+ async function buildTransfer(withPhotos=false){return {app:'요술방망이 나라 백과사전',format:'NS90.140-transfer-1',version:V,createdAt:new Date().toISOString(),local:exportLocal(),cards:await exportCards(),photos:withPhotos?await exportUserPhotos():{}}}
+ function valid(d){return d&&d.app==='요술방망이 나라 백과사전'&&d.format==='NS90.140-transfer-1'&&d.local&&d.cards}
  async function apply(d){if(!valid(d))throw new Error('형식 오류');for(const [k,v] of Object.entries(d.local)){if(appKey(k)&&!SKIP.has(k))try{localStorage.setItem(k,v)}catch(e){if(typeof clearExpendableSearchCaches==='function')try{clearExpendableSearchCaches()}catch(_){};localStorage.setItem(k,v)}}try{localStorage.removeItem('magic_ns90137_run_after_refresh')}catch(_){};for(const [k,v] of Object.entries(d.cards||{})){try{const db=await openCardDB();await new Promise((resolve,reject)=>{const tx=db.transaction(CARD_STORE,'readwrite');tx.objectStore(CARD_STORE).put(v,k);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}catch(_){}}for(const [k,v] of Object.entries(d.photos||{})){try{await setUserPhoto(k,v)}catch(_){}}try{CARD_MEM.clear()}catch(_){};return true}
- function filename(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `요술방망이_NS90.175_통합백업_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`}
+ function filename(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `요술방망이_NS90.140_통합백업_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`}
  async function copyText(t){if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(t);return true}catch(_){}}const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();return ok}
  async function readText(){if(navigator.clipboard?.readText){try{const t=await navigator.clipboard.readText();if(t)return t}catch(_){}}return prompt('Safari에서 복사한 검색결과를 이 칸에 붙여넣은 뒤 확인을 눌러 주세요.','')||''}
  async function doCopy(){try{const d=await buildTransfer(false),t=JSON.stringify(d);if(await copyText(t))alert('검색결과를 복사했습니다.\n\n이제 홈화면 앱을 열어 「앱에서 검색결과 붙여넣기」를 누르세요.\n파일 이름이나 경로를 알 필요가 없습니다.');else alert('자동 복사가 허용되지 않았습니다. Safari 설정을 확인한 뒤 다시 눌러 주세요.')}catch(e){alert('검색결과를 복사하지 못했습니다.')}}
  async function doPaste(){try{const t=await readText();if(!t)return;const d=JSON.parse(t);if(!valid(d))throw new Error();if(!confirm('Safari에서 복사한 검색결과와 카드를 이 앱에 가져올까요?\n현재 검색엔진은 변경하지 않습니다.'))return;await apply(d);alert('가져오기가 완료되었습니다.\nSafari에서 검색된 결과를 이 앱에서도 이어서 사용합니다.');location.reload()}catch(e){alert('복사된 검색결과를 읽지 못했습니다. Safari에서 「검색결과 복사」를 다시 눌러 주세요.')}}
  async function doShare(){try{const d=await buildTransfer(true),blob=new Blob([JSON.stringify(d)],{type:'application/json'}),name=filename(),file=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'요술방망이 통합 백업'});return}const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);alert('통합 백업 파일을 만들었습니다.\n파일 이름은 앱이 자동으로 정했습니다.')}catch(e){if(e?.name!=='AbortError')alert('통합 백업을 만들지 못했습니다.')}}
- async function doImport(f){if(!f)return;try{const d=JSON.parse(await f.text());if(!valid(d))throw new Error();if(confirm('「'+f.name+'」의 검색결과와 카드를 가져올까요?')){await apply(d);alert('통합 백업을 가져왔습니다.');location.reload()}}catch(e){alert('이 파일은 NS90.175 통합 백업 파일이 아닙니다.')}}
+ async function doImport(f){if(!f)return;try{const d=JSON.parse(await f.text());if(!valid(d))throw new Error();if(confirm('「'+f.name+'」의 검색결과와 카드를 가져올까요?')){await apply(d);alert('통합 백업을 가져왔습니다.');location.reload()}}catch(e){alert('이 파일은 NS90.140 통합 백업 파일이 아닙니다.')}}
  function wire(){const c=document.getElementById('ns140Copy'),p=document.getElementById('ns140Paste'),s=document.getElementById('ns140Share'),i=document.getElementById('ns140Import'),f=document.getElementById('ns140FileInput');if(c)c.onclick=doCopy;if(p)p.onclick=doPaste;if(s)s.onclick=doShare;if(i&&f)i.onclick=()=>f.click();if(f)f.onchange=async e=>{await doImport(e.target.files?.[0]);e.target.value=''};try{const w=document.querySelector('#backupModal .backup-warning');if(w)w.innerHTML='※ <b>가장 쉬운 이동:</b> Safari에서 「검색결과 복사」 → 홈화면 앱에서 「검색결과 붙여넣기」. 파일 경로나 이름을 알 필요가 없습니다.<br>※ iOS 보안상 웹앱이 파일 앱의 고정 경로를 몰래 읽을 수는 없습니다. 통합 백업은 파일명을 자동 생성하고 공유창을 이용해 저장할 수 있습니다.'}catch(_){}}
  function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  wire();sync();setTimeout(sync,0);setTimeout(sync,300);setTimeout(sync,1500);setTimeout(sync,3500);
 })();
 </script>
-<!-- NS90.175: representative state integrated into the original v16PaintRow core. -->
+<!-- NS90.151: representative state integrated into the original v16PaintRow core. -->
 
-<!-- NS90.175representative-state integration. This block is intentionally LAST. -->
+<!-- NS90.153 FINAL representative-state integration. This block is intentionally LAST. -->
 
 
-<!-- NS90.175: durable verified representative-state bridge. Search/resolver core untouched. -->
+<!-- NS90.159: durable verified representative-state bridge. Search/resolver core untouched. -->
 <style id="ns90159-style">
 .rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
 <script id="ns90159-durable-verified-state-bridge">
 (()=>{
- const V='MASTER V28 · NS90.175';
+ const V='MASTER V28 · NS90.159 DURABLE VERIFIED STATE BRIDGE · SEARCH CORE LOCKED · ONE MASTER';
  const oldWas=(typeof ns90154WasSearched==='function')?ns90154WasSearched:null;
  const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_\-–—]/g,'');
  const trustedKey=k=>/^magic_v3_result_(?:V11-QUALITY|V9-SHARED)\|/i.test(k)||/^magic_ready_/i.test(k)||/^magic_ns90154_repstate\|/i.test(k);
@@ -6681,4 +6456,4 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  window.addEventListener('load',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,120)});
 })();
 </script>
-
+\n<script id="ns90168-append-only-card-save">\n(()=>{\n const V='MASTER V28 · NS90.176 APPEND ONLY CARD SAVE · SEARCH CORE LOCKED · ONE MASTER';\n function actualKey(country,section,x){return ns9097StableCardKey(String(country||''),section,String(x?.name||x?.entityTitle||''));}\n // Never trust a legacy stableKey while merging. Identity is recalculated from the card name.\n ns90106MergeCards=function(country,section,...lists){\n   const out=[], pos=new Map();\n   for(const list of lists)for(const raw of (Array.isArray(list)?list:[])){\n     if(!raw)continue; const x={...raw};\n     const k=actualKey(country,section,x); if(!k||k.endsWith('|'))continue;\n     x.stableKey=k;\n     if(pos.has(k)){\n       const i=pos.get(k),old=out[i];\n       out[i]={...old,...Object.fromEntries(Object.entries(x).filter(([_,v])=>v!==''&&v!=null))};\n     }else{pos.set(k,out.length);out.push(x)}\n   }\n   return out;\n };\n // New representative cards are appended by their real name identity. Existing siblings are preserved.\n ns90106AppendCard=async function(section,item){\n   const country=String(COUNTRY||''),mk=cardStoreKey(country,section);\n   const db=await cardDBGet(country,section);\n   let mirror=[];try{mirror=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){}\n   const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];\n   const base=ns90106MergeCards(country,section,db,mirror,mem);\n   const wanted=actualKey(country,section,item);\n   if(base.some(x=>actualKey(country,section,x)===wanted))throw new Error('same representative already exists');\n   const fresh={...item,id:newItemId(),stableKey:wanted};\n   const merged=[...base,fresh];\n   await cardDBPut(country,section,merged.map(x=>({...x})));\n   CARD_MEM.set(mk,merged.map(x=>({...x})));\n   try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(e){\n     if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(_){}}\n   }\n   // caller verifies item.id; keep it synchronized with the newly committed id.\n   item.id=fresh.id; item.stableKey=fresh.stableKey;\n   const check=await cardDBGet(country,section);\n   if(!check.some(x=>String(x.id)===String(fresh.id)))throw new Error('NS90.176 append verify failed');\n   await ns90155AfterRepresentativeSave(section,item);\n   return true;\n };\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.176'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);\n})();\n</script>\n
