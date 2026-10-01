@@ -5982,7 +5982,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 #ns90158Diag .dcard{background:#fff;border-radius:16px;padding:12px;margin:10px 0;box-shadow:0 2px 10px #0001}.dmono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;word-break:break-all}.dok{color:#315f3b}.dno{color:#8a3d3d}
 </style>
 <button id="ns90158DiagBtn" type="button">🔎 대표상태 진단</button>
-<div id="ns90158Diag"><div class="dwrap"><div class="dhead"><div><b>NS90.158 대표상태 읽기 전용 진단</b><div style="font-size:12px">저장/검색/카드/삭제 기능을 변경하지 않습니다.</div></div><button id="ns90158Close" type="button">닫기</button></div><div id="ns90158Out"></div></div></div>
+<div id="ns90158Diag"><div class="dwrap"><div class="dhead"><div><b>NS90.159 대표상태 읽기 전용 진단</b><div style="font-size:12px">저장/검색/카드/삭제 기능을 변경하지 않습니다.</div></div><button id="ns90158Close" type="button">닫기</button></div><div id="ns90158Out"></div></div></div>
 <script>
 (()=>{
  const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_-]/g,'');
@@ -6214,3 +6214,67 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 <!-- NS90.153 FINAL representative-state integration. This block is intentionally LAST. -->
 
+
+<!-- NS90.159: durable verified representative-state bridge. Search/resolver core untouched. -->
+<style id="ns90159-style">
+.rep-card-btn-v5.verified-ready{background:#eee7ff!important;border:2px solid #7657e8!important;color:#352080!important;opacity:1!important;box-shadow:0 2px 7px rgba(80,55,170,.12)!important}
+.rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
+</style>
+<script id="ns90159-durable-verified-state-bridge">
+(()=>{
+ const V='MASTER V28 · NS90.159 DURABLE VERIFIED STATE BRIDGE · SEARCH CORE LOCKED · ONE MASTER';
+ const oldWas=(typeof ns90154WasSearched==='function')?ns90154WasSearched:null;
+ const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_\-–—]/g,'');
+ const trustedKey=k=>/^magic_v3_result_(?:V11-QUALITY|V9-SHARED)\|/i.test(k)||/^magic_ready_/i.test(k)||/^magic_ns90154_repstate\|/i.test(k);
+ function sameName(name,obj,key){
+   const n=norm(name); if(!n)return false;
+   const vals=[];
+   try{
+     if(obj&&typeof obj==='object'){
+       if(obj.name)vals.push(obj.name); if(obj.title)vals.push(obj.title);
+       if(obj.verified){if(obj.verified.name)vals.push(obj.verified.name);if(obj.verified.title)vals.push(obj.verified.title)}
+     }
+   }catch(_){ }
+   const tail=String(key||'').split('|').pop(); if(tail)vals.push(tail);
+   return vals.some(v=>{const x=norm(v);return x===n||x.startsWith(n)||n.startsWith(x)});
+ }
+ function hasVerifiedEvidence(section,name,country){
+   const c=String(country||COUNTRY||''), s=String(section||'');
+   for(let i=0;i<localStorage.length;i++){
+     const k=localStorage.key(i)||''; if(!trustedKey(k))continue;
+     if(k.startsWith(NS90154_REP_PREFIX)){
+       if(k===ns90154RepKey(s,name,c)&&localStorage.getItem(k)==='searched')return true;
+       continue;
+     }
+     // Country-specific ready keys must stay in the same country when the country is encoded.
+     if(/^magic_ready_/i.test(k)&&k.includes('|')&&c&&!k.includes(c))continue;
+     let o=null; try{o=JSON.parse(localStorage.getItem(k)||'null')}catch(_){continue}
+     const v=o?.verified||o;
+     const ok=(o?.ok===true||o?.verified||/^magic_ready_/i.test(k))&&!!String(v?.desc||'').trim();
+     if(!ok||!sameName(name,o,k))continue;
+     // When a result key contains a section, require the same section.
+     const kl=k.toLowerCase(); if(s&&kl.includes('|')&&!kl.includes('|'+s.toLowerCase()+'|')&&!/^magic_ready_/i.test(k))continue;
+     return true;
+   }
+   return false;
+ }
+ ns90154WasSearched=function(section,name,country){
+   try{if(oldWas&&oldWas(section,name,country))return true}catch(_){ }
+   const ok=hasVerifiedEvidence(section,name,country);
+   if(ok){try{ns90154MarkSearched(section,name,country)}catch(_){ }}
+   return ok;
+ };
+ window.ns90159HasVerifiedEvidence=hasVerifiedEvidence;
+ function cleanLiteralNewlines(){
+   try{const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),a=[];while(w.nextNode()){const n=w.currentNode;if(/^\\n(?:\\n)*$/.test(String(n.nodeValue||'').trim()))a.push(n)}a.forEach(n=>n.remove())}catch(_){ }
+ }
+ function repaintVisible(){
+   try{document.querySelectorAll('.rep-card-panel-v5').forEach(p=>{const sec=p.closest('section,[id]');const id=sec?.id;if(id&&typeof renderRepresentativeCardButtonsV5==='function')renderRepresentativeCardButtonsV5(id)})}catch(_){ }
+ }
+ try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){ }
+ try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
+ cleanLiteralNewlines();
+ document.addEventListener('DOMContentLoaded',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,80)});
+ window.addEventListener('load',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,120)});
+})();
+</script>
