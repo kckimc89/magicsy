@@ -6197,7 +6197,11 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 })();
 </script>
 
-<!-- NS90.173: UNIFIED VERIFIED RECORD CORE
+<!-- NS90.205: AUTOMATION REMOVED · VERIFIED CARD LIFECYCLE
+     Restored from NS90.173 by excluding the NS90.174 full-rebuild automation layer.
+     No auto-click, no auto-save, no full-delete/rebuild runner.
+
+     UNIFIED VERIFIED RECORD CORE
      One rule for every country/category/item:
      card exists = green; verified record exists = purple; neither = white.
      Card deletion never deletes the verified record.
@@ -6209,7 +6213,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <script id="ns90173-unified-verified-record-core">
 (()=>{
 'use strict';
-const V='MASTER V28 · NS90.173 UNIFIED VERIFIED RECORD · NO EXCEPTIONS · ONE MASTER';
+const V='MASTER V28 · NS90.205 AUTOMATION REMOVED · VERIFIED CARD LIFECYCLE · ONE MASTER';
 const PREFIX='magic_ns90173_verified|';
 
 function canon(v){
@@ -6322,7 +6326,7 @@ function paint173(section,row,panel){
     b.dataset.busy='1';b.disabled=true;b.textContent='… '+shown;
     const pv=panel.querySelector('.rep-preview-v5');
     if(pv)pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(shown)}</b> 하나만 찾고 있어요…</div>`;
-    let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(e){console.warn('[NS90.173 resolve]',e)}
+    let v=null;try{v=await ONE_CARD_ENGINE.resolve({section,name:shown})}catch(e){console.warn('[NS90.205 resolve]',e)}
     b.dataset.busy='0';b.disabled=false;
     if(v&&valid(v)){
       saveRec(section,shown,v);row.ok=true;row.verified=v;
@@ -6358,7 +6362,7 @@ function migrateVisible(){
 }
 function sync(){
   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-  try{document.title='요술방망이 백과사전 · NS90.173'}catch(_){}
+  try{document.title='요술방망이 백과사전 · NS90.205'}catch(_){}
   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
 }
 window.__NS90173={version:V,key:recKey,load:loadRec,save:saveRec,migrate:migrateSection};
@@ -6630,79 +6634,3 @@ setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
 })();
 </script>
 
-
-
-<!-- NS90.204: repair the NS90.174 full-reset/full-rebuild side effect without replacing the proven card engine. -->
-<script id="ns90204-full-rebuild-side-effect-repair">
-(()=>{
- 'use strict';
- const V='MASTER V28 · NS90.204 IN-PLACE SIDE-EFFECT REPAIR · ORIGINAL CARD ENGINE';
- const MARK='magic_ns90204_repair_done_v1';
- const BADRUN='MW_NS90174_REBUILD_STATE';
- const SECS=['food','fruit','animals','places','culture','singers','athletes','people','art'];
- const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_\-–—]/g,'');
- function repNames(c,s){
-   try{
-     const ov=COUNTRY_OVERVIEWS?.[c]?.[s]; if(!ov)return [];
-     const text=Array.isArray(ov)?(ov[2]||''):(ov.names||'');
-     const old=COUNTRY; COUNTRY=c;
-     let a=[]; try{a=parseRepNames(text,s)||[]}finally{COUNTRY=old}
-     return [...new Set(a.map(x=>cardInputName(x)).filter(Boolean))];
-   }catch(_){return []}
- }
- function isBaseRep(card,names){
-   const n=String(card?.name||card?.entityTitle||''); if(!n)return false;
-   return names.some(x=>{try{return sameCardIdentity(x,n)}catch(_){return norm(x)===norm(n)}});
- }
- async function cleanNs171(c,s,names){
-   return await new Promise((resolve)=>{
-     try{
-       const q=indexedDB.open('magic_wand_cards_ns171',1);
-       q.onsuccess=()=>{
-         const d=q.result, tx=d.transaction('card_records','readwrite'), st=tx.objectStore('card_records'), g=st.getAll();
-         g.onsuccess=()=>{for(const r of (g.result||[])){if(String(r.recordKey||'').startsWith(c+'|'+s+'|')&&isBaseRep(r,names))st.delete(r.recordKey)}};
-         tx.oncomplete=()=>resolve(); tx.onerror=()=>resolve();
-       }; q.onerror=()=>resolve();
-     }catch(_){resolve()}
-   });
- }
- async function cleanOldCardStore(c,s,names){
-   try{
-     const arr=await cardDBGet(c,s), kept=(arr||[]).filter(x=>!isBaseRep(x,names));
-     const d=await openCardDB(); await new Promise((resolve)=>{const tx=d.transaction(CARD_STORE,'readwrite');tx.objectStore(CARD_STORE).put(kept,cardStoreKey(c,s));tx.oncomplete=resolve;tx.onerror=resolve});
-   }catch(_){ }
-   try{
-     const k=`${DATA_NS}custom_${c}_${s}`, arr=JSON.parse(localStorage.getItem(k)||'[]'), kept=(arr||[]).filter(x=>!isBaseRep(x,names));
-     localStorage.setItem(k,JSON.stringify(kept));
-   }catch(_){ }
- }
- async function repair(){
-   try{localStorage.removeItem(BADRUN)}catch(_){ }
-   if(localStorage.getItem(MARK)==='done')return;
-   // NS90.174's evaluation routine deleted every visible card and then automatically clicked
-   // the normal "make card" button for every representative. Those auto-created base cards
-   // are the false green state. Remove only base-representative card records; keep verified
-   // search evidence, photos, aliases and user-added/non-representative (yellow) cards.
-   for(const c of ['ES','JP','US'])for(const s of SECS){
-     const names=repNames(c,s); if(!names.length)continue;
-     await cleanNs171(c,s,names); await cleanOldCardStore(c,s,names);
-   }
-   try{CARD_MEM.clear()}catch(_){ }
-   try{localStorage.setItem(MARK,'done')}catch(_){ }
-   try{
-    const detailOpen=document.getElementById('detail')&&!document.getElementById('detail').classList.contains('hidden');
-    if(detailOpen&&COUNTRY&&typeof openCountry==='function') openCountry(COUNTRY);
-    else if(typeof renderHome==='function') renderHome();
-    if(typeof renderCountryOverviews==='function'&&COUNTRY) setTimeout(renderCountryOverviews,50);
-   }catch(_){ }
- }
- function sync(){
-   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){ }
-   try{document.title='요술방망이 백과사전 · NS90.204'}catch(_){ }
-   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
- }
- sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync);
- const own=()=>{const b=document.getElementById('ns9015Banner');if(b)new MutationObserver(sync).observe(b,{childList:true,subtree:true,characterData:true});sync()};
- setTimeout(own,50); setTimeout(()=>repair().catch(()=>{}),700);
-})();
-</script>
