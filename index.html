@@ -6369,7 +6369,7 @@ setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
 })();
 </script>
 
-<div id="iso201-note" style="position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#fff7cc;border:1px solid #d6b84a;border-radius:10px;padding:8px 10px;font:700 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;color:#493d00;box-shadow:0 2px 10px #0002">NS90.201 분리시험 · 기존 저장데이터를 읽지 않는 별도 저장공간 · NS90.201 분리 카드엔진</div></body></html>
+<div id="iso201-note" style="position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#fff7cc;border:1px solid #d6b84a;border-radius:10px;padding:8px 10px;font:700 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;color:#493d00;box-shadow:0 2px 10px #0002">NS90.202 분리시험 · 기존 저장데이터를 읽지 않는 별도 저장공간 · 기존 카드엔진 검증</div></body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
@@ -6630,3 +6630,30 @@ setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
 })();
 </script>
 
+
+<!-- NS90.202 FINAL VISIBLE VERSION OWNER: display only; card/search/storage logic untouched. -->
+<script id="ns90202-final-visible-version-owner">
+(()=>{
+ const V='MASTER V28 · NS90.202 ISOLATED STORAGE TEST · FINAL VERSION OWNER';
+ let writing=false;
+ function own(){
+   if(writing)return; writing=true;
+   try{
+     const b=document.getElementById('ns9015Banner');
+     if(b && b.textContent!=='✅ '+V) b.textContent='✅ '+V;
+     document.title='요술방망이 백과사전 · NS90.202 분리시험';
+     if(window.__NS9021_ONE_ENGINE) window.__NS9021_ONE_ENGINE.version=V;
+   }catch(_){} finally{writing=false}
+ }
+ own();
+ document.addEventListener('DOMContentLoaded',own);
+ window.addEventListener('load',own);
+ const start=()=>{
+   const b=document.getElementById('ns9015Banner');
+   if(!b)return setTimeout(start,50);
+   new MutationObserver(own).observe(b,{childList:true,subtree:true,characterData:true});
+   own();
+ };
+ start();
+})();
+</script>
