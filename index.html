@@ -6199,6 +6199,25 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 
 
+
+<!-- NS90.179 FINAL VERSION AUTHORITY: visible version has exactly one final owner. No engine logic changes. -->
+<script id="ns90179-final-version-authority">
+(()=>{
+ const V='MASTER V28 · NS90.179 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
+ function apply(){
+   try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
+   try{const t='요술방망이 백과사전 · NS90.179';if(document.title!==t)document.title=t}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE&&window.__NS9021_ONE_ENGINE.version!==V)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+   try{const h=document.querySelector('#ns90177Diag .ns177sum b');if(h)h.textContent='NS90.179 자동재검색 진단'}catch(_){}
+ }
+ apply();
+ window.addEventListener('DOMContentLoaded',apply,{once:true});
+ window.addEventListener('load',apply,{once:true});
+ // Older frozen layers may still write their historical labels on timers.
+ // Reassert only the display string; search/card/state logic remains untouched.
+ setInterval(apply,250);
+})();
+</script>
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
