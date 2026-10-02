@@ -6954,3 +6954,83 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.addEventListener('load',()=>{sync();setTimeout(sync,150);setTimeout(sync,900)});
 })();
 </script>
+
+<!-- NS90.212: PM-locked representative commit -> render -> green transaction. -->
+<script id="ns90212-card-render-commit">
+(()=>{
+'use strict';
+const V='MASTER V28 · NS90.212 CARD RENDER COMMIT · ONE MASTER';
+
+async function ns90212Rollback(section,itemId){
+  const country=String(COUNTRY||''), mk=cardStoreKey(country,section);
+  let cur=[];
+  try{cur=await cardDBGet(country,section)}catch(_){try{cur=getCustom(section)||[]}catch(__){cur=[]}}
+  const kept=(cur||[]).filter(x=>String(x?.id||'')!==String(itemId));
+  try{await cardDBPut(country,section,kept.map(x=>({...x})))}catch(_){}
+  try{CARD_MEM.set(mk,kept.map(x=>({...x})))}catch(_){}
+  try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(kept.map(ns9055CompactCardForLocal)))}catch(_){}
+}
+
+async function ns90212CommitAndRender(section,item){
+  const country=String(COUNTRY||'');
+  // 1. Durable commit.
+  await ns90211SaveCardStrict(section,item);
+  // 2. Authoritative read-back by exact id.
+  const db=await cardDBGet(country,section);
+  const stored=(db||[]).find(x=>String(x?.id||'')===String(item.id));
+  if(!stored)throw new Error('NS90.212 durable card missing after commit');
+  CARD_MEM.set(cardStoreKey(country,section),(db||[]).map(x=>({...x})));
+  // 3. Render the actual card list from the same card collection.
+  await renderSection(section);
+  const list=document.getElementById(section+'List');
+  const node=list?.querySelector(`article.item[data-item-id="${CSS.escape(String(item.id))}"]`);
+  if(!node)throw new Error('NS90.212 card DOM missing after render');
+  // 4. Only after the real card exists in DOM may representative state repaint green.
+  await renderRepresentativeCardButtonsV5(section);
+  const saved=ns9067SavedForRepresentative(section,item.name);
+  if(!saved || String(saved.id)!==String(item.id))throw new Error('NS90.212 green gate failed');
+  return true;
+}
+
+// Final wrapper: keep the established preview/search engine, replace only its save action.
+const ns90212OpenBase=openRepresentativePreview;
+openRepresentativePreview=function(section,name,verified,panel){
+  const r=ns90212OpenBase.apply(this,arguments);
+  try{
+    const pv=panel?.querySelector('.rep-preview-v5');
+    const btn=pv?.querySelector('.rep-save-v5');
+    if(!btn)return r;
+    btn.onclick=async()=>{
+      if(btn.dataset.saving==='1')return;
+      const existing=(getCustom(section)||[]);
+      if(hasIdentity(name,existing)){alert('이미 같은 항목이 있습니다.');return;}
+      const item={id:newItemId(),name,desc:String(verified?.desc||'').trim(),emoji:'⭐',source:'recommended',
+        photoVerified:true,photoRemote:String(pv.querySelector('input[name="v3photo"]:checked')?.value||verified?.photo||''),
+        entityId:String(verified?.entityId||''),entityTitle:String(verified?.title||''),pageId:verified?.pageId==null?'':String(verified.pageId),
+        sources:Array.isArray(verified?.sources)?verified.sources.map(String):[]};
+      btn.dataset.saving='1'; btn.disabled=true; const old=btn.textContent; btn.textContent='카드 만드는 중…';
+      try{
+        await ns90212CommitAndRender(section,item);
+        const refreshed=document.getElementById(section)?.querySelector('.rep-preview-v5');if(refreshed)refreshed.innerHTML='';
+        v22ScrollToSection(section);
+      }catch(e){
+        console.error('[NS90.212] card commit/render failed',e);
+        await ns90212Rollback(section,item.id);
+        // Restore READY/purple; never leave a ghost card or green state after a failed render.
+        try{const st=v16State(section),key=v16RepKey(section,name),row=st.rows.get(key);if(row){row.registered=false;row.ok=true;row.verified=verified;row.pending=false}await renderSection(section);await renderRepresentativeCardButtonsV5(section)}catch(_){}
+        alert('카드는 저장되지 않았습니다. 화면에 실제 카드가 만들어지는 단계에서 문제가 확인되었습니다.');
+        const live=document.getElementById(section)?.querySelector('.rep-preview-v5 .rep-save-v5');if(live){live.disabled=false;live.dataset.saving='';live.textContent=old}
+      }
+    };
+  }catch(e){console.error('[NS90.212] save button wiring failed',e)}
+  return r;
+};
+
+function sync(){
+ try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.212'}catch(_){}
+ try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+}
+sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,200);setTimeout(sync,900);
+})();
+</script>
