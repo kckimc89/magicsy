@@ -6632,12 +6632,12 @@ setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
 
 
 
-<!-- NS90.203: repair the NS90.174 full-reset/full-rebuild side effect without replacing the proven card engine. -->
-<script id="ns90203-full-rebuild-side-effect-repair">
+<!-- NS90.204: repair the NS90.174 full-reset/full-rebuild side effect without replacing the proven card engine. -->
+<script id="ns90204-full-rebuild-side-effect-repair">
 (()=>{
  'use strict';
- const V='MASTER V28 · NS90.203 FULL-REBUILD SIDE-EFFECT REPAIR · ORIGINAL CARD ENGINE';
- const MARK='magic_ns90203_repair_done_v1';
+ const V='MASTER V28 · NS90.204 IN-PLACE SIDE-EFFECT REPAIR · ORIGINAL CARD ENGINE';
+ const MARK='magic_ns90204_repair_done_v1';
  const BADRUN='MW_NS90174_REBUILD_STATE';
  const SECS=['food','fruit','animals','places','culture','singers','athletes','people','art'];
  const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[·ㆍ.,()\[\]{}'"_\-–—]/g,'');
@@ -6689,11 +6689,16 @@ setTimeout(sync,100);setTimeout(sync,800);setInterval(sync,1200);
    }
    try{CARD_MEM.clear()}catch(_){ }
    try{localStorage.setItem(MARK,'done')}catch(_){ }
-   try{location.reload()}catch(_){ }
+   try{
+    const detailOpen=document.getElementById('detail')&&!document.getElementById('detail').classList.contains('hidden');
+    if(detailOpen&&COUNTRY&&typeof openCountry==='function') openCountry(COUNTRY);
+    else if(typeof renderHome==='function') renderHome();
+    if(typeof renderCountryOverviews==='function'&&COUNTRY) setTimeout(renderCountryOverviews,50);
+   }catch(_){ }
  }
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){ }
-   try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){ }
+   try{document.title='요술방망이 백과사전 · NS90.204'}catch(_){ }
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }
  }
  sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync);
