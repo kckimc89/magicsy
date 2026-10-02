@@ -1700,7 +1700,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS9015_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2166,7 +2166,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER',
+ version:'MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -3009,7 +3009,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3108,7 +3108,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   if(person&&!photo){pv.innerHTML='<div class="preview-card"><b>인물은 확인했지만 인물 자체의 대표 사진을 찾지 못했습니다.</b><p>책 표지나 관련 작품으로 대신하지 않습니다.</p><button class="v22-back">← 다른 후보 보기</button></div>';pv.querySelector('.v22-back').onclick=renderList;return}
   pv.innerHTML=`<div class="preview-card"><h3>${esc(originName)}</h3><p>${esc(exact.desc||'')}</p>${photo?`<div class="v3-photo-choices"><img src="${esc(photo)}" alt=""></div>`:'<p class="note">대표 사진 없이 확인되었습니다.</p>'}<div class="preview-actions"><button class="v22-back">← 다른 후보 보기</button><button class="v18-manual-save">⭐ 이 항목 추가</button><button class="rep-close-v5">닫기</button></div></div>`;pv.querySelector('.v22-back').onclick=renderList;pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)}};renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9071-entity-first-same-identity-gate">
 // ===== NS90.71 ENTITY-FIRST SAME-IDENTITY GATE =====
@@ -3169,7 +3169,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9072-final-entity-validation">
 // ===== NS90.72 FINAL ENTITY VALIDATION =====
@@ -3226,7 +3226,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  };
  renderList();
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9073-verified-save-path">
 // ===== NS90.73 VERIFIED SAVE PATH =====
@@ -3304,7 +3304,7 @@ renderRepresentativeCardButtonsV5=async function(section){
   }
   return __NS9073_RENDER_REPS(section);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9074-active-multilingual-name-discovery">
 // ===== NS90.74 ACTIVE MULTILINGUAL NAME DISCOVERY =====
@@ -3371,7 +3371,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9075-exact-entity-name-bridge">
 // ===== NS90.75 EXACT ENTITY NAME BRIDGE =====
@@ -3426,7 +3426,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:exact.desc||h.summary?.text||'',emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9076-context-name-interpreter">
 // ===== NS90.76 CONTEXT NAME INTERPRETER =====
@@ -3501,7 +3501,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(h.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!exact.finalEntityVerified:true,photoRemote:photo,entityId:String(exact.entityId||h.wikibaseId||''),entityTitle:String(exact.title||h.title),searchAlias:String(h.title||''),pageId:exact.pageId==null?'':String(exact.pageId)};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,h.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9080-context-candidate-ranker">
 // ===== NS90.80 CONTEXT CANDIDATE RANKER =====
@@ -3556,7 +3556,7 @@ async function ns9080InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9080InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9081-candidate-trace">
 // ===== NS90.81 CANDIDATE TRACE =====
@@ -3612,7 +3612,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  rows.map((r,i)=>`<div style="padding:8px 0;border-top:1px solid #d9dee7"><b>${i+1}. ${esc(r.title)}</b> ${r.qid?`<span>(${esc(r.qid)})</span>`:''}<br><span>검색: ${esc(r.query)} · ${esc(r.lang)} · 점수 ${r.score==null?'—':Math.round(r.score)} · subject ${r.subject??'—'} · cat ${r.cat??'—'} · type ${r.type??'—'} · country ${r.country??'—'} · penalty ${r.penalty??'—'} · role +${r.roleBonus??0}/-${r.rolePenalty??0}</span><br><b>${esc(r.reason||'')}</b><br><span>${esc(String(r.desc||r.snippet||'').slice(0,180))}</span></div>`).join('');
  pv.appendChild(box);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9082-semantic-winner-selector">
 // ===== NS90.82 SEMANTIC WINNER SELECTOR =====
@@ -3673,7 +3673,7 @@ async function ns9082InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9082InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9083-identity-first-winner">
 // ===== NS90.83 IDENTITY-FIRST WINNER =====
@@ -3736,7 +3736,7 @@ async function ns9083InterpretName(name,section){
  return accepted[0]||null;
 }
 ns9076InterpretName=ns9083InterpretName;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9084-verified-winner-to-card">
 // ===== NS90.84 VERIFIED WINNER TO CARD =====
@@ -3774,7 +3774,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:NS9070_PERSON_SECTIONS.has(section)?!!snap.finalEntityVerified:true,photoRemote:photo,entityId:String(snap.entityId||''),entityTitle:String(snap.title||originName),searchAlias:String(snap.title||''),pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9085-concept-fallback">
 // ===== NS90.85 CONCEPT FALLBACK =====
@@ -3839,7 +3839,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a)||hasIdentity(snap.title,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:snap.title,searchAlias:snap.title,pageId:''};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}ns9066LearnAlias(section,originName,snap.title);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9086-concept-card-mode">
 // ===== NS90.86 CONCEPT CARD MODE =====
@@ -3906,7 +3906,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9087-concept-identity-card">
 // ===== NS90.87 CONCEPT IDENTITY CARD =====
@@ -3965,7 +3965,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.v18-manual-save').onclick=async()=>{const a=getCustom(section);if(hasIdentity(originName,a))return alert('이미 같은 항목이 있습니다.');const item={id:newItemId(),name:originName,desc:snap.desc,emoji:'⭐',source:ns90155CardSource(section,originName),photoVerified:!!photo,finalEntityVerified:true,photoRemote:photo,entityId:snap.entityId,entityTitle:originName,searchAlias:snap.searchAlias,pageId:'',conceptMode:true};try{await ns90106AppendCard(section,item)}catch(e){return alert('카드 저장 중 오류가 발생했습니다.')}if(snap.searchAlias)ns9066LearnAlias(section,originName,snap.searchAlias);pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section)};
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9088-country-context-concept-card">
 // ===== NS90.88 COUNTRY CONTEXT CONCEPT CARD =====
@@ -4020,7 +4020,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
 };
 // Candidate trace is development-only; keep it out of the child-facing UI.
 (function(){const st=document.createElement('style');st.textContent='details:has(summary[style*="font-weight:800"]){display:none!important}';document.head.appendChild(st)})();
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9089-country-category-identity-gate">
 // ===== NS90.89 COUNTRY + CATEGORY IDENTITY GATE =====
@@ -4050,7 +4050,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
   pv.innerHTML='';await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,originName);v22ScrollToSection(section);
  };
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>\n
 
 <script id="ns9090-final-route-bypass">
@@ -4082,7 +4082,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(ns9090IsBroad(section,originName)) return ns9090RenderBroad(section,originName,pv);
  return ns9090_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9091-concept-photo-target">
 // ===== NS90.91 CONCEPT PHOTO TARGET =====
@@ -4138,7 +4138,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)) snap.photo=await ns9091ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9092-human-culture-photo-priority">
 // ===== NS90.92 HUMAN CULTURE PHOTO PRIORITY =====
@@ -4189,7 +4189,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9092ConceptPhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9093-culture-scene-photo-ranker">
 // ===== NS90.93 CULTURE SCENE PHOTO RANKER =====
@@ -4251,7 +4251,7 @@ ns9088CountryConceptSnapshot=async function(originName,section){
  if(ns9087IsBroadConcept(originName,section)&&String(section||'')==='culture') snap.photo=await ns9093CultureScenePhoto(originName,section);
  return snap;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9094-universal-artwork-identity">
 // ===== NS90.94 UNIVERSAL ARTWORK IDENTITY =====
@@ -4312,7 +4312,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(String(section)==='art') return ns9094ShowArtwork(section,name,pv,originName);
  return ns9094_prev_show(section,name,pv,originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9096-safe-helpers">
 // ===== NS90.96 SAFE ARTWORK FALLBACK + DELETE VERIFY =====
@@ -4406,7 +4406,7 @@ async function ns9095ExpandedArtworkDiscovery(originName){
 }
 // Replace only the discovery function used by the NS90.94 artwork adapter.
 ns9094ArtworkDiscovery=ns9095ExpandedArtworkDiscovery;
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9097-stable-card-key-final-artwork-gate">
 // ===== NS90.97 STABLE CARD KEY + FINAL ARTWORK GATE =====
@@ -4471,7 +4471,7 @@ ns9094ArtworkDiscovery=async function(originName){
  const x=await ns9096Timeout(ns9097_prev_artwork_discovery(originName),18000,null);
  return await ns9097VerifyArtworkResult(originName,x);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9098-delete-research-cycle">
 // ===== NS90.98 DELETE + RESEARCH CYCLE =====
@@ -4522,7 +4522,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }
  return kept;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns9099-durable-research-memory">
 // ===== NS90.99 DURABLE RESEARCH MEMORY =====
@@ -4564,7 +4564,7 @@ ns9096DeleteDurable=async function(section,itemId){
  }catch(_){ }
  return await ns9099PrevDelete(section,itemId);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90100-universal-artwork-recall">
 // ===== NS90.100 UNIVERSAL ARTWORK RECALL =====
@@ -4642,7 +4642,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob) && !e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90101-multiscript-artwork-bridge">
 // ===== NS90.101 MULTISCRIPT ARTWORK BRIDGE =====
@@ -4722,7 +4722,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90102-universal-artwork-series-resolver">
 // ===== NS90.102 UNIVERSAL ARTWORK SERIES RESOLVER =====
@@ -4811,7 +4811,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns9097GoodArtworkText(blob)&&!e.claims?.P170)return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90103-universal-artwork-title-discovery">
 // ===== NS90.103 UNIVERSAL ARTWORK TITLE DISCOVERY =====
@@ -4903,7 +4903,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(!ns90103ArtworkEntityOK(e,blob))return null;
  return x;
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90105-success-freeze-series-fallback">
 // ===== NS90.106 STABLE CARD STORAGE =====
@@ -4982,7 +4982,7 @@ ns9094ArtworkDiscovery=async function(originName){
  // 3) Only then: generic numbered-series fallback.
  return await ns90105SeriesFallback(originName);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90107-universal-artwork-last-mile-discovery">
 // ===== NS90.107 UNIVERSAL ARTWORK LAST-MILE DISCOVERY =====
@@ -5071,7 +5071,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(old)return old; // Freeze all NS90.106 successes and storage behavior.
  return await ns9096Timeout(ns90107LastMile(originName),26000,null);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90108-universal-artwork-evidence-resolver">
 // ===== NS90.108 UNIVERSAL ARTWORK EVIDENCE RESOLVER =====
@@ -5143,7 +5143,7 @@ ns9094ArtworkDiscovery=async function(originName){
  if(old)return old; // Never alter a NS90.107 success.
  return await ns9096Timeout(ns90108EvidenceResolve(originName),30000,null);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90110-safe-diagnostic-trace">
 // ===== NS90.110 SAFE DIAGNOSTIC TRACE =====
@@ -5194,13 +5194,13 @@ ns9094ShowArtwork=async function(section,name,pv,originName){
  }catch(e){rows=[];timedOut=true}
  const box=pv.querySelector('.ns90110-diag'); if(box)box.outerHTML=ns90110DiagHtml(originName,rows,timedOut);
 };
-window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+window.__NS9021_ONE_ENGINE.version='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 </script>
 <script id="ns90111-real-nonblocking-artwork-discovery">
 // ===== NS90.111 REAL NON-BLOCKING ARTWORK DISCOVERY =====
 // Failure-only rescue. Existing successful cards/storage stay untouched.
 // Every network request is abortable; no diagnostic search is invoked.
-const NS90111_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90111_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90111_prev_discovery=ns9094ArtworkDiscovery;
 const ns90111_prev_show=ns90110_prev_show_artwork; // show routine before NS90.110 diagnostic wrapper
 function ns90111FetchJson(url,ms=1800){
@@ -5303,7 +5303,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90111_VERSION
 // ===== NS90.112 STABLE SUCCESS BRIDGE =====
 // Keep NS90.106 append/merge storage and NS90.111 non-blocking discovery.
 // Important change: a verified fallback result is rendered directly; never rediscover it.
-const NS90112_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90112_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 function ns90112AliasSeeds(origin){
  const out=[], add=v=>{v=String(v||'').trim();if(v&&!out.includes(v))out.push(v)};
  add(origin);
@@ -5364,7 +5364,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90112_VERSION
 // ===== NS90.113 ARTWORK QUALITY GATE =====
 // Freeze NS90.112 discovery/storage. Improve only the verified artwork snapshot:
 // prefer entity-owned artwork images and enrich short descriptions from the entity's own Wikipedia page.
-const NS90113_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90113_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90113_prev_hydrate=ns90111Hydrate;
 async function ns90113WikiExtract(e){
  for(const site of ['kowiki','jawiki','enwiki']){
@@ -5414,7 +5414,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90113_VERSION
 // Preserve NS90.113 exactly. Before any new artwork network search, try the durable
 // NS90.99 success snapshot, but only after re-validating its entity as an artwork.
 // This is universal: no country/title-specific table or exception is used.
-const NS90114_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90114_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90114_prev_show=ns9094ShowArtwork;
 async function ns90114VerifiedMemory(section,origin){
  let mem=null; try{mem=ns9099LoadResearch(section,origin)}catch(_){return null}
@@ -5453,7 +5453,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90114_VERSION
 // Preserve all NS90.114 successes. Only after they fail, discover alternate/native/English
 // titles from multilingual search evidence and send the verified entity through the SAME
 // artwork quality gate. No country or artwork exception table is used.
-const NS90115_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90115_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90115_prev_show=ns9094ShowArtwork;
 function ns90115Norm(s){return String(s||'').toLowerCase().normalize('NFKC').replace(/[《》〈〉「」『』()\[\]·・:：,，.。'"“”‘’\-–—_]/g,' ').replace(/\s+/g,' ').trim()}
 function ns90115Tokens(s){return ns90115Norm(s).split(' ').filter(x=>x.length>1)}
@@ -5535,7 +5535,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90115_VERSION
 // Freeze NS90.115. Failure-only reverse discovery: representative title -> surrounding
 // artwork evidence (creator/collection/series/page) -> linked candidate entity -> SAME quality gate.
 // No country/title-specific exception table.
-const NS90116_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90116_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90116_prev_show=ns9094ShowArtwork;
 async function ns90116Timed(url,ms=1800){try{return await ns90111FetchJson(url,ms)}catch(_){return null}}
 async function ns90116WikiSearch(term,lang){
@@ -5613,7 +5613,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90116_VERSION
 <script id="ns90117-artwork-candidate-observer">
 // ===== NS90.117 ARTWORK CANDIDATE OBSERVER =====
 // Failure-only observer. Existing successful card/search paths are untouched.
-const NS90117_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90117_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90117_prev_show=ns9094ShowArtwork;
 async function ns90117Observe(origin){
  const deadline=Date.now()+12000, seeds=[]; const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
@@ -5673,7 +5673,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90117_VERSION
 // Preserve the existing successful resolver first. On failure, accept a differently-titled
 // candidate only when independent artwork evidence agrees: real work entity + image +
 // creator/series/work-type evidence + clean non-person/non-place semantics. No named-work table.
-const NS90118_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90118_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90118_base_show=ns90117_prev_show;
 function ns90118Claim(e,p){return !!(e?.claims?.[p]?.length)}
 function ns90118WorkEvidence(e,blob){
@@ -5745,7 +5745,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90118_VERSION
 // ===== NS90.119 CANDIDATE PIPELINE BRIDGE =====
 // Collect once, retain every candidate, then evaluate the same retained set.
 // This prevents a good observer candidate from disappearing before the evidence resolver.
-const NS90119_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90119_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90119_frozen_show=ns90118_base_show;
 async function ns90119Collect(origin){
  const deadline=Date.now()+15000,seeds=[];const add=v=>{v=String(v||'').trim();if(v&&!seeds.includes(v))seeds.push(v)};
@@ -5819,7 +5819,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90119_VERSION
 // Failure-only bridge: keep the NS90.119 candidate set, rehydrate promising artwork
 // candidates with a slower detail retry, recover an image from the verified entity/page,
 // and snapshot fetchable images as data URLs for more durable saved cards.
-const NS90120_VERSION='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+const NS90120_VERSION='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
 const ns90120_frozen_show=ns9094ShowArtwork;
 async function ns90120FetchJson(url,ms=4200){
  const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
@@ -5900,7 +5900,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.133: NS90.131 LOCKED CORE + completely isolated failure-only fallback. -->
 <script id="ns90133-locked-core-isolated-fallback">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const LOCKED_CORE=ns9094ShowArtwork; // exact NS90.131 entry point; never replaced internally.
  function failed(pv){
    const t=String(pv?.textContent||'');
@@ -5942,7 +5942,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.134: version sync + Spain person-card cleanup layer. Locked core unchanged. -->
 <script>
 (()=>{
- const NS134_LABEL='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const NS134_LABEL='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  function sync134(){
    for(const el of document.querySelectorAll('body *')){
      if(el.children.length===0 && /MASTER V28\s*[·•]\s*NS90\.131 DURABLE COMMON RESEARCH MEMORY\s*[·•]\s*ONE MASTER/i.test(el.textContent||'')) el.textContent=NS134_LABEL;
@@ -5962,7 +5962,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <style id="ns90154-style">#ns90154Badge{margin:8px auto 12px;max-width:760px;padding:9px 12px;border:1px solid #9bb8a6;border-radius:12px;background:#f3faf5;text-align:center;font-size:14px;font-weight:800;color:#315b3f}</style>
 <script id="ns90154-clean-version-guard">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  function clean(){
   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
@@ -6073,7 +6073,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns9097StableCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -6121,7 +6121,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  }
  function syncVersion(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){}
  }
  window.addEventListener('DOMContentLoaded',()=>{syncVersion();setTimeout(syncVersion,80);setTimeout(syncVersion,500);setTimeout(repair,700)});
  window.addEventListener('load',()=>{syncVersion();setTimeout(syncVersion,300)});
@@ -6133,7 +6133,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -6151,14 +6151,14 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  ns90106AppendCard=async function(s,item){const c=String(COUNTRY||''),b=bucket(c,s);if(!READY.has(b))await migrate(c,s);const cur=(MEM.get(b)||[]).map(x=>({...x})),k=ident(c,s,item);if(cur.some(x=>ident(c,s,x)===k))throw new Error('same representative already exists');const fresh={...item,id:newItemId(),stableKey:k};await put(c,s,fresh);cur.push(fresh);MEM.set(b,cur);item.id=fresh.id;item.stableKey=k;await ns90155AfterRepresentativeSave(s,item);return true};
  ns9096DeleteDurable=async function(s,id){const c=String(COUNTRY||''),b=bucket(c,s);if(!READY.has(b))await migrate(c,s);const cur=MEM.get(b)||[],i=cur.findIndex(x=>String(x.id)===String(id));if(i<0)return cur;await del(c,s,id);const next=cur.filter((_,n)=>n!==i);MEM.set(b,next.map(x=>({...x})));return next};
  async function boot(){for(const c of ['ES','JP','US'])for(const s of secs)await migrate(c,s);try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of secs)await renderSection(s)}catch(_){} }
- function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  boot().catch(e=>console.error('[NS90.176 boot]',e));sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
 })();
 </script>
 
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -6190,7 +6190,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  };
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
  }
  sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync); setTimeout(sync,100); setTimeout(sync,700); setInterval(sync,1500);
@@ -6200,15 +6200,15 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 
 
 
-<!-- NS90.179 FINAL VERSION AUTHORITY: visible version has exactly one final owner. No engine logic changes. -->
+<!-- NS90.180 FINAL VERSION AUTHORITY: visible version has exactly one final owner. No engine logic changes. -->
 <script id="ns90179-final-version-authority">
 (()=>{
- const V='MASTER V28 · NS90.179 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  function apply(){
    try{const b=document.getElementById('ns9015Banner');if(b&&b.textContent!=='✅ '+V)b.textContent='✅ '+V}catch(_){}
-   try{const t='요술방망이 백과사전 · NS90.179';if(document.title!==t)document.title=t}catch(_){}
+   try{const t='요술방망이 백과사전 · NS90.180';if(document.title!==t)document.title=t}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE&&window.__NS9021_ONE_ENGINE.version!==V)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
-   try{const h=document.querySelector('#ns90177Diag .ns177sum b');if(h)h.textContent='NS90.179 자동재검색 진단'}catch(_){}
+   try{const h=document.querySelector('#ns90177Diag .ns177sum b');if(h)h.textContent='자동재검색 진단'}catch(_){}
  }
  apply();
  window.addEventListener('DOMContentLoaded',apply,{once:true});
@@ -6222,7 +6222,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+  const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -6233,7 +6233,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.131: durable common research memory; failure-safe recall before network discovery. -->
 <script id="ns90131-durable-common-research-memory">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const prevShow=ns9094ShowArtwork;
  function validSnap(s){
    if(!s||!String(s.desc||'').trim()) return false;
@@ -6294,7 +6294,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -6328,7 +6328,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -6382,7 +6382,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -6390,7 +6390,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
@@ -6478,7 +6478,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  window.addEventListener('load',()=>{cleanLiteralNewlines();setTimeout(repaintVisible,120)});
 })();
 </script>
-\n<script id="ns90168-append-only-card-save">\n(()=>{\n const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';\n function actualKey(country,section,x){return ns9097StableCardKey(String(country||''),section,String(x?.name||x?.entityTitle||''));}\n // Never trust a legacy stableKey while merging. Identity is recalculated from the card name.\n ns90106MergeCards=function(country,section,...lists){\n   const out=[], pos=new Map();\n   for(const list of lists)for(const raw of (Array.isArray(list)?list:[])){\n     if(!raw)continue; const x={...raw};\n     const k=actualKey(country,section,x); if(!k||k.endsWith('|'))continue;\n     x.stableKey=k;\n     if(pos.has(k)){\n       const i=pos.get(k),old=out[i];\n       out[i]={...old,...Object.fromEntries(Object.entries(x).filter(([_,v])=>v!==''&&v!=null))};\n     }else{pos.set(k,out.length);out.push(x)}\n   }\n   return out;\n };\n // New representative cards are appended by their real name identity. Existing siblings are preserved.\n ns90106AppendCard=async function(section,item){\n   const country=String(COUNTRY||''),mk=cardStoreKey(country,section);\n   const db=await cardDBGet(country,section);\n   let mirror=[];try{mirror=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){}\n   const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];\n   const base=ns90106MergeCards(country,section,db,mirror,mem);\n   const wanted=actualKey(country,section,item);\n   if(base.some(x=>actualKey(country,section,x)===wanted))throw new Error('same representative already exists');\n   const fresh={...item,id:newItemId(),stableKey:wanted};\n   const merged=[...base,fresh];\n   await cardDBPut(country,section,merged.map(x=>({...x})));\n   CARD_MEM.set(mk,merged.map(x=>({...x})));\n   try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(e){\n     if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(_){}}\n   }\n   // caller verifies item.id; keep it synchronized with the newly committed id.\n   item.id=fresh.id; item.stableKey=fresh.stableKey;\n   const check=await cardDBGet(country,section);\n   if(!check.some(x=>String(x.id)===String(fresh.id)))throw new Error('NS90.176 append verify failed');\n   await ns90155AfterRepresentativeSave(section,item);\n   return true;\n };\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);\n})();\n</script>\n
+\n<script id="ns90168-append-only-card-save">\n(()=>{\n const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';\n function actualKey(country,section,x){return ns9097StableCardKey(String(country||''),section,String(x?.name||x?.entityTitle||''));}\n // Never trust a legacy stableKey while merging. Identity is recalculated from the card name.\n ns90106MergeCards=function(country,section,...lists){\n   const out=[], pos=new Map();\n   for(const list of lists)for(const raw of (Array.isArray(list)?list:[])){\n     if(!raw)continue; const x={...raw};\n     const k=actualKey(country,section,x); if(!k||k.endsWith('|'))continue;\n     x.stableKey=k;\n     if(pos.has(k)){\n       const i=pos.get(k),old=out[i];\n       out[i]={...old,...Object.fromEntries(Object.entries(x).filter(([_,v])=>v!==''&&v!=null))};\n     }else{pos.set(k,out.length);out.push(x)}\n   }\n   return out;\n };\n // New representative cards are appended by their real name identity. Existing siblings are preserved.\n ns90106AppendCard=async function(section,item){\n   const country=String(COUNTRY||''),mk=cardStoreKey(country,section);\n   const db=await cardDBGet(country,section);\n   let mirror=[];try{mirror=JSON.parse(localStorage.getItem(`${DATA_NS}custom_${country}_${section}`)||'[]')}catch(_){}\n   const mem=CARD_MEM.has(mk)?CARD_MEM.get(mk):[];\n   const base=ns90106MergeCards(country,section,db,mirror,mem);\n   const wanted=actualKey(country,section,item);\n   if(base.some(x=>actualKey(country,section,x)===wanted))throw new Error('same representative already exists');\n   const fresh={...item,id:newItemId(),stableKey:wanted};\n   const merged=[...base,fresh];\n   await cardDBPut(country,section,merged.map(x=>({...x})));\n   CARD_MEM.set(mk,merged.map(x=>({...x})));\n   try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(e){\n     if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(_){}}\n   }\n   // caller verifies item.id; keep it synchronized with the newly committed id.\n   item.id=fresh.id; item.stableKey=fresh.stableKey;\n   const check=await cardDBGet(country,section);\n   if(!check.some(x=>String(x.id)===String(fresh.id)))throw new Error('NS90.176 append verify failed');\n   await ns90155AfterRepresentativeSave(section,item);\n   return true;\n };\n function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}\n sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);\n})();\n</script>\n
 <style id="ns90177-style">
 #ns90177Tools{position:sticky;top:43px;z-index:9998;background:#fff8e8;border-bottom:1px solid #e4c97d;padding:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
 #ns90177Tools button{border:1px solid #b78b28;background:#fff;border-radius:10px;padding:7px 10px;font-weight:800}#ns90177Tools .danger{background:#fff0f0;border-color:#c55;color:#8b2222}
@@ -6486,12 +6486,12 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </style>
 <script id="ns90177-176-base-re-evaluation">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · FULL DELETE + AUTO RESEARCH DIAGNOSTIC · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const COUNTRIES=['ES','JP','US'], SECTIONS=['food','fruit','animals','places','culture','singers','athletes','people','art'];
  const RUNKEY='magic_ns90177_diag_results', STOPKEY='magic_ns90177_stop';
  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
- function syncV(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
- function mount(){if(document.getElementById('ns90177Tools'))return;const b=document.getElementById('ns9015Banner');if(!b)return;const d=document.createElement('div');d.id='ns90177Tools';d.innerHTML='<button class="danger" id="ns177Run">🧹 전체항목 삭제 → 자동재검색 · 진단</button><button id="ns177View">📊 진단결과</button><button id="ns177Stop">■ 중지</button><span id="ns90177Status">대기 중 · 자동 카드생성 없음</span>';b.after(d);const ov=document.createElement('div');ov.id='ns90177Diag';ov.innerHTML='<div class="wrap"><div class="ns177sum"><button id="ns177Close">닫기</button> <b>NS90.178 자동재검색 진단</b><div id="ns177Summary"></div></div><div id="ns177Out"></div></div>';document.body.appendChild(ov);d.querySelector('#ns177Run').onclick=start;d.querySelector('#ns177View').onclick=show;d.querySelector('#ns177Stop').onclick=()=>{localStorage.setItem(STOPKEY,'1');status('중지 요청됨')};ov.querySelector('#ns177Close').onclick=()=>ov.style.display='none';}
+ function syncV(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ function mount(){if(document.getElementById('ns90177Tools'))return;const b=document.getElementById('ns9015Banner');if(!b)return;const d=document.createElement('div');d.id='ns90177Tools';d.innerHTML='<button class="danger" id="ns177Run">🧹 전체항목 삭제 → 자동재검색 · 진단</button><button id="ns177View">📊 진단결과</button><button id="ns177Stop">■ 중지</button><span id="ns90177Status">대기 중 · 자동 카드생성 없음</span>';b.after(d);const ov=document.createElement('div');ov.id='ns90177Diag';ov.innerHTML='<div class="wrap"><div class="ns177sum"><button id="ns177Close">닫기</button> <b>자동재검색 진단</b><div id="ns177Summary"></div></div><div id="ns177Out"></div></div>';document.body.appendChild(ov);d.querySelector('#ns177Run').onclick=start;d.querySelector('#ns177View').onclick=show;d.querySelector('#ns177Stop').onclick=()=>{localStorage.setItem(STOPKEY,'1');status('중지 요청됨')};ov.querySelector('#ns177Close').onclick=()=>ov.style.display='none';}
  function status(t){const e=document.getElementById('ns90177Status');if(e)e.textContent=t}
  function load(){try{return JSON.parse(localStorage.getItem(RUNKEY)||'[]')}catch(_){return []}}
  function save(a){try{localStorage.setItem(RUNKEY,JSON.stringify(a))}catch(_){}}
@@ -6505,10 +6505,10 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
 </script>
 
 
-<!-- NS90.178 FINAL: READY state unification + remove legacy per-item diagnostic preview. -->
+<!-- NS90.180 FINAL: READY state unification + remove legacy per-item diagnostic preview. -->
 <script id="ns90178-final-ready-unify-no-item-diagnostic">
 (()=>{
- const V='MASTER V28 · NS90.178 · 176 BASE · READY UNIFIED · ITEM DIAGNOSTIC PREVIEW REMOVED · NO AUTO CARD SAVE · ONE MASTER';
+ const V='MASTER V28 · NS90.180 · 176 BASE · READY UNIFIED · VERSION DISPLAY STABLE · NO AUTO CARD SAVE · ONE MASTER';
  const norm=v=>String(v||'').normalize('NFKC').replace(/[◆○]/g,'').replace(/\s+/g,'').trim();
  function paintReady(section,name){
    try{
@@ -6540,7 +6540,7 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
    }catch(_){ }
    return r;
  };
- function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){ }try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){ }try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }}
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){ }try{document.title='요술방망이 백과사전 · NS90.180'}catch(_){ }try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){ }}
  sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,900);setInterval(sync,500);
 })();
 </script>
