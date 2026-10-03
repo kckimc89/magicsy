@@ -1729,7 +1729,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+const NS9015_VERSION='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2193,7 +2193,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE',
+ version:'MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2627,6 +2627,38 @@ function ns90184QuerySet(section,name,countryName,countryEn){
  const h=ns90184SemanticHints(section);
  return [`${countryName} ${name}`,`${countryName}의 ${name}`,`\"${countryName} ${name}\"`,`${countryName} ${name} ${h}`,countryEn?`${countryEn} ${name} ${h}`:'',`${name} ${countryName} ${h}`].filter(Boolean);
 }
+// ===== NS90.185 TARGET MATCH QUALITY =====
+// Judge the source result before card boilerplate is added.  A refresh result must
+// be about the selected country + item, not merely a generic page that happens to
+// mention many countries.  This is shared by every category.
+function ns90185TargetMatch(raw,title,name,countryName,section){
+ const r=String(raw||'').replace(/\s+/g,' ').trim(), t=String(title||'').trim();
+ const n=normalizeItemName(name), tt=normalizeItemName(t), rr=normalizeItemName(r);
+ const c=String(countryName||'').trim();
+ let score=0;
+ const nameInTitle=!!(n&&(tt.includes(n)||n.includes(tt)||oneNameSimilarity(name,t)>=0.58));
+ const nameInRaw=!!(n&&rr.includes(n));
+ const countryInTitle=!!(c&&t.includes(c));
+ const countryInRaw=!!(c&&r.includes(c));
+ if(nameInTitle)score+=28; else if(nameInRaw)score+=14; else score-=35;
+ if(countryInTitle)score+=34; else if(countryInRaw)score+=16; else if(c)score-=30;
+ // Generic/worldwide pages are poor replacements unless the title itself anchors
+ // the selected country.
+ if(/세계 각국|여러 나라|각 나라|국가별|전 세계|세계의|목록|분류:/i.test(r+' '+t) && !countryInTitle)score-=28;
+ // Concrete facts are useful evidence that the result is about one real target.
+ if(/\d{3,4}년|\d{1,2}월\s*\d{1,2}일|\d{1,2}월|\d{1,2}일/.test(r))score+=8;
+ let ctxHits=0; for(const w of ns90184SemanticHints(section).split(/\s+/).filter(Boolean))if(r.includes(w)||t.includes(w))ctxHits++;
+ score+=Math.min(12,ctxHits*2);
+ return {score,nameInTitle,nameInRaw,countryInTitle,countryInRaw};
+}
+function ns90185QuerySet(section,name,countryName,countryEn){
+ const h=ns90184SemanticHints(section);
+ return [
+  `${countryName} ${name}`, `${countryName} ${name} ${h}`, `${name} ${countryName}`,
+  `${countryName}의 ${name}`, `${countryName} ${name} 역사 날짜 의미`,
+  countryEn?`${countryEn} ${name}`:'', countryEn?`${countryEn} ${name} history date`:'',
+ ].filter(Boolean);
+}
 // Same CLEAN resolver, but refresh candidates are ranked and weak duplicates are rejected.
 // Generic rule only: country + section + item identity; no item-specific exceptions.
 function ns90183Specificity(desc,name,countryName,section){
@@ -2646,7 +2678,7 @@ async function ns90183ContextResolve(section,name,current){
  const countryName=String(countries?.[COUNTRY]?.name||'').trim();
  const countryEn=String(countries?.[COUNTRY]?.en||'').trim();
  const context=ns90182ContextWords(section); const topic=oneTopic(section,name);
- const queries=ns90184QuerySet(section,name,countryName,countryEn);
+ const queries=ns90185QuerySet(section,name,countryName,countryEn);
  const titles=[],seen=new Set();
  for(const q of queries){
    let rows=[]; try{rows=await wikiSearchTitle(q,'ko')}catch(_){}
@@ -2660,6 +2692,11 @@ async function ns90183ContextResolve(section,name,current){
    const raw=String(pg.extract||'').replace(/\s+/g,' ').trim(); if(raw.length<55)continue;
    const tt=normalizeItemName(title),nn=normalizeItemName(name);
    const identity=(tt.includes(nn)||nn.includes(tt)||oneNameSimilarity(name,title)>=0.52); if(!identity)continue;
+   const target=ns90185TargetMatch(raw,title,name,countryName,section);
+   // A proposed replacement must first pass target identity.  In particular, a
+   // generic/world page cannot replace a country-specific card just because the
+   // later card template mentions the country.
+   if(target.score<22 || (!target.countryInTitle&&!target.countryInRaw))continue;
    const typeScore=sharedTypeFit(topic.kind,title,raw); if(typeScore<=0)continue;
    let desc=v13CardDescription(raw,name,topic.kind);
    const spec=ns90183Specificity(desc,name,countryName,section);
@@ -2668,8 +2705,8 @@ async function ns90183ContextResolve(section,name,current){
    if(!photo){try{const qid=pg.pageprops?.wikibase_item||'';if(qid){const ents=await V3_wd([qid]);const fn=V3_claim(ents?.[qid],'P18')[0];if(fn)photo=await V3_fileUrl(fn)}}catch(_){}}
    const samePhoto=photo&&oldPhotoKey&&ns90183PhotoKey(photo)===oldPhotoKey;
    const semantic=ns90184SemanticScore(desc,title,name,countryName,section);
-   let score=spec+semantic+ns90182NameScore(name,title,countryName)+typeScore+(sameDesc?-24:8)+(samePhoto?-8:(photo?5:0));
-   if(score>bestScore){bestScore=score;best={name,title,resolvedName:title,entityId:String(pg.pageprops?.wikibase_item||''),pageId:pg.pageid||'',desc,photo,photos:photo?[photo]:[],sources:['NS90.184 semantic quality refresh'],section,kind:topic.kind,qualityRefresh:true,qualityScore:score}}
+   let score=spec+semantic+target.score+ns90182NameScore(name,title,countryName)+typeScore+(sameDesc?-24:8)+(samePhoto?-8:(photo?5:0));
+   if(score>bestScore){bestScore=score;best={name,title,resolvedName:title,entityId:String(pg.pageprops?.wikibase_item||''),pageId:pg.pageid||'',desc,photo,photos:photo?[photo]:[],sources:['NS90.185 target match quality refresh'],section,kind:topic.kind,qualityRefresh:true,qualityScore:score}}
  }
  return best;
 }
@@ -2682,7 +2719,7 @@ async function ns90182FreshResolve(section,name,current){
 }
 async function ns90181QualityRefresh(section,name,current,mode,box){
  const status=box.querySelector('.ns181-status');
- if(status)status.textContent='🔎 나라·카테고리·항목을 함께 넣어 보완 검색하고 있어요…';
+ if(status)status.textContent='🔎 대상 일치도까지 확인하며 보완 검색하고 있어요…';
  let fresh=null;try{fresh=await ns90182FreshResolve(section,name,current)}catch(e){}
  if(!fresh){if(status)status.textContent='더 나은 새 결과를 찾지 못했습니다. 기존 결과는 그대로 유지합니다.';return;}
  const oldPhoto=String(current.photo||((current.photos||[])[0])||'');
@@ -2702,7 +2739,7 @@ async function ns90181QualityRefresh(section,name,current,mode,box){
  const descImproved=(mode==='photo')||(!sameDesc && (newQ>oldQ+2 || semanticGain>=8));
  const photoImproved=(mode==='desc')||(!samePhoto && !!candidate.photo);
  if(!descImproved || !photoImproved){
-   if(status)status.textContent='나라·카테고리·항목의 의미를 함께 검사했지만 더 나은 결과를 찾지 못했습니다. 기존 결과를 그대로 유지합니다.';
+   if(status)status.textContent='대상 일치도와 품질을 함께 검사했지만 더 나은 결과를 찾지 못했습니다. 기존 결과를 그대로 유지합니다.';
    const st=box.querySelector('.ns181-new-result'); if(st)st.innerHTML=''; return;
  }
  const stage=box.querySelector('.ns181-new-result');
@@ -3204,7 +3241,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3322,7 +3359,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3380,7 +3417,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3427,7 +3464,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3466,7 +3503,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 })();
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+const CLEAN_VERSION='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3511,7 +3548,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+  const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -3524,7 +3561,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -3558,7 +3595,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -3612,7 +3649,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -3620,7 +3657,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.184 CLEAN MASTER · SEMANTIC QUALITY REFRESH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
