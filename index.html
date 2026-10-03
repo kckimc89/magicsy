@@ -1729,7 +1729,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+const NS9015_VERSION='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2193,7 +2193,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE',
+ version:'MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -3400,7 +3400,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3518,7 +3518,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3566,7 +3566,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
  }
  function syncVersion(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.181'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.190'}catch(_){}
  }
  window.addEventListener('DOMContentLoaded',()=>{syncVersion();setTimeout(syncVersion,80);setTimeout(syncVersion,500);setTimeout(repair,700)});
  window.addEventListener('load',()=>{syncVersion();setTimeout(syncVersion,300)});
@@ -3576,7 +3576,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3616,14 +3616,47 @@ window.__MAGIC_V7_DIAGNOSTIC={
     localStorage.setItem(MARK,'1');
   }catch(_){}
  }
- async function boot(){for(const c of ['ES','JP','US'])for(const s of secs)await migrate(c,s);await ns90180FreshJoshuaTest();try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of secs)await renderSection(s)}catch(_){} }
- function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.181'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+
+ async function ns90190TrueWeakItemReset(){
+  const MARK='magic_ns90190_true_weak_item_reset_done';
+  try{if(localStorage.getItem(MARK)==='1')return}catch(_){}
+  const targets=[
+   ['US','culture','독립기념일'],
+   ['US','art','크리스티나의 세계'],
+   ['ES','culture','세마나 산타'],
+   ['ES','culture','세비야 봄 축제'],
+   ['ES','culture','성모승천']
+  ];
+  const prevCountry=COUNTRY;
+  try{
+   for(const [country,section,name] of targets){
+    COUNTRY=country;
+    const req=v12Request(section,name);
+    const keys=[
+      ns9053ReadyKey(req),
+      ns90154RepKey(section,name,country),
+      'magic_v28_entity_'+req.key,
+      'magic_v15_entity_'+req.key,
+      'magic_v16_entity_'+req.key
+    ];
+    // Older V14 compatibility cache for the exact same request.
+    const legacyKey=['V14-SAFE',req.section,req.kind,req.name].join('|');
+    keys.push('magic_v14_entity_'+legacyKey);
+    for(const k of keys)try{localStorage.removeItem(k)}catch(_){}
+    try{repAvailabilityCache.delete(req.key)}catch(_){}
+   }
+   localStorage.setItem(MARK,'1');
+  }finally{COUNTRY=prevCountry}
+ }
+
+ async function boot(){for(const c of ['ES','JP','US'])for(const s of secs)await migrate(c,s);await ns90180FreshJoshuaTest();await ns90190TrueWeakItemReset();try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of secs)await renderSection(s)}catch(_){} }
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.190'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  boot().catch(e=>console.error('[NS90.176 boot]',e));sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
 })();
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3655,14 +3688,14 @@ window.__MAGIC_V7_DIAGNOSTIC={
  };
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.181'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.190'}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
  }
  sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync); setTimeout(sync,100); setTimeout(sync,700); setInterval(sync,1500);
 })();
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+const CLEAN_VERSION='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3696,82 +3729,18 @@ ns90106AppendCard=async function(section,item){
 };
 function cleanUI(){
  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+CLEAN_VERSION}catch(_){}
- try{document.title='요술방망이 백과사전 · NS90.181 CLEAN MASTER'}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.190 CLEAN MASTER'}catch(_){}
  ['ns90158DiagBtn','ns90158Diag','ns90177Tools','ns90177Diag'].forEach(id=>{try{document.getElementById(id)?.remove()}catch(_){}});
  // Old diagnostic/test floating controls are intentionally absent in CLEAN ENGINE.
  document.querySelectorAll('button').forEach(b=>{const t=(b.textContent||'').trim();if(t.includes('대표상태 진단')||t.includes('새 백과구조 시험')||t.includes('자동재검색 · 진단'))b.remove()});
  try{window.__NS9021_ONE_ENGINE={version:CLEAN_VERSION,engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver; preview/save reuse that result'}}catch(_){}
 }
 cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',cleanUI);setTimeout(cleanUI,200);setTimeout(cleanUI,900);
-})();</script>
-<script>
-/* ===== NS90.189 WEAK-ITEM FRESH TEST =====
-   Only previously weak-description items are reset to WHITE for testing.
-   Saved cards and user data are preserved.
-*/
-(function(){
-  const TARGETS = [
-    '독립기념일',
-    '세마나 산타',
-    '세비야 봄 축제',
-    '성모승천',
-    '크리스티나의 세계'
-  ];
-  const FLAG='ns90.189.weakItemFreshTest.done';
-
-  function norm(v){return String(v||'').replace(/\s+/g,'').toLowerCase();}
-  function isTarget(v){const n=norm(v);return TARGETS.some(x=>n===norm(x));}
-
-  function scrubStore(store){
-    if(!store)return;
-    const dels=[];
-    for(let i=0;i<store.length;i++){
-      const k=store.key(i); if(!k)continue;
-      const lk=k.toLowerCase();
-      if(!/(ready|resolve|search|candidate|preview|cache|verified|result)/.test(lk))continue;
-      if(TARGETS.some(x=>norm(k).includes(norm(x)))) dels.push(k);
-    }
-    dels.forEach(k=>{try{store.removeItem(k)}catch(_){}});
-  }
-
-  function whiten(){
-    document.querySelectorAll('button,[role="button"],.chip,.candidate,.candidate-chip').forEach(el=>{
-      const t=(el.textContent||'').replace(/^[◆◇○●★☆\s]+/,'').trim();
-      if(!isTarget(t))return;
-      if(el.classList.contains('green') || /카드/.test(el.className)) return;
-      el.dataset.ns90189Fresh='1';
-      el.classList.remove('ready','resolved','purple','searched','found','active');
-      el.classList.add('ns90189-white');
-      const txt=(el.textContent||'').trim();
-      if(/^[◆◇●]/.test(txt)) el.textContent='○ '+t;
-    });
-  }
-
-  try{
-    if(!sessionStorage.getItem(FLAG)){
-      scrubStore(localStorage);
-      scrubStore(sessionStorage);
-      sessionStorage.setItem(FLAG,'1');
-    }
-  }catch(_){}
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(whiten,250));
-  else setTimeout(whiten,250);
-  setTimeout(whiten,900);
-})();
-</script>
-<style>
-.ns90189-white{
-  background:#fff !important;
-  color:#444 !important;
-  border-color:#8f8f98 !important;
-}
-</style>
-
-</body></html>
+})();</script></body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+  const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -3784,7 +3753,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -3818,7 +3787,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -3872,7 +3841,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -3880,7 +3849,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.189 CLEAN MASTER · WEAK-ITEM FRESH TEST · AUTO QUALITY GATE · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.190 CLEAN MASTER · TRUE WEAK-ITEM RESET · AUTO QUALITY GATE · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
