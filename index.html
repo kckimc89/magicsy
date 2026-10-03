@@ -1729,7 +1729,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+const NS9015_VERSION='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2193,7 +2193,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE',
+ version:'MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2692,6 +2692,54 @@ async function ns90186ExpandedTitles(section,name,countryName,countryEn){
  return out.slice(0,60);
 }
 
+
+// ===== NS90.188 AUTO QUALITY GATE =====
+// Common rule for every country/category/item.
+// The user does not have to act as an encyclopedia quality tester.
+// A good first result passes immediately. Only a weak result gets one bounded refresh attempt.
+function ns90188QualityEnough(section,name,card){
+  const d=String(card?.desc||'').replace(/\s+/g,' ').trim();
+  if(!d || d.length<95)return false;
+  const countryName=String(countries?.[COUNTRY]?.name||'').trim();
+  const specific=ns90183Specificity(d,name,countryName,section);
+  const semantic=ns90184SemanticScore(d,String(card?.title||''),name,countryName,section);
+  const boiler=/함께 살펴볼 수 있습니다|대표 후보로 함께|다양한 .* 있습니다/.test(d);
+  return !boiler && specific>=12 && semantic>=0;
+}
+function ns90188Timeout(ms){
+  return new Promise(resolve=>setTimeout(()=>resolve(null),ms));
+}
+async function ns90188AutoQuality(section,name,card){
+  if(!card?.desc)return card;
+  if(ns90188QualityEnough(section,name,card)){
+    card.qualityGate='pass-first';
+    return card;
+  }
+  let better=null;
+  try{
+    // One bounded internal refresh only. No endless retry loop.
+    better=await Promise.race([
+      ns90186ContextResolve(section,name,card),
+      ns90188Timeout(4500)
+    ]);
+  }catch(_){}
+  if(better?.desc){
+    const countryName=String(countries?.[COUNTRY]?.name||'').trim();
+    const oldQ=ns90183Specificity(card.desc||'',name,countryName,section)
+      +ns90184SemanticScore(card.desc||'',card.title||'',name,countryName,section);
+    const newQ=ns90183Specificity(better.desc||'',name,countryName,section)
+      +ns90184SemanticScore(better.desc||'',better.title||'',name,countryName,section);
+    if(newQ>oldQ+3 && ns90188QualityEnough(section,name,better)){
+      better.qualityGate='pass-refresh';
+      return better;
+    }
+  }
+  // Keep the resolved identity, but do not pretend the material is high quality.
+  // Preview offers assisted aliases/foreign-name search instead of manual "description repair".
+  card.qualityGate='limited';
+  return card;
+}
+
 // ===== NS90.187 REFRESH CANDIDATE INSPECTOR =====
 // Temporary common diagnostic for quality-refresh only. It does not alter/save cards.
 // Shows what the common search actually returned and why each candidate passed/failed.
@@ -2864,10 +2912,13 @@ function openRepresentativePreview(section,name,verified,panel){
  // Reuse the verified snapshot; do not search a second time.
  const photoChoices=(verified.photos||[verified.photo]).filter(Boolean).slice(0,5);
  if(!photoChoices.length){try{console.debug('[V13] no safe photo for',name)}catch(e){}}
- pv.innerHTML=`<div class="preview-card"><h3>${esc(name)}</h3><p>${esc(verified.desc)}</p><div class="v3-photo-choices">${photoChoices.map((u,i)=>`<label><input type="radio" name="v3photo" value="${esc(u)}" ${i===0?'checked':''}><img src="${esc(u)}" alt=""></label>`).join('')}</div><div class="preview-actions"><button class="rep-save-v5">⭐ 선택한 사진으로 카드 만들기</button><button class="rep-close-v5">닫기</button></div><div style="margin-top:12px;padding-top:10px;border-top:1px dashed #ccd3df"><b>🔄 결과 보완</b><div style="margin-top:8px"><button class="ns181-desc">설명 보완</button> <button class="ns181-photo">사진 다시 찾기</button> <button class="ns181-both">설명+사진 다시 찾기</button></div><div class="ns181-status" style="margin-top:8px;font-size:14px;color:#596273"></div><div class="ns181-new-result"></div></div></div>`;
- pv.querySelector('.ns181-desc').onclick=()=>ns90181QualityRefresh(section,name,verified,'desc',pv);
- pv.querySelector('.ns181-photo').onclick=()=>ns90181QualityRefresh(section,name,verified,'photo',pv);
- pv.querySelector('.ns181-both').onclick=()=>ns90181QualityRefresh(section,name,verified,'both',pv);
+ pv.innerHTML=`<div class="preview-card"><h3>${esc(name)}</h3><p>${esc(verified.desc)}</p><div class="v3-photo-choices">${photoChoices.map((u,i)=>`<label><input type="radio" name="v3photo" value="${esc(u)}" ${i===0?'checked':''}><img src="${esc(u)}" alt=""></label>`).join('')}</div><div class="preview-actions"><button class="rep-save-v5">⭐ 선택한 사진으로 카드 만들기</button><button class="rep-close-v5">닫기</button></div>${verified.qualityGate==='limited'?`<div class="ns188-quality-note" style="margin-top:12px;padding:12px;border:1px dashed #c8ceda;border-radius:12px"><b>🔎 자료를 조금 더 찾아볼 수 있어요</b><p style="margin:7px 0;font-size:14px;color:#596273">자동 보완검색까지 했지만 충분히 좋은 자료를 확보하지 못했습니다. 잠시 후 다시 찾거나, 같은 대상을 가리키는 다른 표현·외국어 이름 후보를 확인해 보세요.</p><button type="button" class="ns188-alias">다른 이름 후보 찾기</button></div>`:''}</div>`;
+ const aliasBtn=pv.querySelector('.ns188-alias');
+ if(aliasBtn)aliasBtn.onclick=async()=>{
+   aliasBtn.disabled=true;aliasBtn.textContent='다른 이름을 찾고 있어요…';
+   try{await v22ShowAssistResults(section,name,pv,name)}
+   catch(e){console.warn('[NS90.188 assisted alias search]',e);aliasBtn.disabled=false;aliasBtn.textContent='다른 이름 후보 찾기';}
+ };
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
  pv.querySelector('.rep-save-v5').onclick=async()=>{
    const a=getCustom(section);
@@ -3245,6 +3296,8 @@ function v16PaintRow(section,row,panel){
      // NS90.18: every category takes the exact same direct path.
      // No category precheck/repair bridge is allowed between a click and the common engine.
      verified=await ONE_CARD_ENGINE.resolve({section:section,name:shown});
+         if(verified?.desc)verified=await ns90188AutoQuality(section,shown,verified);
+     if(verified?.desc)verified=await ns90188AutoQuality(section,shown,verified);
    }catch(e){console.warn('[NS90.18 direct click resolve]',e)}
    b.dataset.busy='0'; b.disabled=false;
    if(verified&&verified.desc){
@@ -3347,7 +3400,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3465,7 +3518,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3523,7 +3576,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3570,7 +3623,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3609,7 +3662,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 })();
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+const CLEAN_VERSION='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3654,7 +3707,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+  const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -3667,7 +3720,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -3701,7 +3754,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -3755,7 +3808,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -3763,7 +3816,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.187 CLEAN MASTER · REFRESH CANDIDATE INSPECTOR · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.188 CLEAN MASTER · AUTO QUALITY GATE · ASSISTED ALIAS SEARCH · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
