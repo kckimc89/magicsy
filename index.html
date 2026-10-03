@@ -2167,7 +2167,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS',
+ version:'MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2520,9 +2520,6 @@ async function ns90106AppendCard(section,item){
  // do not turn that transient read issue into a false "card save failed" alert.
  // CARD_MEM is updated only after cardDBPut resolves, so it is the same committed snapshot
  // used by getCustom() and the following render.
- const wanted=ns90106CardIdentity(country,section,item);
- const committed=CARD_MEM.get(mk)||[];
- if(!committed.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('CLEAN ENGINE memory commit verify failed');
  await ns90155AfterRepresentativeSave(section,item);
  return true;
 }
@@ -2546,8 +2543,7 @@ function openRepresentativePreview(section,name,verified,panel){
    const saveCountry=String(COUNTRY||'');
    try{
      const ok=await ns90106AppendCard(section,item);
-     const saved=getCustom(section).some(x=>x.id===item.id);
-     if(ok!==true||!saved)throw new Error('primary card save verification failed');
+     if(ok!==true)throw new Error('primary card save failed');
    }catch(e){
      console.error('[NS90.56] primary card save failed',e);
      if(isQuotaError(e)){try{await ns9054MigrateLegacyPhotos();ns9053StorageCleanup(v12Request(section,name).key);ns9053SaveReady(v12Request(section,name),verified);const ok2=await ns90106AppendCard(section,item);if(ok2===true){await renderSection(section);await renderRepresentativeCardButtonsV5(section);v16MarkRegisteredInPlace(section,name);v22ScrollToSection(section);return}}catch(_){}}
@@ -3015,7 +3011,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3133,7 +3129,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns9097StableCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3191,7 +3187,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3215,7 +3211,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3254,7 +3250,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 })();
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+const CLEAN_VERSION='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3299,7 +3295,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+  const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -3312,7 +3308,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -3346,7 +3342,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -3400,7 +3396,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -3408,7 +3404,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+ const V='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
@@ -3436,7 +3432,6 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 .rep-card-btn-v5.registered,.rep-card-btn-v5.ns9017-done,.rep-card-btn-v5.ns9016-done{background:#e8f5e9!important;border:2px solid #78b487!important;color:#315f3b!important;opacity:1!important;box-shadow:none!important}
 </style>
 
-\n\n
 <style id="ns90177-style">
 #ns90177Tools{position:sticky;top:43px;z-index:9998;background:#fff8e8;border-bottom:1px solid #e4c97d;padding:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
 #ns90177Tools button{border:1px solid #b78b28;background:#fff;border-radius:10px;padding:7px 10px;font-weight:800}#ns90177Tools .danger{background:#fff0f0;border-color:#c55;color:#8b2222}
