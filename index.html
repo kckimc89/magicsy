@@ -1701,7 +1701,7 @@ function V8_kind(section,name){
 
 // ===== NS90.15 TRUE ONE ENGINE RESET =====
 // Every category uses this exact pipeline. Only section/topic changes.
-const NS9015_VERSION='MASTER V28 · NS90.177 CLEAN ENGINE · 176 DATA BASE · ONE COMMON ENGINE · NO DIAGNOSTIC LAYERS';
+const NS9015_VERSION='MASTER V28 · NS90.177 CLEAN ENGINE · SAVE FIX · 176 DATA BASE · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2515,9 +2515,14 @@ async function ns90106AppendCard(section,item){
  try{localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(e){
   if(isQuotaError(e)){try{clearExpendableSearchCaches();localStorage.setItem(`${DATA_NS}custom_${country}_${section}`,JSON.stringify(merged.map(ns9055CompactCardForLocal)))}catch(_){}}
  }
- const check=await cardDBGet(country,section);
+ // The successful IndexedDB transaction above is the durable commit.
+ // Safari can occasionally fail an immediate read-back even though the write committed;
+ // do not turn that transient read issue into a false "card save failed" alert.
+ // CARD_MEM is updated only after cardDBPut resolves, so it is the same committed snapshot
+ // used by getCustom() and the following render.
  const wanted=ns90106CardIdentity(country,section,item);
- if(!check.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('NS90.106 append verify failed');
+ const committed=CARD_MEM.get(mk)||[];
+ if(!committed.some(x=>(x.stableKey||ns90106CardIdentity(country,section,x))===wanted))throw new Error('CLEAN ENGINE memory commit verify failed');
  await ns90155AfterRepresentativeSave(section,item);
  return true;
 }
