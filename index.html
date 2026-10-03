@@ -1729,7 +1729,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+const NS9015_VERSION='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2193,7 +2193,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE',
+ version:'MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -2659,6 +2659,63 @@ function ns90185QuerySet(section,name,countryName,countryEn){
   countryEn?`${countryEn} ${name}`:'', countryEn?`${countryEn} ${name} history date`:'',
  ].filter(Boolean);
 }
+// ===== NS90.186 SEARCH EXPANSION + DIFFERENCE CHECK =====
+// Common refresh path for every country/category/item. No item-name exception table.
+function ns90186Tokens(s){return normalizeItemName(String(s||'')).split(/\s+/).filter(x=>x.length>1)}
+function ns90186TextSimilarity(a,b){
+ const A=new Set(ns90186Tokens(a)),B=new Set(ns90186Tokens(b)); if(!A.size||!B.size)return 0;
+ let n=0; for(const x of A)if(B.has(x))n++; return n/Math.max(A.size,B.size);
+}
+function ns90186MeaningfulDifference(current,candidate,mode){
+ const od=String(current?.desc||''), nd=String(candidate?.desc||'');
+ const op=ns90183PhotoKey(current?.photo||((current?.photos||[])[0])||'');
+ const np=ns90183PhotoKey(candidate?.photo||((candidate?.photos||[])[0])||'');
+ const descDifferent=ns90186TextSimilarity(od,nd)<0.88;
+ const photoDifferent=!!np && np!==op;
+ if(mode==='desc')return descDifferent;
+ if(mode==='photo')return photoDifferent;
+ return descDifferent||photoDifferent;
+}
+async function ns90186ExpandedTitles(section,name,countryName,countryEn){
+ const base=ns90185QuerySet(section,name,countryName,countryEn), out=[], seen=new Set();
+ const add=t=>{t=String(t||'').trim();if(t&&!seen.has(t)){seen.add(t);out.push(t)}};
+ // Pass 1: normal semantic queries.
+ for(const q of base){let rows=[];try{rows=await wikiSearchTitle(q,'ko')}catch(_){};(rows||[]).slice(0,8).forEach(add)}
+ // Pass 2: use identities discovered by pass 1 as expansion terms. This is generic:
+ // the engine learns aliases/qualified titles from search itself rather than a hand-made item table.
+ const seeds=out.slice(0,12);
+ for(const seed of seeds){
+   for(const q of [`${countryName} ${seed}`,`${seed} ${ns90184SemanticHints(section)}`,countryEn?`${countryEn} ${seed}`:'']){
+     if(!q)continue;let rows=[];try{rows=await wikiSearchTitle(q,'ko')}catch(_){};(rows||[]).slice(0,6).forEach(add)
+   }
+ }
+ return out.slice(0,60);
+}
+async function ns90186ContextResolve(section,name,current){
+ const countryName=String(countries?.[COUNTRY]?.name||'').trim(), countryEn=String(countries?.[COUNTRY]?.en||'').trim();
+ const topic=oneTopic(section,name), titles=await ns90186ExpandedTitles(section,name,countryName,countryEn);
+ const oldDesc=String(current?.desc||'').replace(/\s+/g,' ').trim();
+ const oldPhoto=String(current?.photo||((current?.photos||[])[0])||''), oldPhotoKey=ns90183PhotoKey(oldPhoto);
+ let best=null,bestScore=-999;
+ for(const title of titles){
+   let pg=null;try{pg=await onePage(title)}catch(_){} if(!pg||pg.missing!==undefined)continue;
+   const raw=String(pg.extract||'').replace(/\s+/g,' ').trim();if(raw.length<55)continue;
+   const target=ns90185TargetMatch(raw,title,name,countryName,section); if(target.score<20)continue;
+   const typeScore=sharedTypeFit(topic.kind,title,raw);if(typeScore<=0)continue;
+   const desc=v13CardDescription(raw,name,topic.kind); if(!desc)continue;
+   let photo=String(pg.thumbnail?.source||pg.original?.source||'');
+   if(!photo){try{const qid=pg.pageprops?.wikibase_item||'';if(qid){const ents=await V3_wd([qid]);const fn=V3_claim(ents?.[qid],'P18')[0];if(fn)photo=await V3_fileUrl(fn)}}catch(_){}}
+   const samePhoto=photo&&oldPhotoKey&&ns90183PhotoKey(photo)===oldPhotoKey;
+   const sim=ns90186TextSimilarity(oldDesc,desc);
+   // A refresh must add information or a genuinely different photo. Near-duplicates are not proposals.
+   if(sim>=0.94 && (!photo||samePhoto))continue;
+   const spec=ns90183Specificity(desc,name,countryName,section), sem=ns90184SemanticScore(desc,title,name,countryName,section);
+   let score=spec+sem+target.score+ns90182NameScore(name,title,countryName)+typeScore+(sim<0.82?12:0)+(photo&&!samePhoto?8:0);
+   if(score>bestScore){bestScore=score;best={name,title,resolvedName:title,entityId:String(pg.pageprops?.wikibase_item||''),pageId:pg.pageid||'',desc,photo,photos:photo?[photo]:[],sources:['NS90.186 common search expansion'],section,kind:topic.kind,qualityRefresh:true,qualityScore:score}}
+ }
+ return best;
+}
+
 // Same CLEAN resolver, but refresh candidates are ranked and weak duplicates are rejected.
 // Generic rule only: country + section + item identity; no item-specific exceptions.
 function ns90183Specificity(desc,name,countryName,section){
@@ -2713,13 +2770,13 @@ async function ns90183ContextResolve(section,name,current){
 async function ns90182FreshResolve(section,name,current){
  const req=v12Request(section,name); repAvailabilityCache.delete(req.key);
  // Do not destroy the accepted READY snapshot. Refresh is a parallel proposal only.
- let fresh=null;try{fresh=await ns90183ContextResolve(section,name,current)}catch(e){}
- if(!fresh){try{fresh=await ns90182ContextResolve(section,name)}catch(e){}}
+ let fresh=null;try{fresh=await ns90186ContextResolve(section,name,current)}catch(e){}
+ if(!fresh){try{fresh=await ns90183ContextResolve(section,name,current)}catch(e){}}
  return fresh&&fresh.desc?fresh:null;
 }
 async function ns90181QualityRefresh(section,name,current,mode,box){
  const status=box.querySelector('.ns181-status');
- if(status)status.textContent='🔎 대상 일치도까지 확인하며 보완 검색하고 있어요…';
+ if(status)status.textContent='🔎 검색 의미를 확장하고 기존 결과와 차이까지 검사하고 있어요…';
  let fresh=null;try{fresh=await ns90182FreshResolve(section,name,current)}catch(e){}
  if(!fresh){if(status)status.textContent='더 나은 새 결과를 찾지 못했습니다. 기존 결과는 그대로 유지합니다.';return;}
  const oldPhoto=String(current.photo||((current.photos||[])[0])||'');
@@ -2736,8 +2793,10 @@ async function ns90181QualityRefresh(section,name,current,mode,box){
  const oldQ=ns90183Specificity(current.desc||'',name,countryName,section);
  const newQ=ns90183Specificity(candidate.desc||'',name,countryName,section);
  const semanticGain=ns90184SemanticScore(candidate.desc||'',candidate.title||'',name,countryName,section)-ns90184SemanticScore(current.desc||'',current.title||'',name,countryName,section);
+ const meaningfulDifferent=ns90186MeaningfulDifference(current,candidate,mode);
  const descImproved=(mode==='photo')||(!sameDesc && (newQ>oldQ+2 || semanticGain>=8));
  const photoImproved=(mode==='desc')||(!samePhoto && !!candidate.photo);
+ if(!meaningfulDifferent){if(status)status.textContent='기존 결과와 실질적으로 같은 결과라서 보완 후보로 표시하지 않습니다.';const st=box.querySelector('.ns181-new-result');if(st)st.innerHTML='';return;}
  if(!descImproved || !photoImproved){
    if(status)status.textContent='대상 일치도와 품질을 함께 검사했지만 더 나은 결과를 찾지 못했습니다. 기존 결과를 그대로 유지합니다.';
    const st=box.querySelector('.ns181-new-result'); if(st)st.innerHTML=''; return;
@@ -3241,7 +3300,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3359,7 +3418,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3417,7 +3476,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3464,7 +3523,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3503,7 +3562,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 })();
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+const CLEAN_VERSION='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3548,7 +3607,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+  const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -3561,7 +3620,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -3595,7 +3654,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -3649,7 +3708,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -3657,7 +3716,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.185 CLEAN MASTER · TARGET MATCH QUALITY · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.186 CLEAN MASTER · SEARCH EXPANSION + DIFFERENCE CHECK · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
