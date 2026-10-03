@@ -4082,6 +4082,60 @@ sync197();document.addEventListener('DOMContentLoaded',()=>{sync197();setTimeout
 window.__NS90197={version:V,principle:'pass1 all importance names first; only then pass2 gray items with same-entity aliases; successful assisted retry becomes purple; unresolved stays gray'};
 })();
 </script>
+
+<script id="ns90198-direct-add-visible-bridge">
+/* NS90.198 — Direct Add is a first-class exploration path.
+   It uses its own visible preview holder because the old duplicate representative
+   card-maker panel is intentionally hidden by the one-board UI. */
+(()=>{
+const V='MASTER V28 · NS90.198 CLEAN MASTER · TWO PASS SEARCH · PRIORITY SEARCH · DIRECT ADD CONNECTED · ONE COMMON ENGINE';
+function ns90198Holder(section){
+ const sec=document.getElementById(section); if(!sec)return null;
+ let holder=sec.querySelector('.ns198-direct-add-holder');
+ if(!holder){
+  holder=document.createElement('div');
+  holder.className='rep-card-panel-v5 ns198-direct-add-holder';
+  holder.dataset.country=String(COUNTRY||'');
+  holder.innerHTML='<div class="rep-preview-v5"></div>';
+  const add=sec.querySelector('.add-btn');
+  if(add&&add.parentNode) add.insertAdjacentElement('afterend',holder); else sec.appendChild(holder);
+ }
+ holder.style.setProperty('display','block','important');
+ holder.style.marginTop='10px';
+ return holder;
+}
+// Direct Add always opens a real, visible assisted-name stage.
+v18ManualAssist=async function(section,name){
+ const original=cardInputName(name); if(!original)return;
+ const holder=ns90198Holder(section),pv=holder?.querySelector('.rep-preview-v5');
+ if(!pv)return alert('직접 항목추가 화면을 준비하지 못했습니다.');
+ holder.scrollIntoView({behavior:'smooth',block:'nearest'});
+ return v22ShowAssistResults(section,original,pv,original);
+};
+// Keep the same-entity candidate engine from 196, but resolve inside the visible Direct Add holder.
+ns90196ResolveSelected=async function(section,original,c,pv){
+ pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(c.label)}</b> 이름으로 자료를 찾고 있어요…</div>`;
+ let v=null;try{v=await ONE_CARD_ENGINE.resolve({section:String(section),name:cardInputName(c.query)})}catch(e){console.warn('[NS90.198 direct add resolve]',e)}
+ if(v?.desc){
+  try{v=await ns90188AutoQuality(section,original,v)}catch(_){}
+  v={...v,searchAlias:c.query,representativeName:original};
+  const holder=pv.closest('.rep-card-panel-v5')||ns90198Holder(section);
+  openRepresentativePreview(section,original,v,holder);
+  return;
+ }
+ pv.innerHTML=`<div class="preview-card"><h3>${esc(c.label)}</h3><p>이 이름으로는 충분한 카드 자료를 찾지 못했습니다.</p><button class="ns196-back">← 이름 후보 다시 보기</button> <button class="rep-close-v5">닫기</button></div>`;
+ pv.querySelector('.ns196-back').onclick=()=>v22ShowAssistResults(section,original,pv,original);
+ pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
+};
+function sync(){
+ try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.198'}catch(_){}
+ try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+}
+sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,250);setInterval(sync,1800);
+window.__NS90198={version:V,directAdd:'visible same-entity candidate -> selected-name search -> preview -> save; independent from one representative board'};
+})();
+</script>
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
