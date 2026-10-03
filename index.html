@@ -1698,8 +1698,14 @@ function V8_kind(section,name){
  if(section==='food')return 'food';
  if(section==='fruit')return 'fruit';
  if(section==='animals'){
-  return ['나무','라벤더','대나무','소나무','삼나무','세쿼이아','레드우드','선인장','메이플','매화']
-    .some(x=>String(name).includes(x))?'plant':'animal';
+  // CLEAN common classification: use the one shared plant-identity vocabulary,
+  // including aliases, instead of maintaining a second hard-coded detector here.
+  const raw=String(name||'').trim();
+  let names=[raw];
+  try{if(typeof V3_aliases==='function')names.push(...V3_aliases(raw))}catch(_){}
+  const plantWords=[...(CATEGORY_FIRST_RULES?.plantIdentityWords||[]),'나무','라벤더','대나무','소나무','삼나무','세쿼이아','레드우드','선인장','메이플','매화'];
+  const isPlant=names.some(n=>plantWords.some(w=>String(n).includes(w)));
+  return isPlant?'plant':'animal';
  }
  if(section==='places')return 'place';
  if(section==='culture')return 'culture';
@@ -1719,7 +1725,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+const NS9015_VERSION='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2185,7 +2191,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST',
+ version:'MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -3033,7 +3039,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3151,7 +3157,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3199,7 +3205,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
  }
  function syncVersion(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.179'}catch(_){}
  }
  window.addEventListener('DOMContentLoaded',()=>{syncVersion();setTimeout(syncVersion,80);setTimeout(syncVersion,500);setTimeout(repair,700)});
  window.addEventListener('load',()=>{syncVersion();setTimeout(syncVersion,300)});
@@ -3209,7 +3215,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3226,40 +3232,37 @@ window.__MAGIC_V7_DIAGNOSTIC={
  ns9055SetCustomDurable=async function(s,a){setCustom(s,a);const c=String(COUNTRY||''),clean=dedupe(c,s,a);for(const x of clean)await put(c,s,x);return true};
  ns90106AppendCard=async function(s,item){const c=String(COUNTRY||''),b=bucket(c,s);if(!READY.has(b))await migrate(c,s);const cur=(MEM.get(b)||[]).map(x=>({...x})),k=ident(c,s,item);if(cur.some(x=>ident(c,s,x)===k))throw new Error('same representative already exists');const fresh={...item,id:newItemId(),stableKey:k};await put(c,s,fresh);cur.push(fresh);MEM.set(b,cur);item.id=fresh.id;item.stableKey=k;await ns90155AfterRepresentativeSave(s,item);return true};
  ns9096DeleteDurable=async function(s,id){const c=String(COUNTRY||''),b=bucket(c,s);if(!READY.has(b))await migrate(c,s);const cur=MEM.get(b)||[],i=cur.findIndex(x=>String(x.id)===String(id));if(i<0)return cur;await del(c,s,id);const next=cur.filter((_,n)=>n!==i);MEM.set(b,next.map(x=>({...x})));return next};
- async function ns90178FreshPlantTest(){
-  const MARK='magic_ns90178_fresh_plant_test_done';
+ async function ns90179FreshJoshuaTest(){
+  const MARK='magic_ns90179_fresh_joshua_test_done';
   try{if(localStorage.getItem(MARK)==='1')return}catch(_){}
-  const targets=new Set(['레드우드','캘리포니아레드우드','슈거메이플','슈가메이플','조슈아트리']);
-  // Remove only the three test cards from the US animals/plant section.
+  const target='조슈아트리';
   const b=bucket('US','animals');
   if(!READY.has(b))await migrate('US','animals');
   const cur=(MEM.get(b)||[]).map(x=>({...x}));
-  const drop=cur.filter(x=>targets.has(cardInputName(x.name)));
+  const drop=cur.filter(x=>cardInputName(x.name)===target);
   for(const x of drop)await del('US','animals',x.id);
-  MEM.set(b,cur.filter(x=>!targets.has(cardInputName(x.name))).map(x=>({...x})));
-  // Clear only READY/search/cache traces for the same three representatives.
+  MEM.set(b,cur.filter(x=>cardInputName(x.name)!==target).map(x=>({...x})));
+  // Clear only Joshua-tree READY/search/cache traces. Other cards and READY data stay untouched.
   try{
-    const words=['레드우드','캘리포니아레드우드','슈거메이플','슈가메이플','조슈아트리','Coast redwood','Sugar maple','Joshua tree','Sequoia sempervirens','Acer saccharum','Yucca brevifolia'];
+    const words=['조슈아트리','조슈아 트리','Joshua tree','Yucca brevifolia'];
     const rm=[];
     for(let i=0;i<localStorage.length;i++){
       const k=String(localStorage.key(i)||''); let v=''; try{v=String(localStorage.getItem(k)||'')}catch(_){}
       if(words.some(w=>k.includes(w)||v.includes(w)))rm.push(k);
     }
     rm.forEach(k=>localStorage.removeItem(k));
-    localStorage.removeItem(ns90154RepKey('animals','레드우드','US'));
-    localStorage.removeItem(ns90154RepKey('animals','슈거메이플','US'));
-    localStorage.removeItem(ns90154RepKey('animals','조슈아트리','US'));
+    try{localStorage.removeItem(ns90154RepKey('animals',target,'US'))}catch(_){}
     localStorage.setItem(MARK,'1');
   }catch(_){}
  }
- async function boot(){for(const c of ['ES','JP','US'])for(const s of secs)await migrate(c,s);await ns90178FreshPlantTest();try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of secs)await renderSection(s)}catch(_){} }
- function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
+ async function boot(){for(const c of ['ES','JP','US'])for(const s of secs)await migrate(c,s);await ns90179FreshJoshuaTest();try{if(!document.getElementById('detail').classList.contains('hidden'))for(const s of secs)await renderSection(s)}catch(_){} }
+ function sync(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.179'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  boot().catch(e=>console.error('[NS90.176 boot]',e));sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
 })();
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3291,14 +3294,14 @@ window.__MAGIC_V7_DIAGNOSTIC={
  };
  function sync(){
    try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
-   try{document.title='요술방망이 백과사전 · NS90.178'}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.179'}catch(_){}
    try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
  }
  sync(); document.addEventListener('DOMContentLoaded',sync); window.addEventListener('load',sync); setTimeout(sync,100); setTimeout(sync,700); setInterval(sync,1500);
 })();
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+const CLEAN_VERSION='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3332,7 +3335,7 @@ ns90106AppendCard=async function(section,item){
 };
 function cleanUI(){
  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+CLEAN_VERSION}catch(_){}
- try{document.title='요술방망이 백과사전 · NS90.178 CLEAN MASTER'}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.179 CLEAN MASTER'}catch(_){}
  ['ns90158DiagBtn','ns90158Diag','ns90177Tools','ns90177Diag'].forEach(id=>{try{document.getElementById(id)?.remove()}catch(_){}});
  // Old diagnostic/test floating controls are intentionally absent in CLEAN ENGINE.
  document.querySelectorAll('button').forEach(b=>{const t=(b.textContent||'').trim();if(t.includes('대표상태 진단')||t.includes('새 백과구조 시험')||t.includes('자동재검색 · 진단'))b.remove()});
@@ -3343,7 +3346,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+  const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -3356,7 +3359,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -3390,7 +3393,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -3444,7 +3447,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -3452,7 +3455,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.178 CLEAN MASTER · ONE COMMON ENGINE · SAVE KEY FIX · 3-ITEM FRESH TEST';
+ const V='MASTER V28 · NS90.179 CLEAN MASTER · COMMON PLANT CLASSIFIER · SAVE KEY FIX · JOSHUA FRESH TEST';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
