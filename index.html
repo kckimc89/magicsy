@@ -7166,3 +7166,63 @@ if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90120_VERSION
  sync();window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
 })();
 </script>
+
+<script id="ns90200-best-preview-ready-commit">
+/* NS90.200 — BEST PREVIEW READY COMMIT
+   1) A first successful preview is committed immediately.
+   2) A preview with a real photo upgrades an earlier text-only/guide READY snapshot.
+   3) Once a photo-backed preview exists, later guide/text-only results cannot downgrade it.
+   4) Reopening READY reuses the best stored preview; no automatic card save. */
+(()=>{
+ const V='MASTER V28 · NS90.200 · 176 BASE · BEST PREVIEW READY COMMIT · TEST RESET · NO AUTO CARD SAVE · ONE MASTER';
+ const oldSave=ns9053SaveReady;
+ function hasPhoto(v){return !!String(v?.photo||v?.photoRemote||((Array.isArray(v?.photos)&&v.photos[0])||'')).trim()}
+ function compact(v){try{return ns9053CompactVerified(v)}catch(_){return v}}
+ ns9053SaveReady=function(req,v){
+   const incoming=compact(v); if(!incoming||!String(incoming.desc||'').trim())return false;
+   let old=null;try{old=JSON.parse(localStorage.getItem(ns9053ReadyKey(req))||'null')}catch(_){}
+   // Never downgrade a good photo-backed preview to a guide/text-only result.
+   if(old&&String(old.desc||'').trim()&&hasPhoto(old)&&!hasPhoto(incoming))return true;
+   // A real preview must be allowed to upgrade a previously cached guide result even
+   // when the preview came from the DOM and therefore has no entityId yet.
+   if(hasPhoto(incoming)&&(!old||!hasPhoto(old))){
+     try{localStorage.setItem(ns9053ReadyKey(req),JSON.stringify(incoming));return true}catch(_){}
+   }
+   return oldSave(req,incoming);
+ };
+ function repaint(section,name,snap){
+   try{ns90154MarkSearched(section,name,COUNTRY)}catch(_){}
+   try{const st=v16State(section),n=cardInputName(name);for(const r of st.rows.values())if(cardInputName(r.name)===n||cardInputName(r.resolvedName||'')===n){r.ok=true;r.verified=snap;r.pending=false}}catch(_){}
+   try{
+     if(typeof ns9067SavedForRepresentative==='function'&&ns9067SavedForRepresentative(section,name))return;
+     const sec=document.getElementById(section),n=cardInputName(name);if(!sec)return;
+     for(const b of sec.querySelectorAll('.rep-card-btn-v5')){
+       const bn=String(b.textContent||'').replace(/^[◆○…]\s*/,'').trim();
+       if(cardInputName(bn)===n){b.textContent='◆ '+n;b.className='rep-card-btn-v5 verified-ready';b.disabled=false;b.title='검색 확인 완료 · 눌러서 미리보기를 다시 엽니다.'}
+     }
+   }catch(_){}
+ }
+ const oldOpen=openRepresentativePreview;
+ openRepresentativePreview=function(section,name,verified,panel){
+   let use=verified, stored=null;try{stored=ns9053LoadReady(v12Request(section,name))}catch(_){}
+   // Prefer the richer stored preview only when it has a photo and the new result does not.
+   if(stored&&hasPhoto(stored)&&!hasPhoto(use))use=stored;
+   const out=oldOpen.call(this,section,name,use,panel);
+   try{
+     if(use&&String(use.desc||'').trim()){
+       ns9053SaveReady(v12Request(section,name),use);
+       const best=ns9053LoadReady(v12Request(section,name))||use;
+       repaint(section,name,best);
+       queueMicrotask(()=>repaint(section,name,ns9053LoadReady(v12Request(section,name))||best));
+     }
+   }catch(_){}
+   return out;
+ };
+ function sync(){
+   try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
+   try{document.title='요술방망이 백과사전 · NS90.200'}catch(_){}
+   try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
+ }
+ sync();window.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,100);setTimeout(sync,700);setInterval(sync,1500);
+})();
+</script>
