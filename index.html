@@ -4956,4 +4956,78 @@ window.__NS90219={version:RELEASE219,rule:'user-added registry survives independ
 })();
 </script>
 
+
+
+<!-- NS90.220 FINAL: iPad Safari refresh restores the current encyclopedia screen once, from session state. -->
+<script id="ns90220-ipad-refresh-owner">
+(()=>{
+'use strict';
+const RELEASE220='MASTER V28 · NS90.220 CLEAN RELEASE · IPAD REFRESH RESTORE · USER-ADDED BOARD SURVIVES DELETE · TWO PASS SEARCH · ONE COMMON ENGINE';
+const STATE_KEY='magic_ns90220_view_state';
+let restoring220=false;
+function read220(){try{return JSON.parse(sessionStorage.getItem(STATE_KEY)||'null')}catch(_){return null}}
+function write220(extra={}){
+ try{
+  const detail=document.getElementById('detail');
+  const inDetail=!!(detail&&!detail.classList.contains('hidden'));
+  const old=read220()||{};
+  sessionStorage.setItem(STATE_KEY,JSON.stringify({...old,view:inDetail?'detail':'home',country:inDetail?String(COUNTRY||old.country||''):'',scrollY:Math.max(0,Math.round(window.scrollY||0)),...extra,at:Date.now()}));
+ }catch(_){}
+}
+function clearDetail220(){try{sessionStorage.setItem(STATE_KEY,JSON.stringify({view:'home',country:'',scrollY:0,at:Date.now()}))}catch(_){} }
+function repaint220(){
+ try{if(typeof renderCountryOverviews==='function')renderCountryOverviews()}catch(_){}
+ try{if(Array.isArray(REP_SECTIONS))REP_SECTIONS.forEach(s=>{try{if(typeof v26RefreshOverviewRep==='function')v26RefreshOverviewRep(s)}catch(_){};try{if(typeof paint219==='function')paint219(s)}catch(_){}})}catch(_){}
+}
+function restore220(reason){
+ if(restoring220)return;
+ const st=read220();
+ if(!st||st.view!=='detail'||!st.country||!countries?.[st.country])return;
+ restoring220=true;
+ try{
+   // openCountry is the single authoritative renderer. Calling it again is intentional:
+   // Safari may restore an old visual snapshot after the normal load event.
+   openCountry(st.country);
+   repaint220();
+   const y=Number(st.scrollY)||0;
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{try{window.scrollTo(0,y)}catch(_){}}));
+   setTimeout(()=>{repaint220();try{window.scrollTo(0,y)}catch(_){}},180);
+   setTimeout(()=>{repaint220();try{window.scrollTo(0,y)}catch(_){}},650);
+ }catch(e){console.warn('[NS90.220 restore]',reason,e)}
+ finally{setTimeout(()=>{restoring220=false},750)}
+}
+// Remember the exact country before the normal renderer runs.
+try{
+ const baseOpen220=openCountry;
+ openCountry=function(code){
+   try{sessionStorage.setItem(STATE_KEY,JSON.stringify({view:'detail',country:String(code||''),scrollY:0,at:Date.now()}))}catch(_){}
+   const r=baseOpen220.apply(this,arguments);
+   setTimeout(repaint220,0);setTimeout(repaint220,160);
+   return r;
+ };
+}catch(_){}
+// Back-to-list is an explicit user action, so refresh should stay on the list afterwards.
+try{
+ const back=document.getElementById('backBtn');
+ if(back)back.addEventListener('click',()=>clearDetail220(),true);
+}catch(_){}
+let scrollTimer220=0;
+window.addEventListener('scroll',()=>{clearTimeout(scrollTimer220);scrollTimer220=setTimeout(()=>write220(),120)},{passive:true});
+window.addEventListener('pagehide',()=>write220());
+window.addEventListener('beforeunload',()=>write220());
+function boot220(){restore220('boot');setTimeout(()=>restore220('late-boot'),260)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot220,{once:true});else boot220();
+window.addEventListener('load',()=>{restore220('load');setTimeout(()=>restore220('late-load'),420)},{once:true});
+window.addEventListener('pageshow',e=>{restore220(e.persisted?'bfcache-pageshow':'pageshow');setTimeout(()=>restore220('late-pageshow'),500)});
+function release220(){
+ try{const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+RELEASE220;b.style.position='static';b.dataset.release='NS90.220'}}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.220'}catch(_){}
+ try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=RELEASE220}catch(_){}
+}
+release220();setTimeout(release220,0);setTimeout(release220,300);setTimeout(release220,1200);
+const mo220=new MutationObserver(()=>{const b=document.getElementById('ns9015Banner');if(b&&(b.dataset.release!=='NS90.220'||b.textContent!=='✅ '+RELEASE220)){b.textContent='✅ '+RELEASE220;b.dataset.release='NS90.220'}});
+try{mo220.observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+window.__NS90220={version:RELEASE220,rule:'iPad Safari refresh/pageshow restores the current country detail and redraws saved/prepared boards from session state'};
+})();
+</script>
 </body></html>
