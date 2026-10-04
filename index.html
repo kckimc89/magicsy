@@ -1729,7 +1729,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const NS9015_VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2193,7 +2193,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE',
+ version:'MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -3409,7 +3409,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3527,7 +3527,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3585,7 +3585,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3666,7 +3666,7 @@ async function ns90190TrueWeakItemReset(){
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3709,7 +3709,7 @@ async function ns90190TrueWeakItemReset(){
 window.__NS90191_ASSISTED_NAME_STAGE = v22ShowAssistResults;
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const CLEAN_VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3810,7 +3810,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
    Layer 3: direct add = optional exploration with SAME-ENTITY aliases only.
 */
 (()=>{
-const NS90195_VERSION='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const NS90195_VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 const NS90195_PREP=new Map();
 function ns90195CandidateNames(section){return parseRepNames(repTextFor(section),section).map(n=>v28RepresentativeName(section,n));}
 function ns90195Photo(v){return String(v?.photo||((Array.isArray(v?.photos)&&v.photos[0])||''));}
@@ -3938,7 +3938,7 @@ window.__NS90195={version:NS90195_VERSION,principle:'overview=importance; card-m
 
 <script id="ns90196-direct-add-repair">
 (()=>{
-const NS90196_VERSION='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const NS90196_VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 
 function ns90196Norm(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}}
 function ns90196Words(section){
@@ -4004,7 +4004,7 @@ v18ManualAssist=async function(section,name){
  if(!pv)return alert('직접 항목추가 화면을 준비하지 못했습니다.');
  return v22ShowAssistResults(section,name,pv,name);
 };
-function sync196(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+NS90196_VERSION}catch(_){}try{document.title='요술방망이 백과사전 · NS90.202'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90196_VERSION}catch(_){}}
+function sync196(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+NS90196_VERSION}catch(_){}try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90196_VERSION}catch(_){}}
 sync196();document.addEventListener('DOMContentLoaded',sync196);window.addEventListener('load',sync196);setTimeout(sync196,200);setInterval(sync196,1600);
 window.__NS90196={version:NS90196_VERSION,directAdd:'same-entity candidate stage repaired; original remains searchable; related entities excluded'};
 })();
@@ -4017,7 +4017,7 @@ window.__NS90196={version:NS90196_VERSION,directAdd:'same-entity candidate stage
            priority in pass 1. Purple always means prepared material is already cached.
 */
 (()=>{
-const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 const P2='magic_ns90197_pass2|';
 const p2key=(c,s,n)=>P2+[c,s,cardInputName(n)].join('|');
 const norm=v=>{try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}};
@@ -4077,7 +4077,7 @@ const oldRenderBoard=renderBoard;renderBoard=function(section){const x=oldRender
    if(p2running&&pending2)pr.textContent += ` · 2차 보완검색 ${pending2}`;
  }
 }catch(_){}return x};
-function sync197(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.202'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){} }
+function sync197(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){} }
 sync197();document.addEventListener('DOMContentLoaded',()=>{sync197();setTimeout(startPass2WhenIdle,800)});window.addEventListener('load',()=>{sync197();setTimeout(startPass2WhenIdle,1200)});
 window.__NS90197={version:V,principle:'pass1 all importance names first; only then pass2 gray items with same-entity aliases; successful assisted retry becomes purple; unresolved stays gray'};
 })();
@@ -4088,7 +4088,7 @@ window.__NS90197={version:V,principle:'pass1 all importance names first; only th
    It uses its own visible preview holder because the old duplicate representative
    card-maker panel is intentionally hidden by the one-board UI. */
 (()=>{
-const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 function ns90198Holder(section){
  const sec=document.getElementById(section); if(!sec)return null;
  let holder=sec.querySelector('.ns198-direct-add-holder');
@@ -4129,7 +4129,7 @@ ns90196ResolveSelected=async function(section,original,c,pv){
 };
 function sync(){
  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
- try{document.title='요술방망이 백과사전 · NS90.202'}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}
  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
 }
 sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,250);setInterval(sync,1800);
@@ -4138,7 +4138,7 @@ window.__NS90198={version:V,directAdd:'visible same-entity candidate -> selected
 </script>
 \n<script id="ns90199-smart-direct-add">
 (()=>{
-const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 function N(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\\s+/g,'')}}
 function sectionKo(s){return ({food:'음식',fruit:'과일',animals:'동식물',places:'명소',culture:'문화',singers:'가수',athletes:'운동선수',people:'역사인물',art:'예술작품'})[s]||''}
 function countryKo(){try{return countries?.[COUNTRY]?.name||({JP:'일본',ES:'스페인',US:'미국'})[COUNTRY]||''}catch(_){return ''}}
@@ -4190,7 +4190,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(cs.length<=1)pv.querySelector('.ns199-note').textContent='도움이 되는 다른 후보를 찾지 못했습니다. 입력한 이름으로 검색해볼 수 있습니다.';
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
 };
-function sync(){try{document.querySelectorAll('.add-btn').forEach(b=>b.textContent='항목 추가')}catch(_){}try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.202'}catch(_){}}
+function sync(){try{document.querySelectorAll('.add-btn').forEach(b=>b.textContent='항목 추가')}catch(_){}try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}}
 sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,250);setInterval(sync,1800);
 window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related concrete candidates; shared with gray pass 2'};
 })();
@@ -4202,7 +4202,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
 </style>
 <script id="ns90202-relation-gated-direct-add">
 (()=>{
-const VERSION='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 function N(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}}
 function SK(s){return ({food:'음식',fruit:'과일',animals:'동식물',places:'명소',culture:'문화',singers:'가수',athletes:'운동선수',people:'역사인물',art:'예술작품'})[s]||''}
 function CK(){try{return countries?.[COUNTRY]?.name||''}catch(_){return ''}}
@@ -4252,16 +4252,104 @@ ns90196ResolveSelected=async function(section,original,cand,pv){
  // Never disappear after a selection: always leave a visible result and a way back.
  pv.innerHTML=`<div class="preview-card"><h3>${esc(cand.label)}</h3><p>같은 대상을 가리키는 다른 이름까지 확인했지만 이번에는 충분한 카드 자료를 찾지 못했습니다.</p><button class="ns202-back">← 후보 다시 보기</button> <button class="rep-close-v5">닫기</button></div>`;pv.querySelector('.ns202-back').onclick=()=>v22ShowAssistResults(section,original,pv,original);pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
 };
-function sync202(){try{const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static'}}catch(_){}try{document.title='요술방망이 백과사전 · NS90.202'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=VERSION}catch(_){}}
+function sync202(){try{const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static'}}catch(_){}try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=VERSION}catch(_){}}
 sync202();document.addEventListener('DOMContentLoaded',sync202);window.addEventListener('load',()=>setTimeout(sync202,100));setInterval(sync202,2000);
 window.__NS90202={version:VERSION,principle:'country+category first; direct-relation gate before candidates; selected candidate keeps context and same-entity aliases through card resolution; selection never vanishes'};
 })();
 </script>
+
+<style id="ns90203-style">
+.ns203-direct-panel{margin:12px 0 18px;padding:0;background:transparent}
+.ns203-direct-panel .rep-preview-v5{display:block!important}
+</style>
+<script id="ns90203-stable-direct-add-session">
+(()=>{
+const VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
+const sessions=new Map();
+function sid(section){return String(COUNTRY||'')+'|'+String(section||'')}
+function ensurePanel(section){
+ const sec=document.getElementById(section); if(!sec)return null;
+ let panel=sec.querySelector('.ns203-direct-panel');
+ if(!panel){
+   panel=document.createElement('div');
+   panel.className='ns203-direct-panel rep-card-panel-v5 ns195-preview-holder';
+   panel.innerHTML='<div class="rep-preview-v5"></div>';
+   const add=sec.querySelector('.add-btn');
+   if(add)add.insertAdjacentElement('afterend',panel); else sec.appendChild(panel);
+ }
+ let pv=panel.querySelector('.rep-preview-v5');
+ if(!pv){pv=document.createElement('div');pv.className='rep-preview-v5';panel.appendChild(pv)}
+ return {sec,panel,pv};
+}
+function alive(section,token){const x=ensurePanel(section);return x&&sessions.get(sid(section))?.token===token?x:null}
+function show(section,html,token){const x=alive(section,token);if(!x)return null;x.pv.innerHTML=html;return x.pv}
+async function stableCandidates(section,original){
+ try{return await ns90200Candidates(section,original)}catch(e){console.warn('[NS90.203 candidates]',e);return [{label:original,query:original,why:'입력한 이름',kind:'input'}]}
+}
+async function showCandidates(section,name,originName){
+ const original=cardInputName(originName||name); if(!original)return;
+ const token=(sessions.get(sid(section))?.token||0)+1;
+ sessions.set(sid(section),{token,original,state:'candidates'});
+ show(section,`<div class="preview-card">🔎 <b>${esc(original)}</b>의 후보를 찾고 있어요…</div>`,token);
+ let cs=[];try{cs=await stableCandidates(section,original)}catch(_){}
+ const pv=show(section,`<div class="preview-card"><h3>🔎 검색에 도움이 되는 후보</h3><p>현재 나라와 카테고리에서 <b>${esc(original)}</b>과 직접 관련된 이름을 골라 보여줍니다.</p><div class="ns203-candidates"></div><p class="note ns203-note"></p><button class="rep-close-v5">닫기</button></div>`,token);
+ if(!pv)return;
+ const host=pv.querySelector('.ns203-candidates');
+ if(!cs.length)cs=[{label:original,query:original,why:'입력한 이름',kind:'input'}];
+ for(const cand of cs){
+   const b=document.createElement('button');b.className='rep-card-btn-v5 can-make';b.textContent=cand.label+(cand.why?' · '+cand.why:'');host.appendChild(b);
+   b.onclick=()=>resolveSelected(section,original,cand,token);
+ }
+ if(cs.length<=1)pv.querySelector('.ns203-note').textContent='다른 후보를 찾지 못했습니다. 입력한 이름으로 검색할 수 있습니다.';
+ pv.querySelector('.rep-close-v5').onclick=()=>{sessions.delete(sid(section));const x=ensurePanel(section);if(x)x.pv.innerHTML=''};
+}
+async function resolveSelected(section,original,cand,parentToken){
+ const token=parentToken+1;sessions.set(sid(section),{token,original,cand,state:'searching'});
+ show(section,`<div class="preview-card">🔎 <b>${esc(cand.label)}</b> 자료를 찾고 있어요…<p class="note">검색이 끝날 때까지 이 화면은 그대로 유지됩니다.</p></div>`,token);
+ let v=null,err=null;
+ try{
+   v=await Promise.race([
+     ONE_CARD_ENGINE.resolve({section:String(section),name:cardInputName(cand.query||cand.label)}),
+     new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),18000))
+   ]);
+ }catch(e){err=e;console.warn('[NS90.203 direct add resolve]',e)}
+ // Recreate the panel if any country/category renderer replaced it while await was running.
+ const x=alive(section,token);if(!x)return;
+ if(v?.desc){
+   try{v=await ns90188AutoQuality(section,cand.label,v)}catch(_){}
+   const display=cardInputName(cand.kind==='related'?cand.label:original);
+   v={...v,searchAlias:String(cand.query||cand.label),representativeName:display};
+   try{putAdded(section,display,{searchAlias:v.searchAlias})}catch(_){}
+   try{ns9053SaveReady(v12Request(section,display),v)}catch(_){}
+   const y=alive(section,token);if(!y)return;
+   try{openRepresentativePreview(section,display,v,y.panel)}catch(e){
+     y.pv.innerHTML=`<div class="preview-card"><h3>${esc(display)}</h3><p>${esc(v.desc||'')}</p><p class="note">자료는 찾았지만 미리보기를 여는 중 문제가 생겼습니다.</p><button class="ns203-back">← 후보 다시 보기</button></div>`;
+     y.pv.querySelector('.ns203-back').onclick=()=>showCandidates(section,original,original);
+   }
+   setTimeout(()=>{try{v26RefreshOverviewRep(section);renderRepresentativeCardButtonsV5(section);paintAdded(section)}catch(_){};ensurePanel(section)},80);
+   return;
+ }
+ const msg=err&&String(err.message)==='timeout'?'검색 시간이 길어 이번 검색을 마쳤습니다. 다른 후보로 다시 찾아볼 수 있습니다.':'이 이름으로는 충분한 카드 자료를 찾지 못했습니다.';
+ const pv=show(section,`<div class="preview-card"><h3>${esc(cand.label)}</h3><p>${esc(msg)}</p><button class="ns203-back">← 후보 다시 보기</button> <button class="rep-close-v5">닫기</button></div>`,token);
+ if(!pv)return;pv.querySelector('.ns203-back').onclick=()=>showCandidates(section,original,original);pv.querySelector('.rep-close-v5').onclick=()=>{sessions.delete(sid(section));pv.innerHTML=''};
+}
+// These are the only Direct Add entry points from this version onward.
+v22ShowAssistResults=async function(section,name,pv,originName){return showCandidates(section,name,originName||name)};
+v18ManualAssist=async function(section,name){return showCandidates(section,name,name)};
+// Keep a live Direct Add session visible even when background representative-board rendering runs.
+const observer=new MutationObserver(()=>{for(const [k,s] of sessions){const [country,section]=k.split('|');if(country!==String(COUNTRY||''))continue;const x=ensurePanel(section);if(x&&!x.pv.innerHTML&&s.state==='searching')x.pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(s.cand?.label||s.original)}</b> 자료를 찾고 있어요…</div>`;}});
+try{observer.observe(document.body,{childList:true,subtree:true})}catch(_){}
+function sync(){try{const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static'}}catch(_){}try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=VERSION}catch(_){} }
+sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setInterval(sync,2000);
+window.__NS90203={version:VERSION,principle:'Direct Add owns a persistent section panel. candidate -> searching -> preview/failure/timeout; background rendering cannot silently erase the session.'};
+})();
+</script>
+
 </body></html>
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+  const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -4274,7 +4362,7 @@ window.__NS90202={version:VERSION,principle:'country+category first; direct-rela
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -4308,7 +4396,7 @@ window.__NS90202={version:VERSION,principle:'country+category first; direct-rela
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -4362,7 +4450,7 @@ window.__NS90202={version:VERSION,principle:'country+category first; direct-rela
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -4370,7 +4458,7 @@ window.__NS90202={version:VERSION,principle:'country+category first; direct-rela
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
@@ -4425,7 +4513,7 @@ window.__NS90202={version:VERSION,principle:'country+category first; direct-rela
    Clicking white/gray promotes that item to the next search position.
 */
 (()=>{
-const V='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 const FAIL='magic_ns90195_fail|';
 const queue=[];const queued=new Set();let working=false,current='';
 const key=(country,section,name)=>[country,section,cardInputName(name)].join('|');
@@ -4527,7 +4615,7 @@ window.__NS90195={version:V,principle:'one importance-name board; white->purple/
 </style>
 <script id="ns90200-context-direct-add">
 (()=>{
-const VERSION='MASTER V28 · NS90.202 CLEAN MASTER · RELATION-GATED DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const VERSION='MASTER V28 · NS90.203 CLEAN MASTER · STABLE DIRECT ADD SESSION · RELATION-GATED SEARCH · TWO PASS SEARCH · ONE COMMON ENGINE';
 const ADD_PREFIX='magic_ns90200_added|';
 function norm(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}}
 function addedKey(section,country=String(COUNTRY||'')){return ADD_PREFIX+country+'|'+section}
@@ -4592,7 +4680,7 @@ ns90196ResolveSelected=async function(section,original,cand,pv){
 function paintAdded(section){const sec=document.getElementById(section);if(!sec)return;const adds=getAdded(section);sec.querySelectorAll('.ns195-chip').forEach(b=>{const txt=String(b.textContent||'').replace(/^[○◆●✓…＋+]+\s*/,'').replace(/\s*\+$/,'').trim();if(!adds.some(x=>norm(x.name)===norm(txt)))return;b.classList.add(b.classList.contains('saved')?'user-added-saved':'user-added-ready');if(!b.textContent.includes('＋'))b.textContent='＋ '+txt;b.title=(b.title?b.title+' · ':'')+'항목 추가로 찾은 항목';});}
 function paintAll(){try{REP_SECTIONS.forEach(paintAdded)}catch(_){}}
 const oldRender=window.renderRepresentativeCardButtonsV5;if(typeof oldRender==='function')window.renderRepresentativeCardButtonsV5=async function(section){const r=await oldRender(section);paintAdded(section);return r};
-function sync(){const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static';const h=document.getElementById('header');if(h&&b.previousElementSibling!==h)h.insertAdjacentElement('afterend',b)}try{document.title='요술방망이 백과사전 · NS90.202'}catch(_){}try{document.querySelectorAll('.add-btn').forEach(x=>x.textContent='항목 추가')}catch(_){}paintAll()}
+function sync(){const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static';const h=document.getElementById('header');if(h&&b.previousElementSibling!==h)h.insertAdjacentElement('afterend',b)}try{document.title='요술방망이 백과사전 · NS90.203'}catch(_){}try{document.querySelectorAll('.add-btn').forEach(x=>x.textContent='항목 추가')}catch(_){}paintAll()}
 sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',()=>{sync();setTimeout(sync,200)});setInterval(sync,1800);
 window.__NS90200={version:VERSION,principle:'context-first direct add; partial-name and broad-term discovery; successful user discoveries persist on board; user-added color survives card deletion; banner below navigation'};
 })();
