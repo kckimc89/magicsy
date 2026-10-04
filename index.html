@@ -1729,7 +1729,7 @@ function ns177CleanCardKey(country,section,name){
  n=String(n||raw).trim().toLowerCase().replace(/\s+/g,' ');
  return [c,s,n].join('|');
 }
-const NS9015_VERSION='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const NS9015_VERSION='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 const NS9051_STATE_RULE='saved=green; verified-ready=purple; unverified=white; delete-card=>verified-ready';
 const ONE_TOPIC_ADAPTER={
  food:{kind:'food',ko:'음식'}, fruit:{kind:'fruit',ko:'과일'},
@@ -2193,7 +2193,7 @@ async function oneResolve(section,name,forcedKind=''){
  return {name:clean,title:finalName,resolvedName:finalName,entityId:best.p.pageprops?.wikibase_item||'',pageId:best.p.pageid||'',desc:cardDesc,photo,photos:photo?[photo]:[],sources:['NS90.39 검색 복구 기준 · NS90.33 검증 나라 연결 + NS90.30 풍부한 한국어 설명 + NS90.29 한국어 미리보기 보장 + NS90.28 한국어 설명 브리지 + NS90.27 안전 카드 품질 게이트 + NS90.26 다국어 동일대상 브리지'],score:bestScore,section,kind:topic.kind,qualityGate:{identity:true,type:true,description:true,photo:true,koreanPreview:true,countryContext:true,countryContextVerified}};
 }
 const ONE_CARD_ENGINE={
- version:'MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE',
+ version:'MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE',
  async resolve(input){return await oneResolve(input.section,input.name,input.kind||'')}
 };
 async function sharedResolve(name,type,section=''){return await ONE_CARD_ENGINE.resolve({section:section||type,name,kind:type})}
@@ -3409,7 +3409,7 @@ openCountry=function(code){
  return r;
 };
 
-window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
+window.__NS9021_ONE_ENGINE={version:'MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE',engine:ONE_CARD_ENGINE,rule:'country + section + name -> exactly one resolver'};
 window.__MAGIC_V7_DIAGNOSTIC={
  engine:'tested V3 core',
  lessonV23:'Fushimi/Yutoku: representative quality tie-break + exact selected-page photo binding',
@@ -3527,7 +3527,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 <!-- NS90.176: repair stale stableKey collisions by deriving identity from the card's current name. -->
 <script id="ns90167-card-identity-repair">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  function actualKey(country,section,x){
    const n=String(x?.name||x?.entityTitle||'').trim();
    try{return ns177CleanCardKey(country,section,n)}catch(_){return [String(country||COUNTRY||''),String(section||''),normalizeItemName(n)].join('|')}
@@ -3585,7 +3585,7 @@ window.__MAGIC_V7_DIAGNOSTIC={
 </script>
 <script id="ns90170-record-store">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  const DB='magic_wand_cards_ns171', STORE='card_records', MEM=new Map(), READY=new Set();
  const secs=['food','animals','fruit','places','culture','singers','athletes','people','art'];
  const oldGet=getCustom, oldSet=setCustom;
@@ -3666,7 +3666,7 @@ async function ns90190TrueWeakItemReset(){
 </script>
 <script id="ns90171-nondestructive-save">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  // New rule: ordinary save/update may NEVER remove an existing card.
  // Only ns9096DeleteDurable is allowed to remove a card.
  function mergeKeepExisting(section,incoming){
@@ -3709,7 +3709,7 @@ async function ns90190TrueWeakItemReset(){
 window.__NS90191_ASSISTED_NAME_STAGE = v22ShowAssistResults;
 </script>
 <script id="ns90177-clean-engine">(()=>{
-const CLEAN_VERSION='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const CLEAN_VERSION='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 // ONE resolver only: the original common oneResolve-backed ONE_CARD_ENGINE from the base.
 // No resolver wrapping, no category-specific second engine, no retry wrapper.
 async function cleanResolve(section,name){
@@ -3810,7 +3810,7 @@ cleanUI();addEventListener('DOMContentLoaded',cleanUI);addEventListener('load',c
    Layer 3: direct add = optional exploration with SAME-ENTITY aliases only.
 */
 (()=>{
-const NS90195_VERSION='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const NS90195_VERSION='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 const NS90195_PREP=new Map();
 function ns90195CandidateNames(section){return parseRepNames(repTextFor(section),section).map(n=>v28RepresentativeName(section,n));}
 function ns90195Photo(v){return String(v?.photo||((Array.isArray(v?.photos)&&v.photos[0])||''));}
@@ -3938,7 +3938,7 @@ window.__NS90195={version:NS90195_VERSION,principle:'overview=importance; card-m
 
 <script id="ns90196-direct-add-repair">
 (()=>{
-const NS90196_VERSION='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const NS90196_VERSION='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 
 function ns90196Norm(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}}
 function ns90196Words(section){
@@ -4004,7 +4004,7 @@ v18ManualAssist=async function(section,name){
  if(!pv)return alert('직접 항목추가 화면을 준비하지 못했습니다.');
  return v22ShowAssistResults(section,name,pv,name);
 };
-function sync196(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+NS90196_VERSION}catch(_){}try{document.title='요술방망이 백과사전 · NS90.200'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90196_VERSION}catch(_){}}
+function sync196(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+NS90196_VERSION}catch(_){}try{document.title='요술방망이 백과사전 · NS90.201'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=NS90196_VERSION}catch(_){}}
 sync196();document.addEventListener('DOMContentLoaded',sync196);window.addEventListener('load',sync196);setTimeout(sync196,200);setInterval(sync196,1600);
 window.__NS90196={version:NS90196_VERSION,directAdd:'same-entity candidate stage repaired; original remains searchable; related entities excluded'};
 })();
@@ -4017,7 +4017,7 @@ window.__NS90196={version:NS90196_VERSION,directAdd:'same-entity candidate stage
            priority in pass 1. Purple always means prepared material is already cached.
 */
 (()=>{
-const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 const P2='magic_ns90197_pass2|';
 const p2key=(c,s,n)=>P2+[c,s,cardInputName(n)].join('|');
 const norm=v=>{try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}};
@@ -4077,7 +4077,7 @@ const oldRenderBoard=renderBoard;renderBoard=function(section){const x=oldRender
    if(p2running&&pending2)pr.textContent += ` · 2차 보완검색 ${pending2}`;
  }
 }catch(_){}return x};
-function sync197(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.200'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){} }
+function sync197(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.201'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){} }
 sync197();document.addEventListener('DOMContentLoaded',()=>{sync197();setTimeout(startPass2WhenIdle,800)});window.addEventListener('load',()=>{sync197();setTimeout(startPass2WhenIdle,1200)});
 window.__NS90197={version:V,principle:'pass1 all importance names first; only then pass2 gray items with same-entity aliases; successful assisted retry becomes purple; unresolved stays gray'};
 })();
@@ -4088,7 +4088,7 @@ window.__NS90197={version:V,principle:'pass1 all importance names first; only th
    It uses its own visible preview holder because the old duplicate representative
    card-maker panel is intentionally hidden by the one-board UI. */
 (()=>{
-const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 function ns90198Holder(section){
  const sec=document.getElementById(section); if(!sec)return null;
  let holder=sec.querySelector('.ns198-direct-add-holder');
@@ -4129,7 +4129,7 @@ ns90196ResolveSelected=async function(section,original,c,pv){
 };
 function sync(){
  try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}
- try{document.title='요술방망이 백과사전 · NS90.200'}catch(_){}
+ try{document.title='요술방망이 백과사전 · NS90.201'}catch(_){}
  try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}
 }
 sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,250);setInterval(sync,1800);
@@ -4138,7 +4138,7 @@ window.__NS90198={version:V,directAdd:'visible same-entity candidate -> selected
 </script>
 \n<script id="ns90199-smart-direct-add">
 (()=>{
-const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 function N(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\\s+/g,'')}}
 function sectionKo(s){return ({food:'음식',fruit:'과일',animals:'동식물',places:'명소',culture:'문화',singers:'가수',athletes:'운동선수',people:'역사인물',art:'예술작품'})[s]||''}
 function countryKo(){try{return countries?.[COUNTRY]?.name||({JP:'일본',ES:'스페인',US:'미국'})[COUNTRY]||''}catch(_){return ''}}
@@ -4190,7 +4190,7 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(cs.length<=1)pv.querySelector('.ns199-note').textContent='도움이 되는 다른 후보를 찾지 못했습니다. 입력한 이름으로 검색해볼 수 있습니다.';
  pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
 };
-function sync(){try{document.querySelectorAll('.add-btn').forEach(b=>b.textContent='항목 추가')}catch(_){}try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.200'}catch(_){}}
+function sync(){try{document.querySelectorAll('.add-btn').forEach(b=>b.textContent='항목 추가')}catch(_){}try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{document.title='요술방망이 백과사전 · NS90.201'}catch(_){}}
 sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,250);setInterval(sync,1800);
 window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related concrete candidates; shared with gray pass 2'};
 })();
@@ -4199,7 +4199,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
 <!-- NS90.130: exact NS90.120 proven ONE MASTER baseline restore. No search/resolver logic added. -->
 <script>
 (()=>{
-  const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+  const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
   try{
     const b=document.getElementById('ns9015Banner');
     if(b) b.textContent='✅ '+V;
@@ -4212,7 +4212,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
 <!-- NS90.134: version sync + Spain person-card tidy. Locked core/fallback logic unchanged. -->
 <script id="ns90134-version-sync-spain-card-tidy">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  const ES_ORDER={
   singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
   athletes:['라파엘 나달','카를로스 알카라스','안드레스 이니에스타','사비 에르난데스','이케르 카시야스','파우 가솔','페르난도 알론소'],
@@ -4246,7 +4246,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
 <!-- NS90.135: country data cleanup only. Search engine is intentionally untouched. -->
 <script id="ns90135-country-data-cleanup-only">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  const DATA={
   ES:{
    singers:['훌리오 이글레시아스','엔리케 이글레시아스','로살리아','알레한드로 산스','파코 데 루시아','플라시도 도밍고','몬세라트 카바예'],
@@ -4300,7 +4300,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
 <!-- NS90.137 final visible version sync; no search logic changes. -->
 <script id="ns90138-final-version-sync">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  function sync138(){try{const b=document.getElementById('ns9015Banner');if(b)b.textContent='✅ '+V}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=V}catch(_){}}
  sync138(); setTimeout(sync138,0); setTimeout(sync138,300); setTimeout(sync138,1500); setTimeout(sync138,3500);
 })();
@@ -4308,7 +4308,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
 <!-- NS90.140: iOS Safari ↔ Home Screen transfer bridge. Search engine untouched. -->
 <script id="ns90140-ios-transfer-bridge">
 (()=>{
- const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+ const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
  const SKIP=new Set(['magic_ns90137_run_after_refresh']);
  function appKey(k){return k==='encyclopedia_title'||k==='country_favorites'||k.startsWith('magic_')||k.startsWith(DATA_NS)}
  function exportLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(appKey(k)&&!SKIP.has(k))o[k]=localStorage.getItem(k)}return o}
@@ -4363,7 +4363,7 @@ window.__NS90199={version:V,directAdd:'same-entity aliases + broad-query related
    Clicking white/gray promotes that item to the next search position.
 */
 (()=>{
-const V='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const V='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 const FAIL='magic_ns90195_fail|';
 const queue=[];const queued=new Set();let working=false,current='';
 const key=(country,section,name)=>[country,section,cardInputName(name)].join('|');
@@ -4465,7 +4465,7 @@ window.__NS90195={version:V,principle:'one importance-name board; white->purple/
 </style>
 <script id="ns90200-context-direct-add">
 (()=>{
-const VERSION='MASTER V28 · NS90.200 CLEAN MASTER · CONTEXT DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
+const VERSION='MASTER V28 · NS90.201 CLEAN MASTER · CONTEXT-FIRST DIRECT ADD · TWO PASS SEARCH · ONE COMMON ENGINE';
 const ADD_PREFIX='magic_ns90200_added|';
 function norm(v){try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}}
 function addedKey(section,country=String(COUNTRY||'')){return ADD_PREFIX+country+'|'+section}
@@ -4474,7 +4474,7 @@ function putAdded(section,name,meta={}){name=cardInputName(name);if(!name)return
 function isAdded(section,name){return getAdded(section).some(x=>norm(x.name)===norm(name))}
 function sectionKo(s){return ({food:'음식',fruit:'과일',animals:'동식물',places:'명소',culture:'문화',singers:'가수',athletes:'운동선수',people:'역사인물',art:'예술작품'})[s]||''}
 function countryKo(){try{return countries?.[COUNTRY]?.name||''}catch(_){return ''}}
-function words(section){return ({food:['음식','요리','국','탕','면','밥','덮밥','라멘','수프','소스','된장','미소','장어','dish','food','cuisine','soup'],fruit:['과일','열매','fruit','citrus','berry'],animals:['동물','식물','나무','새','물고기','animal','plant','tree','bird','fish'],places:['장소','도시','건축','사원','공원','산','place','city','building','temple','park'],culture:['문화','축제','전통','스포츠','culture','festival','tradition','sport'],singers:['가수','음악가','singer','musician'],athletes:['선수','athlete','player'],people:['인물','사람','person','politician'],art:['그림','회화','작품','미술','painting','artwork','sculpture']})[section]||[]}
+function words(section){return ({food:['음식','요리','국','탕','면','밥','덮밥','라멘','수프','소스','된장','dish','food','cuisine','soup'],fruit:['과일','열매','fruit','citrus','berry'],animals:['동물','식물','나무','새','물고기','animal','plant','tree','bird','fish'],places:['장소','도시','건축','사원','공원','산','place','city','building','temple','park'],culture:['문화','축제','전통','스포츠','culture','festival','tradition','sport'],singers:['가수','음악가','singer','musician'],athletes:['선수','athlete','player'],people:['인물','사람','person','politician'],art:['그림','회화','작품','미술','painting','artwork','sculpture']})[section]||[]}
 async function wd(q,lang='ko',limit=10){try{const u='https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encodeURIComponent(q)+'&language='+lang+'&uselang='+lang+'&type=item&limit='+limit+'&format=json&origin=*';const r=await fetch(u);if(r.ok)return (await r.json()).search||[]}catch(_){}return []}
 async function wiki(q,limit=10){try{const u='https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(q)+'&srlimit='+limit+'&srnamespace=0&format=json&origin=*';const r=await fetch(u);if(r.ok)return (await r.json()).query?.search||[]}catch(_){}return []}
 function broadInfo(name){const raw=String(name||'').trim(),ends=['요리','음식','문화','예술','작품','음악','스포츠','운동','선수','가수','인물','명소','관광지','과일','동물','식물','축제'];for(const x of ends)if(raw.endsWith(x)&&raw.length>x.length)return {broad:true,base:raw.slice(0,-x.length).trim()};return {broad:false,base:raw}}
@@ -4483,18 +4483,31 @@ async function ns90200Candidates(section,name){
  const original=cardInputName(name),out=[],seen=new Set(),bi=broadInfo(original),c=countryKo(),sk=sectionKo(section);
  const add=(label,why,kind='same',score=0)=>{label=String(label||'').replace(/\s*[-–—|].*$/,'').trim();const k=norm(label);if(!label||!k||seen.has(k)||label.length>45)return;seen.add(k);out.push({label,query:label,why,kind,score})};
  add(original,'입력한 이름','input',999);
- // First try an exact entity, but only trust it when it fits the current category. This prevents 미소 -> smile.
+ // Context-first: names already known in this country's current category are the strongest clue
+ // when the user remembers only part of a name (e.g. a prefix/keyword).
+ try{
+   const known=importanceNames(section)||[];
+   const on=norm(original),bn=norm(bi.base);
+   for(const k0 of known){
+     const k=cardInputName(k0),kn=norm(k);
+     if(!k||kn===on)continue;
+     if((on&&kn.includes(on))||(bn&&bn!==on&&kn.includes(bn))) add(k,'현재 항목에서 찾은 관련 이름','related',95);
+   }
+ }catch(_){}
+ // Then try an exact entity, but only trust it when its meaning fits the current category.
  const rows=[...(await wd(original,'ko',10))];if(!rows.length)rows.push(...await wd(original,'en',10));
  const n=norm(original);const ranked=rows.map((x,i)=>{const lab=norm(x.label),mat=norm(x.match?.text),d=String(x.description||'');let s=(lab===n?80:0)+(mat===n?60:0)+(lab&&n&&(lab.includes(n)||n.includes(lab))?15:0)+categoryScore(section,x.label,d)-i;return{x,s,cat:categoryScore(section,x.label,d)}}).sort((a,b)=>b.s-a.s);
  const best=ranked[0];let trusted=!!(best&&best.x?.id&&best.cat>0);
  if(trusted){try{const u='https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+encodeURIComponent(best.x.id)+'&props=labels|aliases&languages=ko|en|ja|es&format=json&origin=*';const r=await fetch(u);if(r.ok){const e=(await r.json()).entities?.[best.x.id];if(e){if(e.labels?.ko?.value)add(e.labels.ko.value,'한국어 이름');for(const a of (e.aliases?.ko||[]).slice(0,4))add(a.value,'한국어 다른 이름');if(COUNTRY==='JP'&&e.labels?.ja?.value)add(e.labels.ja.value,'일본어 이름');if(COUNTRY==='ES'&&e.labels?.es?.value)add(e.labels.es.value,'스페인어 이름');if(e.labels?.en?.value)add(e.labels.en.value,'영어 이름')}}}catch(_){} }
  // If input is broad OR exact meaning does not fit the category, search by country+category+input as a discovery helper.
  if(bi.broad||!trusted||out.length<3){
-   const qs=[`${c} ${sk} ${original}`,`${c} ${original} ${sk}`,bi.base&&bi.base!==original?`${c} ${sk} ${bi.base}`:''].filter(Boolean);
+   const qs=[`${c} ${sk} ${original}`,`${c} ${original} ${sk}`,`${sk} ${original} ${c}`,bi.base&&bi.base!==original?`${c} ${sk} ${bi.base}`:''].filter(Boolean);
    const cand=[];
-   for(const q of qs){for(const x of await wiki(q,10)){const label=String(x.title||'').replace(/\s*\([^)]*\)\s*$/,'').trim(),snippet=String(x.snippet||'').replace(/<[^>]+>/g,' ');let s=categoryScore(section,label,snippet);if(label.includes(original)||snippet.includes(original))s+=18;if(bi.base&&(label.includes(bi.base)||snippet.includes(bi.base)))s+=12;if(c&&(snippet.includes(c)||label.includes(c)))s+=5;if(s>=10)cand.push({label,s})}if(cand.length>=12)break}
-   for(const q of qs.slice(0,2)){for(const x of await wd(q,'ko',10)){const label=String(x.label||''),desc=String(x.description||'');let s=categoryScore(section,label,desc);if(label.includes(original)||desc.includes(original))s+=18;if(bi.base&&(label.includes(bi.base)||desc.includes(bi.base)))s+=12;if(c&&(desc.includes(c)||label.includes(c)))s+=5;if(s>=10)cand.push({label,s})}}
-   cand.sort((a,b)=>b.s-a.s);for(const x of cand.slice(0,12))add(x.label,'관련 세부항목','related',x.s);
+   for(const q of qs){for(const x of await wiki(q,10)){const label=String(x.title||'').replace(/\s*\([^)]*\)\s*$/,'').trim(),snippet=String(x.snippet||'').replace(/<[^>]+>/g,' ');let s=categoryScore(section,label,snippet);if(label.includes(original)||snippet.includes(original))s+=28;if(bi.base&&(label.includes(bi.base)||snippet.includes(bi.base)))s+=18;if(c&&(snippet.includes(c)||label.includes(c)))s+=8;if(section==='food'&&/(요리|음식|국|탕|면|밥|덮밥|라멘|수프|구이|소스|料理|丼|汁)/i.test(label+' '+snippet))s+=18;if(s>=18)cand.push({label,s})}if(cand.length>=12)break}
+   for(const q of qs.slice(0,2)){for(const x of await wd(q,'ko',10)){const label=String(x.label||''),desc=String(x.description||'');let s=categoryScore(section,label,desc);if(label.includes(original)||desc.includes(original))s+=28;if(bi.base&&(label.includes(bi.base)||desc.includes(bi.base)))s+=18;if(c&&(desc.includes(c)||label.includes(c)))s+=8;if(section==='food'&&/(요리|음식|국|탕|면|밥|덮밥|라멘|수프|구이|소스|料理|丼|汁)/i.test(label+' '+desc))s+=18;if(s>=18)cand.push({label,s})}}
+   cand.sort((a,b)=>b.s-a.s);
+   const badFood=/(웃음|미소짓|smile|smiling|grin|도시|거리|영화|노래|앨범|인물|목|과|강|산맥)/i;
+   for(const x of cand){if(section==='food'&&badFood.test(x.label))continue;add(x.label,'관련 세부항목','related',x.s);if(out.length>=10)break}
  }
  return out.slice(0,10);
 }
@@ -4510,15 +4523,15 @@ v22ShowAssistResults=async function(section,name,pv,originName){
  if(cs.length<=1)pv.querySelector('.ns200-note').textContent='도움이 되는 후보를 찾지 못했습니다. 입력한 이름으로 검색해볼 수 있습니다.';pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
 };
 ns90196ResolveSelected=async function(section,original,cand,pv){
- pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(cand.label)}</b> 이름으로 자료를 찾고 있어요…</div>`;let v=null;try{v=await ONE_CARD_ENGINE.resolve({section:String(section),name:cardInputName(cand.query)})}catch(e){console.warn('[NS90.200 direct add]',e)}
+ pv.innerHTML=`<div class="preview-card">🔎 <b>${esc(cand.label)}</b> 이름으로 자료를 찾고 있어요…</div>`;let v=null;try{v=await ONE_CARD_ENGINE.resolve({section:String(section),name:cardInputName(cand.query)})}catch(e){console.warn('[NS90.201 direct add]',e)}
  if(v?.desc){try{v=await ns90188AutoQuality(section,cand.label,v)}catch(_){}const display=(cand.kind==='related'?cardInputName(cand.label):cardInputName(original));v={...v,searchAlias:cand.query,representativeName:display};putAdded(section,display,{searchAlias:cand.query});try{ns9053SaveReady(v12Request(section,display),v)}catch(_){}const holder=pv.closest('.rep-card-panel-v5')||document.getElementById(section);openRepresentativePreview(section,display,v,holder);setTimeout(()=>{try{v26RefreshOverviewRep(section);renderRepresentativeCardButtonsV5(section);paintAdded(section)}catch(_){}},60);return}
  pv.innerHTML=`<div class="preview-card"><h3>${esc(cand.label)}</h3><p>이 이름으로는 충분한 카드 자료를 찾지 못했습니다.</p><button class="ns200-back">← 후보 다시 보기</button> <button class="rep-close-v5">닫기</button></div>`;pv.querySelector('.ns200-back').onclick=()=>v22ShowAssistResults(section,original,pv,original);pv.querySelector('.rep-close-v5').onclick=()=>pv.innerHTML='';
 };
 function paintAdded(section){const sec=document.getElementById(section);if(!sec)return;const adds=getAdded(section);sec.querySelectorAll('.ns195-chip').forEach(b=>{const txt=String(b.textContent||'').replace(/^[○◆●✓…＋+]+\s*/,'').replace(/\s*\+$/,'').trim();if(!adds.some(x=>norm(x.name)===norm(txt)))return;b.classList.add(b.classList.contains('saved')?'user-added-saved':'user-added-ready');if(!b.textContent.includes('＋'))b.textContent='＋ '+txt;b.title=(b.title?b.title+' · ':'')+'항목 추가로 찾은 항목';});}
 function paintAll(){try{REP_SECTIONS.forEach(paintAdded)}catch(_){}}
 const oldRender=window.renderRepresentativeCardButtonsV5;if(typeof oldRender==='function')window.renderRepresentativeCardButtonsV5=async function(section){const r=await oldRender(section);paintAdded(section);return r};
-function sync(){const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static';const h=document.getElementById('header');if(h&&b.previousElementSibling!==h)h.insertAdjacentElement('afterend',b)}try{document.title='요술방망이 백과사전 · NS90.200'}catch(_){}try{document.querySelectorAll('.add-btn').forEach(x=>x.textContent='항목 추가')}catch(_){}paintAll()}
+function sync(){const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+VERSION;b.style.position='static';const h=document.getElementById('header');if(h&&b.previousElementSibling!==h)h.insertAdjacentElement('afterend',b)}try{document.title='요술방망이 백과사전 · NS90.201'}catch(_){}try{document.querySelectorAll('.add-btn').forEach(x=>x.textContent='항목 추가')}catch(_){}paintAll()}
 sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',()=>{sync();setTimeout(sync,200)});setInterval(sync,1800);
-window.__NS90200={version:VERSION,principle:'context-aware direct add; successful user discoveries persist on board; user-added color survives card deletion; banner below navigation'};
+window.__NS90200={version:VERSION,principle:'context-first direct add; partial-name and broad-term discovery; successful user discoveries persist on board; user-added color survives card deletion; banner below navigation'};
 })();
 </script>
