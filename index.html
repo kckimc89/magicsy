@@ -4871,4 +4871,53 @@ window.__NS90214={version:RELEASE,rule:'single visible release owner; removes st
 })();
 </script>
 
+
+<style id="ns90215-user-added-board-final-style">
+.ns195-chip.user-added-ready{background:#e9f6ff!important;border-color:#78bce6!important;color:#176b9c!important}
+.ns195-chip.user-added-saved{background:#eaf8ee!important;border-color:#86c99a!important;color:#276b3a!important}
+</style>
+<script id="ns90215-user-added-board-final">
+(()=>{
+'use strict';
+const RELEASE='MASTER V28 · NS90.215 CLEAN MASTER · USER-ADDED BOARD SURVIVES CARD DELETE · TWO PASS SEARCH · ONE COMMON ENGINE';
+const PREFIX='magic_ns90200_added|';
+const N=v=>{try{return normalizeItemName(String(v||''))}catch(_){return String(v||'').toLowerCase().replace(/\s+/g,'')}};
+const clean=v=>{try{return cardInputName(String(v||''))}catch(_){return String(v||'').trim()}};
+const regKey=(section,country=String(COUNTRY||''))=>PREFIX+country+'|'+section;
+function regs(section){try{const a=JSON.parse(localStorage.getItem(regKey(section))||'[]');return Array.isArray(a)?a:[]}catch(_){return[]}}
+function saveReg(section,name,meta={}){name=clean(name);if(!name)return;const a=regs(section),k=N(name),old=a.find(x=>N(x.name)===k);const row={...(old||{}),name,source:'user-add',prepared:true,searchAlias:String(meta.searchAlias||old?.searchAlias||''),addedAt:Number(old?.addedAt||Date.now())};try{localStorage.setItem(regKey(section),JSON.stringify(old?a.map(x=>N(x.name)===k?row:x):[...a,row]))}catch(_){}return row}
+function ready(section,name){try{return ns9053LoadReady(v12Request(section,name))}catch(_){return null}}
+function saved(section,name){try{return getSaved(section,name)}catch(_){return null}}
+function openReady(section,name){const r=ready(section,name);if(r){try{return openPrepared(section,name,r)}catch(_){}}try{enqueue(section,name,true,true)}catch(_){}}
+function ensureBoardItems(section){
+ const root=document.getElementById(section),host=root?.querySelector('.ns195-board');if(!host)return;
+ const rows=regs(section); if(!rows.length)return;
+ const existing=()=>Array.from(host.querySelectorAll('.ns195-chip')).map(b=>({b,name:clean(String(b.textContent||'').replace(/^[○◆●✓…＋+]\s*/,''))}));
+ for(const x of rows){const name=clean(x.name);if(!name)continue;let hit=existing().find(y=>N(y.name)===N(name));const sv=saved(section,name),rd=!sv&&ready(section,name);
+   if(!hit){const b=document.createElement('button');b.type='button';b.className='ns195-chip';host.appendChild(b);hit={b,name};}
+   const b=hit.b;b.disabled=false;b.dataset.busy='0';b.classList.remove('white','ready','failed','searching','saved','user-added-ready','user-added-saved');
+   if(sv){b.classList.add('saved','user-added-saved');b.textContent='✓ ＋ '+name;b.title='항목 추가로 만든 카드';b.onclick=()=>{try{openSaved(section,name,sv)}catch(_){}}}
+   else {b.classList.add('ready','user-added-ready');b.textContent='＋ '+name;b.title='항목 추가로 찾은 준비된 항목 · 다시 누르면 미리보기';b.onclick=()=>openReady(section,name)}
+ }
+ // Recalculate visible counts without turning user-added prepared items into background-search jobs.
+ const p=root.querySelector('.ns195-progress');if(p){const bs=[...host.querySelectorAll('.ns195-chip')],r=bs.filter(b=>b.classList.contains('ready')).length,s=bs.filter(b=>b.classList.contains('saved')).length,w=bs.filter(b=>b.classList.contains('white')).length,f=bs.filter(b=>b.classList.contains('failed')).length,q=bs.filter(b=>b.classList.contains('searching')).length;p.textContent=`준비 ${r} · 만든 카드 ${s} · 아직 ${w} · 자료 부족 ${f}${q?' · 검색 중 1':''}`}
+}
+// Final board wrapper: registry entries are painted/appended even if an older name-source wrapper misses them.
+const prevBoard=window.renderRepresentativeCardButtonsV5;
+if(typeof prevBoard==='function')window.renderRepresentativeCardButtonsV5=async function(section){const r=await prevBoard(section);ensureBoardItems(section);return r};
+const prevRefresh=window.v26RefreshOverviewRep;
+if(typeof prevRefresh==='function')window.v26RefreshOverviewRep=function(section){const r=prevRefresh(section);ensureBoardItems(section);return r};
+// Final delete owner. Capture the card before deletion and preserve BOTH registry and READY snapshot.
+const prevDelete=ns9096DeleteDurable;
+ns9096DeleteDurable=async function(section,itemId){let snap=null;try{snap=(getCustom(section)||[]).find(x=>String(x.id)===String(itemId))||null}catch(_){};
+ const user=!!(snap&&(regs(section).some(x=>N(x.name)===N(snap.name))||snap.searchAlias||String(snap.source||'')==='user-add'));
+ if(user){saveReg(section,snap.name,{searchAlias:snap.searchAlias||snap.entityTitle||''});try{if(snap.desc)ns9053SaveReady(v12Request(section,snap.name),{title:String(snap.entityTitle||snap.name),desc:String(snap.desc),photo:String(snap.photoRemote||''),photos:snap.photoRemote?[String(snap.photoRemote)]:[],entityId:String(snap.entityId||''),pageId:snap.pageId==null?'':String(snap.pageId),searchAlias:String(snap.searchAlias||''),representativeName:String(snap.name),preparedAt:Date.now(),qualityGate:'pass-prepared',userAdded:true})}catch(_){}}
+ const out=await prevDelete.apply(this,arguments);
+ if(user){saveReg(section,snap.name,{searchAlias:snap.searchAlias||snap.entityTitle||''});setTimeout(()=>ensureBoardItems(section),0);setTimeout(()=>ensureBoardItems(section),150)}return out};
+function sync(){try{const b=document.getElementById('ns9015Banner');if(b){b.textContent='✅ '+RELEASE;b.style.position='static'}}catch(_){}try{document.title='요술방망이 백과사전 · NS90.215'}catch(_){}try{if(window.__NS9021_ONE_ENGINE)window.__NS9021_ONE_ENGINE.version=RELEASE}catch(_){}try{REP_SECTIONS.forEach(ensureBoardItems)}catch(_){}}
+sync();document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,80));window.addEventListener('load',()=>{setTimeout(sync,250);setTimeout(sync,800)});
+window.__NS90215={version:RELEASE,rule:'user-added discovery is a durable board item independent of visible card; deleting card returns it to light-blue plus ready state'};
+})();
+</script>
+
 </body></html>
